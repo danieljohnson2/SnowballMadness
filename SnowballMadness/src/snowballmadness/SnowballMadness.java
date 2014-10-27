@@ -16,10 +16,9 @@ import org.bukkit.inventory.meta.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.*;
 
-import static com.google.common.base.Preconditions.*;
-import com.google.common.collect.*;
-
 /**
+ * This is the plug-in class for this mod; it handles events and forwards them to
+ * logic objects.
  *
  * @author DanJ
  */
@@ -46,7 +45,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             int overSlot = heldSlot + 27;
             ItemStack over = inv.getItem(overSlot);
 
-            SnowballLogic logic = SnowballLogic.createLogic(snowball, over.getType());
+            SnowballLogic logic = SnowballLogic.createLogic(snowball, over);
 
             if (logic != null) {
                 logic.start();

@@ -7,6 +7,7 @@ package snowballmadness;
 import org.bukkit.entity.Snowball;
 
 /**
+ * This class detonates a TNT explosion at the point of impact of a snwoabll.
  *
  * @author DanJ
  */
