@@ -46,6 +46,12 @@ public abstract class SnowballLogic {
     }
 
     /**
+     * This is called when the snowball is launcher.
+     */
+    public void launch() {
+    }
+
+    /**
      * This is called when the snowball hits something.
      */
     public void hit() {
@@ -98,6 +104,9 @@ public abstract class SnowballLogic {
         switch (hint.getType()) {
             case TNT:
                 return new TNTSnowballLogic(snowball);
+
+            case FIREWORK:
+                return new JetbackSnowballLogic(snowball);
 
             default:
                 return null;

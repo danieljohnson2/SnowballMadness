@@ -49,6 +49,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
             if (logic != null) {
                 logic.start();
+                logic.launch();;
             }
         }
     }
