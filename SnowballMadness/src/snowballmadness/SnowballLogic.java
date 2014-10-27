@@ -48,4 +48,14 @@ public abstract class SnowballLogic {
         inFlight.remove(getSnowball());
         Bukkit.getLogger().info(String.format("Snowball hit: %d", inFlight.size()));
     }
+
+    public static SnowballLogic createLogic(Snowball snowball, Material hint) {
+        switch (hint) {
+            case TNT:
+                return new TNTSnowballLogic(snowball);
+
+            default:
+                return null;
+        }
+    }
 }

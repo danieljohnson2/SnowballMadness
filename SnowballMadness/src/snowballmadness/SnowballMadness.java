@@ -35,10 +35,22 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent e) {
         Projectile proj = e.getEntity();
+        LivingEntity shooter = proj.getShooter();
 
-        if (proj instanceof Snowball) {
+        if (proj instanceof Snowball && shooter instanceof Player) {
             Snowball snowball = (Snowball) proj;
-            new TNTSnowballLogic(snowball).start();
+            Player player = (Player) shooter;
+
+            PlayerInventory inv = player.getInventory();
+            int heldSlot = inv.getHeldItemSlot();
+            int overSlot = heldSlot + 27;
+            ItemStack over = inv.getItem(overSlot);
+
+            SnowballLogic logic = SnowballLogic.createLogic(snowball, over.getType());
+
+            if (logic != null) {
+                logic.start();
+            }
         }
     }
 
