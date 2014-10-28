@@ -20,7 +20,7 @@ public class InvertedSnowballLogic extends SnowballLogic {
         super.launch();
 
         Snowball sb = getSnowball();
-        LivingEntity shooter = sb.getShooter();
+        LivingEntity shooter = getShooter();
 
         Location snowballLoc = sb.getLocation().clone();
         snowballLoc.setY(snowballLoc.getY() - 1);
@@ -29,7 +29,10 @@ public class InvertedSnowballLogic extends SnowballLogic {
         Vector velocity = sb.getVelocity().clone();
         velocity.multiply(2);
 
-        shooter.teleport(snowballLoc);
+        if (snowballLoc.distance(shooter.getLocation()) < 2) {
+            shooter.teleport(snowballLoc);
+        }
+
         shooter.setVelocity(velocity);
 
         sb.remove();

@@ -23,6 +23,7 @@ public abstract class SnowballLogic {
 
     private final static WeakHashMap<Snowball, SnowballLogic> inFlight = new WeakHashMap<Snowball, SnowballLogic>();
     private Snowball snowball;
+    private LivingEntity shooter;
 
     /**
      * This provides the world the snowball is in.
@@ -31,6 +32,18 @@ public abstract class SnowballLogic {
      */
     public final World getWorld() {
         return snowball.getWorld();
+    }
+
+    public final LivingEntity getShooter() {
+        if (shooter == null) {
+            throw new IllegalStateException("A SnwoballLogic must be given a shooter before it can be used.");
+        }
+
+        return shooter;
+    }
+
+    protected void setShooter(LivingEntity shooter) {
+        this.shooter = Preconditions.checkNotNull(shooter);
     }
 
     /**
@@ -78,20 +91,24 @@ public abstract class SnowballLogic {
 
             PlayerInventory inv = player.getInventory();
             int heldSlot = inv.getHeldItemSlot();
-            
-            InventorySlice slice = InventorySlice.fromSLot(inv, heldSlot).skip(1);
 
+            InventorySlice slice = InventorySlice.fromSLot(inv, heldSlot).skip(1);
             SnowballLogic logic = createLogic(slice);
 
             if (logic != null) {
-                try {
-                    logic.setSnowball(snowball);
-                    logic.start();
-                    logic.launch();
-                } finally {
-                    logic.setSnowball(null);
-                }
+                logic.launchSnowball(snowball, shooter);
             }
+        }
+    }
+
+    public void launchSnowball(Snowball snowball, LivingEntity shooter) {
+        try {
+            setShooter(shooter);
+            setSnowball(snowball);
+            start();
+            launch();
+        } finally {
+            setSnowball(null);
         }
     }
 
@@ -181,6 +198,9 @@ public abstract class SnowballLogic {
 
             case SPIDER_EYE:
                 return new InvertedSnowballLogic();
+
+            case SNOW_BALL:
+                return new MultiplierSnowballLogic(hint.getAmount(), createLogic(slice.skip(1)));
 
             default:
                 return null;

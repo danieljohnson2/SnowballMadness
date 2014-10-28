@@ -20,12 +20,12 @@ public class JetbackSnowballLogic extends SnowballLogic {
         super.launch();
 
         Snowball sb = getSnowball();
-        LivingEntity shooter = sb.getShooter();
+        LivingEntity shooter = getShooter();
 
         sb.setVelocity(new Vector(0, -0.5, 0));
 
         Vector v = shooter.getVelocity().clone();
-        v.setY(v.getY() + 0.5);
+        v.setY(Math.min(64, v.getY() + 0.5));
         shooter.setVelocity(v);
     }
 }
