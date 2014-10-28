@@ -8,8 +8,9 @@ import org.bukkit.entity.*;
 import org.bukkit.util.*;
 
 /**
- * This class provides a 'jetpack' effect, where the snowball
- * goes down, and the player who throws it is boosted up.
+ * This class provides a 'jetpack' effect, where the snowball goes down, and the
+ * player who throws it is boosted up.
+ *
  * @author DanJ
  */
 public class JetbackSnowballLogic extends SnowballLogic {
@@ -27,9 +28,7 @@ public class JetbackSnowballLogic extends SnowballLogic {
 
         sb.setVelocity(new Vector(0, -0.5, 0));
 
-        Vector v = new Vector();
-        v.copy(shooter.getVelocity());
-
+        Vector v = shooter.getVelocity().clone();
         v.setY(v.getY() + 0.5);
         shooter.setVelocity(v);
     }

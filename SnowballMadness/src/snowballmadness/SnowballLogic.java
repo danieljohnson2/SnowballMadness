@@ -103,11 +103,17 @@ public abstract class SnowballLogic {
 
         switch (hint.getType()) {
             case TNT:
-                return new TNTSnowballLogic(snowball);
+                return new TNTSnowballLogic(snowball, 4);
+
+            case SULPHUR:
+                return new TNTSnowballLogic(snowball, 1);
 
             case FIREWORK:
                 return new JetbackSnowballLogic(snowball);
 
+            case SPIDER_EYE:
+                return new InvertedSnowballLogic(snowball);
+                
             default:
                 return null;
         }

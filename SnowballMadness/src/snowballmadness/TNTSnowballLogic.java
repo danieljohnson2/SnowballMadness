@@ -13,13 +13,16 @@ import org.bukkit.entity.Snowball;
  */
 public class TNTSnowballLogic extends SnowballLogic {
 
-    public TNTSnowballLogic(Snowball snowball) {
+    private final float snowballSize;
+
+    public TNTSnowballLogic(Snowball snowball, float snowballSize) {
         super(snowball);
+        this.snowballSize = snowballSize;
     }
 
     @Override
     public void hit() {
         super.hit();
-        getWorld().createExplosion(getSnowball().getLocation(), 4);
+        getWorld().createExplosion(getSnowball().getLocation(), snowballSize);
     }
 }
