@@ -78,10 +78,10 @@ public abstract class SnowballLogic {
 
             PlayerInventory inv = player.getInventory();
             int heldSlot = inv.getHeldItemSlot();
-            int overSlot = heldSlot + 27;
-            ItemStack over = inv.getItem(overSlot);
+            
+            InventorySlice slice = InventorySlice.fromSLot(inv, heldSlot).skip(1);
 
-            SnowballLogic logic = SnowballLogic.createLogic(over);
+            SnowballLogic logic = createLogic(slice);
 
             if (logic != null) {
                 try {
@@ -158,7 +158,13 @@ public abstract class SnowballLogic {
      * @return The new logic, not yet started, or null if the snowball will be
      * illogical.
      */
-    public static SnowballLogic createLogic(ItemStack hint) {
+    public static SnowballLogic createLogic(InventorySlice slice) {
+        if (slice.isEmpty()) {
+            return null;
+        }
+
+        ItemStack hint = slice.get(0);
+
         if (hint == null) {
             return null;
         }
