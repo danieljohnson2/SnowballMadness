@@ -15,10 +15,6 @@ import org.bukkit.util.*;
  */
 public class JetbackSnowballLogic extends SnowballLogic {
 
-    public JetbackSnowballLogic(Snowball snowball) {
-        super(snowball);
-    }
-
     @Override
     public void launch() {
         super.launch();

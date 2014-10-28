@@ -15,10 +15,6 @@ import org.bukkit.util.*;
  */
 public class InvertedSnowballLogic extends SnowballLogic {
 
-    public InvertedSnowballLogic(Snowball snowball) {
-        super(snowball);
-    }
-
     @Override
     public void launch() {
         super.launch();
@@ -35,5 +31,7 @@ public class InvertedSnowballLogic extends SnowballLogic {
 
         shooter.teleport(snowballLoc);
         shooter.setVelocity(velocity);
+
+        sb.remove();
     }
 }

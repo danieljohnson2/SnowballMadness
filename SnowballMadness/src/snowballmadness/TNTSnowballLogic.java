@@ -15,8 +15,7 @@ public class TNTSnowballLogic extends SnowballLogic {
 
     private final float snowballSize;
 
-    public TNTSnowballLogic(Snowball snowball, float snowballSize) {
-        super(snowball);
+    public TNTSnowballLogic(float snowballSize) {
         this.snowballSize = snowballSize;
     }
 
