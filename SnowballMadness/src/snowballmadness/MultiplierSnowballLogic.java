@@ -30,7 +30,9 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         super.hit();
 
         World world = getWorld();
-        Location source = getSnowball().getLocation();
+        LivingEntity shooter = getShooter();
+        Location source = getSnowball().getLocation().clone();
+        source.setY(source.getY() + 0.25);
 
         for (int i = 0; i < numberOfSnowballs; ++i) {
             Snowball sb = world.spawn(source, Snowball.class);
@@ -42,9 +44,7 @@ public class MultiplierSnowballLogic extends SnowballLogic {
 
             sb.setVelocity(vector);
 
-            if (nextLogic != null) {
-                nextLogic.launchSnowball(sb, getShooter());
-            }
+            performLaunch(nextLogic, sb, shooter);
         }
     }
 }

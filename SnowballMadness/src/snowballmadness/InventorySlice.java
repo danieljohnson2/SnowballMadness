@@ -54,12 +54,26 @@ public final class InventorySlice extends AbstractList<ItemStack> {
      * @param index The index to start at.
      * @return A new slice that starts the the indicated slot.
      */
-    public static InventorySlice fromSLot(PlayerInventory inventory, int index) {
+    public static InventorySlice fromSlot(PlayerInventory inventory, int index) {
         if (index <= 8) {
             return new InventorySlice(inventory, index, 3);
         } else {
             int i = index - 9;
             return new InventorySlice(inventory, i % 9, i / 9);
+        }
+    }
+
+    /**
+     * This method return the bottommost item of the slice, or null if the slice
+     * is empty or the bottom slot contains nothing.
+     *
+     * @return The bottommost item in the slice, or null.
+     */
+    public ItemStack getBottomItem() {
+        if (inventory != null) {
+            return inventory.getItem(getSlotIndex(x, y));
+        } else {
+            return null;
         }
     }
 
@@ -94,7 +108,7 @@ public final class InventorySlice extends AbstractList<ItemStack> {
             return inventory.getItem(getSlotIndex(x, offsetY));
         }
 
-        throw new IllegalArgumentException("Index out of range.");
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
@@ -121,6 +135,6 @@ public final class InventorySlice extends AbstractList<ItemStack> {
             return (y + 1) * 9 + x;
         }
 
-        throw new IllegalArgumentException("Index out of range.");
+        throw new IndexOutOfBoundsException();
     }
 }

@@ -13,7 +13,7 @@ import org.bukkit.util.*;
  *
  * @author DanJ
  */
-public class InvertedSnowballLogic extends SnowballLogic {
+public class ReversedSnowballLogic extends SnowballLogic {
 
     @Override
     public void launch() {
