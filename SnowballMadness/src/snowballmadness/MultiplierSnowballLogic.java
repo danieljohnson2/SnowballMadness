@@ -20,10 +20,17 @@ public class MultiplierSnowballLogic extends SnowballLogic {
 
     private final int numberOfSnowballs;
     private final InventorySlice inventory;
+    private double amplification = 1.0;
 
     public MultiplierSnowballLogic(int numberOfSnowballs, InventorySlice inventory) {
         this.numberOfSnowballs = numberOfSnowballs;
         this.inventory = Preconditions.checkNotNull(inventory);
+    }
+
+    @Override
+    protected void applyAmplification(double amplification) {
+        super.applyAmplification(amplification);
+        this.amplification *= amplification;
     }
 
     @Override
@@ -41,11 +48,12 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             Vector vector = Vector.getRandom();
             vector.setX(vector.getX() - 0.5);
             vector.setZ(vector.getZ() - 0.5);
-            vector.setY(0.5);
+            vector.setY(0.25);
+            vector.multiply(new Vector(amplification, 1.0, amplification));
 
             sb.setVelocity(vector);
 
-            performLaunch(inventory, sb, shooter);
+            performLaunch(inventory, sb, shooter, amplification);
         }
     }
 

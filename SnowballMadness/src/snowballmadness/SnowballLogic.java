@@ -113,10 +113,19 @@ public abstract class SnowballLogic {
     protected void setSnowball(Snowball snowball) {
         this.snowball = snowball;
     }
+
+    /**
+     * This method is used by the AmplifiedSnowballLogic to amplify the effect
+     * of another logic.
+     *
+     * @param amplification A multiplier to apply to the logic.
+     */
+    protected void applyAmplification(double amplification) {
+    }
+
     ////////////////////////////////////////////////////////////////
     // Creation
     //
-
     /**
      * This method creates a new logic, but does not start it. It chooses the
      * logic based on 'hint', which is the stack immediately above the snowball
@@ -134,6 +143,9 @@ public abstract class SnowballLogic {
         }
 
         switch (hint.getType()) {
+            case ARROW:
+                return new ProjectileSnowballLogic(Arrow.class);
+
             case TNT:
                 return new TNTSnowballLogic(4);
 
@@ -145,6 +157,12 @@ public abstract class SnowballLogic {
 
             case SPIDER_EYE:
                 return new ReversedSnowballLogic();
+
+            case GLOWSTONE_DUST:
+                return new AmplifiedSnowballLogic(1.25, slice.skip(1));
+
+            case GLOWSTONE:
+                return new AmplifiedSnowballLogic(1.5, slice.skip(1));
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
@@ -168,15 +186,18 @@ public abstract class SnowballLogic {
      * @param inventory The inventory slice that determines the logic type.
      * @param snowball The snowball to be launched.
      * @param shooter The shooter who launched the snowball.
-     * @return The logic assocated with the snowball; may be null.
+     * @param amplification The amplification to apply to the logic before
+     * using it.
+     * @return The logic associated with the snowball; may be null.
      */
-    public static SnowballLogic performLaunch(InventorySlice inventory, Snowball snowball, LivingEntity shooter) {
+    public static SnowballLogic performLaunch(InventorySlice inventory, Snowball snowball, LivingEntity shooter, double amplification) {
         SnowballLogic logic = createLogic(inventory);
 
         if (logic != null) {
             try {
                 logic.setShooter(shooter);
                 logic.setSnowball(snowball);
+                logic.applyAmplification(amplification);
                 logic.start();
 
                 Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
@@ -230,7 +251,7 @@ public abstract class SnowballLogic {
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
                 InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball, shooter);
+                SnowballLogic logic = performLaunch(slice, snowball, shooter, 1.0);
 
                 if (logic != null) {
                     replenishSnowball(plugin, inv, heldSlot);
