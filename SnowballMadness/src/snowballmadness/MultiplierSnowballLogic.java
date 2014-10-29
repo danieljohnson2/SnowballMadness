@@ -4,6 +4,7 @@
  */
 package snowballmadness;
 
+import com.google.common.base.Preconditions;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.util.*;
@@ -18,11 +19,11 @@ import org.bukkit.util.*;
 public class MultiplierSnowballLogic extends SnowballLogic {
 
     private final int numberOfSnowballs;
-    private final SnowballLogic nextLogic;
+    private final InventorySlice inventory;
 
-    public MultiplierSnowballLogic(int numberOfSnowballs, SnowballLogic nextLogic) {
+    public MultiplierSnowballLogic(int numberOfSnowballs, InventorySlice inventory) {
         this.numberOfSnowballs = numberOfSnowballs;
-        this.nextLogic = nextLogic; // can be null for plain snowballs
+        this.inventory = Preconditions.checkNotNull(inventory);
     }
 
     @Override
@@ -44,7 +45,15 @@ public class MultiplierSnowballLogic extends SnowballLogic {
 
             sb.setVelocity(vector);
 
-            performLaunch(nextLogic, sb, shooter);
+            performLaunch(inventory, sb, shooter);
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s -> (x%d) %s",
+                super.toString(),
+                numberOfSnowballs,
+                createLogic(inventory));
     }
 }

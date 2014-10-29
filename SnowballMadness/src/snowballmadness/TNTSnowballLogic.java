@@ -24,4 +24,9 @@ public class TNTSnowballLogic extends SnowballLogic {
         super.hit();
         getWorld().createExplosion(getSnowball().getLocation(), snowballSize);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%f)", super.toString(), snowballSize);
+    }
 }

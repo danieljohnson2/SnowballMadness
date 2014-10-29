@@ -35,6 +35,11 @@ public abstract class SnowballLogic {
      */
     public void hit() {
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
     ////////////////////////////////////////////////////////////////
     // Snowball Information
     //
@@ -115,10 +120,9 @@ public abstract class SnowballLogic {
      * logic based on 'hint', which is the stack immediately above the snowball
      * being thrown.
      *
-     * @param snowball The snowball whose logic this will be.
-     * @param hint The stack above the snowball in the inventory; may be null.
-     * @return The new logic, not yet started, or null if the snowball will be
-     * illogical.
+     * @param slice The inventory slice above the snowball in the inventory.
+     * @return The new logic, not yet started or attached to a snowball, or null
+     * if the snowball will be illogical.
      */
     public static SnowballLogic createLogic(InventorySlice slice) {
         ItemStack hint = slice.getBottomItem();
@@ -141,7 +145,7 @@ public abstract class SnowballLogic {
                 return new ReversedSnowballLogic();
 
             case SNOW_BALL:
-                return new MultiplierSnowballLogic(hint.getAmount(), createLogic(slice.skip(1)));
+                return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
 
             default:
                 return null;
@@ -155,22 +159,25 @@ public abstract class SnowballLogic {
      * This method processes a new snowball, executing its launch() method and
      * also recording it so the hit() method can be called later.
      *
-     * This method will do nothing if 'logic' or 'snowball' is null.
-     *
      * The shooter may be provided as well; this allows us to launch snowballs
      * from places that are not a player, but associated it with a player
      * anyway.
      *
-     * @param logic The logic to handle the snowball; if null nothing happens.
-     * @param snowball The snowball to be launched; if null nothing happens.
+     * @param inventory The inventory slice that determines the logic type.
+     * @param snowball The snowball to be launched.
      * @param shooter The shooter who launched the snowball.
      */
-    public static void performLaunch(SnowballLogic logic, Snowball snowball, LivingEntity shooter) {
-        if (logic != null || snowball != null) {
+    public static void performLaunch(InventorySlice inventory, Snowball snowball, LivingEntity shooter) {
+        SnowballLogic logic = createLogic(inventory);
+
+        if (logic != null) {
             try {
                 logic.setShooter(shooter);
                 logic.setSnowball(snowball);
                 logic.start();
+
+                Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
+
                 logic.launch();
             } finally {
                 logic.setSnowball(null);
@@ -180,16 +187,16 @@ public abstract class SnowballLogic {
 
     /**
      * This method processes the impact of a snowball, and invokes the hit()
-     * method on its logic object, if it has one. If 'snowball' is null this
-     * method does nothing.
+     * method on its logic object, if it has one.
      *
      * @param snowball The impacting snowball.
      */
     public static void performHit(Snowball snowball) {
-        SnowballLogic logic = getLogic(snowball);
+        SnowballLogic logic = getLogic(Preconditions.checkNotNull(snowball));
 
         if (logic != null) {
             try {
+                Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", logic, inFlight.size()));
                 logic.hit();
             } finally {
                 logic.end();
@@ -216,7 +223,7 @@ public abstract class SnowballLogic {
             int heldSlot = inv.getHeldItemSlot();
 
             InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
-            performLaunch(createLogic(slice), snowball, shooter);
+            performLaunch(slice, snowball, shooter);
         }
     }
 
@@ -275,7 +282,6 @@ public abstract class SnowballLogic {
      */
     public void start() {
         inFlight.put(getSnowball(), this);
-        Bukkit.getLogger().info(String.format("Snowball launched: %d", inFlight.size()));
     }
 
     /**
@@ -284,6 +290,5 @@ public abstract class SnowballLogic {
      */
     public void end() {
         inFlight.remove(getSnowball());
-        Bukkit.getLogger().info(String.format("Snowball hit: %d", inFlight.size()));
     }
 }
