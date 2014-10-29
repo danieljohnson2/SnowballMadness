@@ -16,25 +16,22 @@ import org.bukkit.util.*;
 public class ReversedSnowballLogic extends SnowballLogic {
 
     @Override
-    public void launch() {
-        super.launch();
+    public void launch(Snowball snowball, SnowballInfo info) {
+        super.launch(snowball, info); //To change body of generated methods, choose Tools | Templates.
 
-        Snowball sb = getSnowball();
-        LivingEntity shooter = getShooter();
-
-        Location snowballLoc = sb.getLocation().clone();
+        Location snowballLoc = snowball.getLocation().clone();
         snowballLoc.setY(snowballLoc.getY() - 1);
-        snowballLoc.setDirection(shooter.getLocation().getDirection());
+        snowballLoc.setDirection(info.shooter.getLocation().getDirection());
 
-        Vector velocity = sb.getVelocity().clone();
-        velocity.multiply(2);
+        Vector velocity = snowball.getVelocity().clone();
+        velocity = velocity.multiply(info.amplification);
 
-        if (snowballLoc.distance(shooter.getLocation()) < 2) {
-            shooter.teleport(snowballLoc);
+        if (snowballLoc.distance(info.shooter.getLocation()) < 2) {
+            info.shooter.teleport(snowballLoc);
         }
 
-        shooter.setVelocity(velocity);
+        info.shooter.setVelocity(velocity);
 
-        sb.remove();
+        snowball.remove();
     }
 }

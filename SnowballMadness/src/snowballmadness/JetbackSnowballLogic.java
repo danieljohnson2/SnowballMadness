@@ -15,24 +15,15 @@ import org.bukkit.util.*;
  */
 public class JetbackSnowballLogic extends SnowballLogic {
 
-    private double amplification = 1.0;
-
     @Override
-    protected void applyAmplification(double amplification) {
-        super.applyAmplification(amplification);
-        this.amplification *= amplification;
-    }
+    public void launch(Snowball snowball, SnowballInfo info) {
+        super.launch(snowball, info);
+    
+        LivingEntity shooter = info.shooter;
 
-    @Override
-    public void launch() {
-        super.launch();
+        double delta = info.amplification / 2.0;
 
-        Snowball sb = getSnowball();
-        LivingEntity shooter = getShooter();
-
-        double delta = amplification / 2.0;
-
-        sb.setVelocity(new Vector(0, -delta, 0));
+        snowball.setVelocity(new Vector(0, -delta, 0));
 
         Vector v = shooter.getVelocity().clone();
         v.setY(Math.min(64, v.getY() + delta));

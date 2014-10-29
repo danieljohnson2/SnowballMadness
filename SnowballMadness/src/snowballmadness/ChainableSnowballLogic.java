@@ -5,58 +5,46 @@
 package snowballmadness;
 
 import com.google.common.base.Preconditions;
+import org.bukkit.entity.Snowball;
 
 /**
- * This is a base class for a logic that carries a second logic, which it applies
- * as will as any effects the subclass provides.
+ * This is a base class for a logic that carries a second logic, which it
+ * applies as will as any effects the subclass provides.
  *
  * @author DanJ
  */
 public abstract class ChainableSnowballLogic extends SnowballLogic {
 
-    private final SnowballLogic nextLogic;
+    public final SnowballLogic nextLogic;
 
     public ChainableSnowballLogic(InventorySlice nextSlice) {
         this.nextLogic = createLogic(nextSlice);
     }
 
-    public ChainableSnowballLogic(SnowballLogic nextLogic) {
-        this.nextLogic = Preconditions.checkNotNull(nextLogic);
-    }
-
     @Override
-    protected void applyAmplification(double amplification) {
-        super.applyAmplification(amplification);
-        nextLogic.applyAmplification(amplification);
-    }
-
-    @Override
-    public void launch() {
-        super.launch();
+    public void launch(Snowball snowball, SnowballInfo info) {
+        super.launch(snowball, info);
 
         if (nextLogic != null) {
-            try {
-                nextLogic.setSnowball(getSnowball());
-                nextLogic.setShooter(getShooter());
-                nextLogic.launch();
-            } finally {
-                nextLogic.setSnowball(null);
-            }
+            nextLogic.launch(snowball, adjustInfo(snowball, info));
         }
     }
 
     @Override
-    public void hit() {
-        super.hit();
+    public void hit(Snowball snowball, SnowballInfo info) {
+        super.hit(snowball, info);
 
         if (nextLogic != null) {
-            try {
-                nextLogic.setSnowball(getSnowball());
-                nextLogic.setShooter(getShooter());
-                nextLogic.hit();
-            } finally {
-                nextLogic.setSnowball(null);
-            }
+            nextLogic.hit(snowball, adjustInfo(snowball, info));
         }
+    }
+
+    protected SnowballInfo adjustInfo(Snowball snowball, SnowballInfo info) {
+        return info;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s -> %s", super.toString(), nextLogic);
     }
 }

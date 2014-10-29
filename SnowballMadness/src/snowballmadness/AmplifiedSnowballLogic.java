@@ -15,36 +15,23 @@ import org.bukkit.util.Vector;
  */
 public class AmplifiedSnowballLogic extends ChainableSnowballLogic {
 
-    private double amplification;
+    private final double amplification;
 
     public AmplifiedSnowballLogic(double amplification, InventorySlice nextSlice) {
-        super(makeAmplifiedSnowball(amplification, nextSlice));
+        super(nextSlice);
         this.amplification = amplification;
     }
 
     @Override
-    protected void applyAmplification(double amplification) {
-        super.applyAmplification(amplification);
-        this.amplification *= amplification;
+    protected SnowballInfo adjustInfo(Snowball snowball, SnowballInfo info) {
+        return info.getAmplified(amplification);
     }
 
     @Override
-    public void launch() {
-        Snowball snowball = getSnowball();
-        Vector vector = snowball.getVelocity().clone();
-        vector.multiply(amplification);
-        snowball.setVelocity(vector);
-
-        super.launch();
-    }
-
-    private static SnowballLogic makeAmplifiedSnowball(double amplification, InventorySlice nextSlice) {
-        SnowballLogic nextLogic = createLogic(nextSlice);
-
-        if (nextLogic != null) {
-            nextLogic.applyAmplification(amplification);
-        }
-
-        return nextLogic;
+    public String toString() {
+        return String.format("%s -> (x%d) %s",
+                super.toString(),
+                amplification,
+                nextLogic);
     }
 }

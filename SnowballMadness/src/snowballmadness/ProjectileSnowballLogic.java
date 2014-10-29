@@ -21,11 +21,10 @@ public class ProjectileSnowballLogic extends SnowballLogic {
     }
 
     @Override
-    public void launch() {
-        super.launch();
-
-        World world = getWorld();
-        Snowball snowball = getSnowball();
+    public void launch(Snowball snowball, SnowballInfo info) {
+        super.launch(snowball, info); //To change body of generated methods, choose Tools | Templates.
+    
+        World world = snowball.getWorld();
 
         Projectile arrow = world.spawn(snowball.getLocation(), projectileClass);
         arrow.setVelocity(snowball.getVelocity());

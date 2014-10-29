@@ -20,7 +20,6 @@ public class MultiplierSnowballLogic extends SnowballLogic {
 
     private final int numberOfSnowballs;
     private final InventorySlice inventory;
-    private double amplification = 1.0;
 
     public MultiplierSnowballLogic(int numberOfSnowballs, InventorySlice inventory) {
         this.numberOfSnowballs = numberOfSnowballs;
@@ -28,18 +27,12 @@ public class MultiplierSnowballLogic extends SnowballLogic {
     }
 
     @Override
-    protected void applyAmplification(double amplification) {
-        super.applyAmplification(amplification);
-        this.amplification *= amplification;
-    }
+    public void hit(Snowball snowball, SnowballInfo info) {
+        super.hit(snowball, info);
 
-    @Override
-    public void hit() {
-        super.hit();
-
-        World world = getWorld();
-        LivingEntity shooter = getShooter();
-        Location source = getSnowball().getLocation().clone();
+        World world = snowball.getWorld();
+        LivingEntity shooter = info.shooter;
+        Location source = snowball.getLocation().clone();
         source.setY(source.getY() + 0.25);
 
         for (int i = 0; i < numberOfSnowballs; ++i) {
@@ -49,11 +42,11 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             vector.setX(vector.getX() - 0.5);
             vector.setZ(vector.getZ() - 0.5);
             vector.setY(0.25);
-            vector.multiply(new Vector(amplification, 1.0, amplification));
+            vector = vector.multiply(new Vector(info.amplification, 1.0, info.amplification));
 
             sb.setVelocity(vector);
 
-            performLaunch(inventory, sb, shooter, amplification);
+            performLaunch(inventory, sb, info);
         }
     }
 

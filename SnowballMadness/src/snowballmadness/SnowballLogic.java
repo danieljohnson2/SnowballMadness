@@ -19,6 +19,10 @@ import org.bukkit.scheduler.BukkitRunnable;
  * This class is the base class that hosts the logic that triggers when a
  * snowball hits a target.
  *
+ * We keep these in a weak hash map, so it is important that this object (and
+ * all subclasses) not hold onto a reference to a Snowball, or that snowball may
+ * never be collected.
+ *
  * @author DanJ
  */
 public abstract class SnowballLogic {
@@ -27,15 +31,21 @@ public abstract class SnowballLogic {
     // Logic
     //
     /**
-     * This is called when the snowball is launcher.
+     * This is called when the snowball is launched.
+     *
+     * @param snowball The snowball being launched.
+     * @param info Other information about the snowball.
      */
-    public void launch() {
+    public void launch(Snowball snowball, SnowballInfo info) {
     }
 
     /**
      * This is called when the snowball hits something.
+     *
+     * @param snowball The snowball hitting something.
+     * @param info Other information about the snowball.
      */
-    public void hit() {
+    public void hit(Snowball snowball, SnowballInfo info) {
     }
 
     @Override
@@ -43,89 +53,9 @@ public abstract class SnowballLogic {
         return getClass().getSimpleName();
     }
     ////////////////////////////////////////////////////////////////
-    // Snowball Information
-    //
-    private Snowball snowball;
-    private LivingEntity shooter;
-
-    /**
-     * This provides the world the snowball is in. This works only during calls
-     * to launch() and hit() and such; at other times it throws.
-     *
-     * @return The world the snowball is in.
-     * @throws IllegalStateException If the logic is not prepared for use.
-     */
-    public final World getWorld() {
-        return snowball.getWorld();
-    }
-
-    /**
-     * The player that fires off this snowball. In cases where extra snowballs
-     * get spawned, this is the player who started the cascade of nonsense. In
-     * such cases getSnowball().getShooter() will be null, and you must use this
-     * method. This works only during calls to launch() and hit() and such; at
-     * other times it throws.
-     *
-     * @return The snowball's shooter.
-     * @throws IllegalStateException If the logic is not prepared for use.
-     */
-    public final LivingEntity getShooter() {
-        if (shooter == null) {
-            throw new IllegalStateException("A SnwoballLogic must be given a shooter before it can be used.");
-        }
-
-        return shooter;
-    }
-
-    /**
-     * This returns the snowball being tracked. This works only during calls to
-     * launch() and hit() and such; at other times it throws.
-     *
-     * @return The snowball whose logic this is.
-     * @throws IllegalStateException If the logic is not prepared for use.
-     */
-    public final Snowball getSnowball() {
-        if (snowball == null) {
-            throw new IllegalStateException("A SnwoballLogic must be given a snowball before it can be used.");
-        }
-
-        return snowball;
-    }
-
-    /**
-     * This method sets the shooter; we can't just use the value from the
-     * snowball itself, because we can fire snowballs with no real shooter, and
-     * we need a way to provide a fake one.
-     *
-     * @param shooter The shooter to return from getShooter().
-     */
-    protected void setShooter(LivingEntity shooter) {
-        this.shooter = shooter;
-    }
-
-    /**
-     * This method sets the snowball; we associate the logic with the snowball
-     * when in use, but then reset it afterwards. This will allow the snowball
-     * to be garbage-collected.
-     *
-     * @param snowball The snowball to associate with the logic.
-     */
-    protected void setSnowball(Snowball snowball) {
-        this.snowball = snowball;
-    }
-
-    /**
-     * This method is used by the AmplifiedSnowballLogic to amplify the effect
-     * of another logic.
-     *
-     * @param amplification A multiplier to apply to the logic.
-     */
-    protected void applyAmplification(double amplification) {
-    }
-
-    ////////////////////////////////////////////////////////////////
     // Creation
     //
+
     /**
      * This method creates a new logic, but does not start it. It chooses the
      * logic based on 'hint', which is the stack immediately above the snowball
@@ -159,10 +89,10 @@ public abstract class SnowballLogic {
                 return new ReversedSnowballLogic();
 
             case GLOWSTONE_DUST:
-                return new AmplifiedSnowballLogic(1.25, slice.skip(1));
+                return new AmplifiedSnowballLogic(1.5, slice.skip(1));
 
             case GLOWSTONE:
-                return new AmplifiedSnowballLogic(1.5, slice.skip(1));
+                return new AmplifiedSnowballLogic(3, slice.skip(1));
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
@@ -185,27 +115,18 @@ public abstract class SnowballLogic {
      *
      * @param inventory The inventory slice that determines the logic type.
      * @param snowball The snowball to be launched.
-     * @param shooter The shooter who launched the snowball.
-     * @param amplification The amplification to apply to the logic before
-     * using it.
+     * @param info The info record that describes the snowball.
      * @return The logic associated with the snowball; may be null.
      */
-    public static SnowballLogic performLaunch(InventorySlice inventory, Snowball snowball, LivingEntity shooter, double amplification) {
+    public static SnowballLogic performLaunch(InventorySlice inventory, Snowball snowball, SnowballInfo info) {
         SnowballLogic logic = createLogic(inventory);
 
         if (logic != null) {
-            try {
-                logic.setShooter(shooter);
-                logic.setSnowball(snowball);
-                logic.applyAmplification(amplification);
-                logic.start();
+            logic.start(snowball, info);
 
-                Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
+            Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
 
-                logic.launch();
-            } finally {
-                logic.setSnowball(null);
-            }
+            logic.launch(snowball, info);
         }
 
         return logic;
@@ -218,15 +139,14 @@ public abstract class SnowballLogic {
      * @param snowball The impacting snowball.
      */
     public static void performHit(Snowball snowball) {
-        SnowballLogic logic = getLogic(Preconditions.checkNotNull(snowball));
+        SnowballLogicData data = getData(Preconditions.checkNotNull(snowball));
 
-        if (logic != null) {
+        if (data.logic != null) {
             try {
-                Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", logic, inFlight.size()));
-                logic.hit();
+                Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", data.logic, inFlight.size()));
+                data.logic.hit(snowball, data.info);
             } finally {
-                logic.end();
-                logic.unget();
+                data.logic.end(snowball);
             }
         }
     }
@@ -251,7 +171,8 @@ public abstract class SnowballLogic {
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
                 InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball, shooter, 1.0);
+                SnowballLogic logic = performLaunch(slice, snowball,
+                        new SnowballInfo(shooter, 1.0));
 
                 if (logic != null) {
                     replenishSnowball(plugin, inv, heldSlot);
@@ -307,53 +228,58 @@ public abstract class SnowballLogic {
     ////////////////////////////////////////////////////////////////
     // Logic Association
     //
-    private final static WeakHashMap<Snowball, SnowballLogic> inFlight = new WeakHashMap<Snowball, SnowballLogic>();
+    private final static WeakHashMap<Snowball, SnowballLogicData> inFlight = new WeakHashMap<Snowball, SnowballLogicData>();
 
     /**
-     * This returns the logic for a snowball that has one. This also attaches
-     * the snowball to it; callers should use unget() when done with the
-     * snowball to break this link, because we want the snowball to remain
-     * collectible by the GC.
-     *
-     * @param snowball The snowball of interest; can be null.
-     * @return The logic of the snowball, or none if it is an illogical snowball
-     * or it was null.
+     * this class just holds the snowball logic and info for a snowball; the
+     * snowball itself must not be kept here, as this is the value of a
+     * weak-hash-map keyed on the snowballs. We don't want to keep them alive.
      */
-    private static SnowballLogic getLogic(Snowball snowball) {
-        if (snowball != null) {
-            SnowballLogic logic = inFlight.get(snowball);
+    private final static class SnowballLogicData {
 
-            if (logic != null) {
-                logic.setSnowball(snowball);
-                return logic;
-            }
+        public static final SnowballLogicData EMPTY = new SnowballLogicData(null, SnowballInfo.EMPTY);
+        public final SnowballLogic logic;
+        public final SnowballInfo info;
+
+        public SnowballLogicData(SnowballLogic logic, SnowballInfo info) {
+            this.logic = logic;
+            this.info = info;
         }
-
-        return null;
     }
 
     /**
-     * unget() reverses the effects of getLogic() on the snowball; removing the
-     * link to the snowball itself. We do this to make the snowball collectible
-     * by the GC, so we don't keep it alive forever.
+     * This returns the logic and shooter for a snowball that has one.
+     *
+     * @param snowball The snowball of interest; can be null.
+     * @return The logic and info of the snowball, or the empty data if it is an
+     * illogical snowball or it was null.
      */
-    private void unget() {
-        setSnowball(null);
+    private static SnowballLogicData getData(Snowball snowball) {
+        if (snowball != null) {
+            return inFlight.get(snowball);
+        } else {
+            return SnowballLogicData.EMPTY;
+        }
     }
 
     /**
      * This method registers the logic so getLogic() can find it. Logics only
      * work once started.
+     *
+     * @param snowball The snowball being launched.
+     * @param info Other information about the snowball.
      */
-    public void start() {
-        inFlight.put(getSnowball(), this);
+    public void start(Snowball snowball, SnowballInfo info) {
+        inFlight.put(snowball, new SnowballLogicData(this, info));
     }
 
     /**
      * This method unregisters this logic so it is no longer invoked; this is
      * done when snowball hits something.
+     *
+     * @param snowball The snowball to deregister.
      */
-    public void end() {
-        inFlight.remove(getSnowball());
+    public void end(Snowball snowball) {
+        inFlight.remove(snowball);
     }
 }
