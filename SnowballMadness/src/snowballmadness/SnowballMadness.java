@@ -25,7 +25,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent e) {
-        SnowballLogic.onProjectileLaunch(e);
+        SnowballLogic.onProjectileLaunch(this, e);
     }
 
     @EventHandler

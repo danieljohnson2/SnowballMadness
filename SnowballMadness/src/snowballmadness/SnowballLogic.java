@@ -12,6 +12,8 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.*;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * This class is the base class that hosts the logic that triggers when a
@@ -166,8 +168,9 @@ public abstract class SnowballLogic {
      * @param inventory The inventory slice that determines the logic type.
      * @param snowball The snowball to be launched.
      * @param shooter The shooter who launched the snowball.
+     * @return The logic assocated with the snowball; may be null.
      */
-    public static void performLaunch(InventorySlice inventory, Snowball snowball, LivingEntity shooter) {
+    public static SnowballLogic performLaunch(InventorySlice inventory, Snowball snowball, LivingEntity shooter) {
         SnowballLogic logic = createLogic(inventory);
 
         if (logic != null) {
@@ -183,6 +186,8 @@ public abstract class SnowballLogic {
                 logic.setSnowball(null);
             }
         }
+
+        return logic;
     }
 
     /**
@@ -211,7 +216,7 @@ public abstract class SnowballLogic {
      *
      * @param e The event data.
      */
-    public static void onProjectileLaunch(ProjectileLaunchEvent e) {
+    public static void onProjectileLaunch(Plugin plugin, ProjectileLaunchEvent e) {
         Projectile proj = e.getEntity();
         LivingEntity shooter = proj.getShooter();
 
@@ -221,10 +226,49 @@ public abstract class SnowballLogic {
 
             PlayerInventory inv = player.getInventory();
             int heldSlot = inv.getHeldItemSlot();
+            ItemStack sourceStack = inv.getItem(heldSlot);
 
-            InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
-            performLaunch(slice, snowball, shooter);
+            if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
+                InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
+                SnowballLogic logic = performLaunch(slice, snowball, shooter);
+
+                if (logic != null) {
+                    replenishSnowball(plugin, inv, heldSlot);
+                }
+            }
         }
+    }
+
+    /**
+     * This method increments the number of snowballs in the slot indicated; but
+     * it does this after a brief delay since changes made during the launch are
+     * ignored. If the indicated slot contains something that is not a snowball,
+     * we don't update it. If it is empty, we put one snowball in there.
+     *
+     * @param plugin The plugin, used to schedule the update.
+     * @param inventory The inventory to update.
+     * @param slotIndex The slot to update.
+     */
+    private static void replenishSnowball(Plugin plugin, final PlayerInventory inventory, final int slotIndex) {
+
+        // ugh. We must delay the inventory update or it won't take.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                ItemStack replacing = inventory.getItem(slotIndex);
+
+                if (replacing == null) {
+                    inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL));
+                } else if (replacing.getType() == Material.SNOW_BALL) {
+                    int oldCount = replacing.getAmount();
+                    int newCount = Math.min(16, oldCount + 1);
+
+                    if (oldCount != newCount) {
+                        inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL, newCount));
+                    }
+                }
+            }
+        }.runTaskLater(plugin, 1);
     }
 
     /**
