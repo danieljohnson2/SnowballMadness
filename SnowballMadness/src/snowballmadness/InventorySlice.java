@@ -14,6 +14,10 @@ import org.bukkit.inventory.*;
  * examining the very first item of the slice, but use the skip() method to
  * generate a logic from the next.
  *
+ * This class provides a 'view' of a players inventory, not a copy of it: if it
+ * changes while a snowball is in flight, you can see the changes when th e
+ * snowball hits.
+ *
  * @author DanJ
  */
 public final class InventorySlice extends AbstractList<ItemStack> {

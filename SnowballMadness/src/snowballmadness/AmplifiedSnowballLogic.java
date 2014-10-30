@@ -41,7 +41,7 @@ public class AmplifiedSnowballLogic extends ChainableSnowballLogic {
     @Override
     public String toString() {
         return String.format("%s -> (x%f) %s",
-                super.toString(),
+                getClass().getSimpleName(),
                 amplification,
                 nextLogic);
     }
