@@ -16,12 +16,13 @@ import org.bukkit.inventory.*;
  *
  * @author DanJ
  */
-public class SwordSnowballLogic extends SnowballLogic {
+public class SwordSnowballLogic extends DurabilityDrainSnowballLogic {
 
     private final double damage;
 
-    public SwordSnowballLogic(ItemStack item) {
-        this.damage = damages.get(item.getType());
+    public SwordSnowballLogic(InventorySlice inventory) {
+        super(inventory);
+        this.damage = damages.get(inventory.getBottomItem().getType());
     }
 
     @Override

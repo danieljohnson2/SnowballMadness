@@ -95,8 +95,8 @@ public abstract class SnowballLogic {
             case IRON_SWORD:
             case GOLD_SWORD:
             case DIAMOND_SWORD:
-                return new SwordSnowballLogic(hint);
-                
+                return new SwordSnowballLogic(slice);
+
             case TNT:
                 return new TNTSnowballLogic(4);
 
@@ -202,7 +202,7 @@ public abstract class SnowballLogic {
             ItemStack sourceStack = inv.getItem(heldSlot);
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
-                InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
+                InventorySlice slice = InventorySlice.fromSlot(plugin, player, heldSlot).skip(1);
                 SnowballLogic logic = performLaunch(slice, snowball, SnowballInfo.EMPTY);
 
                 if (logic != null) {

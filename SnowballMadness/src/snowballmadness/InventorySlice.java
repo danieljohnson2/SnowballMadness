@@ -5,8 +5,12 @@
 package snowballmadness;
 
 import com.google.common.base.*;
-import java.util.AbstractList;
+import java.util.*;
+
+import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * This class represents a segment of a player's inventory, a vertical slice
@@ -23,17 +27,20 @@ import org.bukkit.inventory.*;
 public final class InventorySlice extends AbstractList<ItemStack> {
 
     private static final InventorySlice EMPTY = new InventorySlice();
-    private final PlayerInventory inventory;
+    private final Plugin plugin;
+    private final Player player;
     private final int x, y;
 
     private InventorySlice() {
-        this.inventory = null;
+        this.plugin = null;
+        this.player = null;
         this.x = 0;
         this.y = 0;
     }
 
-    private InventorySlice(PlayerInventory inventory, int x, int y) {
-        this.inventory = Preconditions.checkNotNull(inventory);
+    private InventorySlice(Plugin plugin, Player player, int x, int y) {
+        this.plugin = Preconditions.checkNotNull(plugin);
+        this.player = Preconditions.checkNotNull(player);
         this.x = x;
         this.y = y;
     }
@@ -54,16 +61,16 @@ public final class InventorySlice extends AbstractList<ItemStack> {
      * Indexes 0-8 represent hotbar slots, and they include the slots above the
      * hotbar in the main inventory.
      *
-     * @param inventory The player inventory to examine.
+     * @param player The player whose inventory to access.
      * @param index The index to start at.
      * @return A new slice that starts the the indicated slot.
      */
-    public static InventorySlice fromSlot(PlayerInventory inventory, int index) {
+    public static InventorySlice fromSlot(Plugin plugin, Player player, int index) {
         if (index <= 8) {
-            return new InventorySlice(inventory, index, 3);
+            return new InventorySlice(plugin, player, index, 3);
         } else {
             int i = index - 9;
-            return new InventorySlice(inventory, i % 9, i / 9);
+            return new InventorySlice(plugin, player, i % 9, i / 9);
         }
     }
 
@@ -74,8 +81,8 @@ public final class InventorySlice extends AbstractList<ItemStack> {
      * @return The bottommost item in the slice, or null.
      */
     public ItemStack getBottomItem() {
-        if (inventory != null) {
-            return inventory.getItem(getSlotIndex(x, y));
+        if (player != null) {
+            return player.getInventory().getItem(getSlotIndex(x, y));
         } else {
             return null;
         }
@@ -92,14 +99,14 @@ public final class InventorySlice extends AbstractList<ItemStack> {
      * @return A slice that does not include these slots.
      */
     public InventorySlice skip(int count) {
-        if (count <= 0 || inventory == null) {
+        if (count <= 0 || player == null) {
             return this;
         }
 
         int offsetY = y - count;
 
         if (offsetY >= 0) {
-            return new InventorySlice(inventory, x, offsetY);
+            return new InventorySlice(plugin, player, x, offsetY);
         } else {
             return empty();
         }
@@ -107,21 +114,44 @@ public final class InventorySlice extends AbstractList<ItemStack> {
 
     @Override
     public ItemStack get(int index) {
-        if (inventory != null) {
+        if (player != null) {
             int offsetY = y - index;
-            return inventory.getItem(getSlotIndex(x, offsetY));
+            return player.getInventory().getItem(getSlotIndex(x, offsetY));
         }
 
         throw new IndexOutOfBoundsException();
     }
 
     @Override
-    public int size() {
-        if (inventory == null) {
-            return 0;
-        }
+    public ItemStack set(int index, ItemStack stack) {
+        if (player != null) {
+            int offsetY = y - index;
+            int slotIndex = getSlotIndex(x, offsetY);
+            PlayerInventory inv = player.getInventory();
 
-        return y + 1;
+            ItemStack previous = inv.getItem(slotIndex);
+            inv.setItem(slotIndex, stack);
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.updateInventory();
+                }
+            }.runTaskLater(plugin, 1);
+
+            return previous;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    @Override
+    public int size() {
+        if (player == null) {
+            return 0;
+        } else {
+            return y + 1;
+        }
     }
 
     /**
