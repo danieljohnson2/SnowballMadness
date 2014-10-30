@@ -27,6 +27,7 @@ public class ProjectileSnowballLogic extends SnowballLogic {
         World world = snowball.getWorld();
 
         Projectile arrow = world.spawn(snowball.getLocation(), projectileClass);
+        arrow.setShooter(snowball.getShooter());
         arrow.setVelocity(snowball.getVelocity());
 
         snowball.remove();

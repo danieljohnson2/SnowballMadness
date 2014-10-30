@@ -40,6 +40,20 @@ public abstract class SnowballLogic {
     }
 
     /**
+     * This is called when the snowball hits something and returns teh damange
+     * to be done (which can be 0).
+     *
+     * @param snowball The snowball hitting something.
+     * @param info Other information about the snowball.
+     * @param target The entity that was hit.
+     * @param damage The damage the snowball is expected to do..
+     * @return The damage teh snowball will do.
+     */
+    public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
+        return proposedDamage;
+    }
+
+    /**
      * This is called when the snowball hits something.
      *
      * @param snowball The snowball hitting something.
@@ -151,9 +165,20 @@ public abstract class SnowballLogic {
         }
     }
 
+    public static double performDamage(Snowball snowball, Entity target, double damage) {
+        SnowballLogicData data = getData(Preconditions.checkNotNull(snowball));
+
+        if (data.logic != null) {
+            Bukkit.getLogger().info(String.format("Snowball damage: %s [%d]", data.logic, inFlight.size()));
+            return data.logic.damage(snowball, data.info, target, damage);
+        }
+
+        return damage;
+    }
+
     /**
-     * This method handles a projectile launcher; it selects a logic and runs
-     * its launch method.
+     * This method handles a projectile launch; it selects a logic and runs its
+     * launch method.
      *
      * @param e The event data.
      */
@@ -171,12 +196,31 @@ public abstract class SnowballLogic {
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
                 InventorySlice slice = InventorySlice.fromSlot(inv, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball,
-                        new SnowballInfo(shooter, 1.0));
+                SnowballLogic logic = performLaunch(slice, snowball, SnowballInfo.EMPTY);
 
                 if (logic != null) {
                     replenishSnowball(plugin, inv, heldSlot);
                 }
+            }
+        }
+    }
+
+    /**
+     * This method handles the damage a snowball does on impact, and can adjust
+     * that damage.
+     *
+     * @param e The damage event.
+     */
+    public static void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
+        Entity damagee = e.getEntity();
+        Entity damager = e.getDamager();
+        double damage = e.getDamage();
+
+        if (damager instanceof Snowball) {
+            double newDamage = performDamage((Snowball) damager, damagee, damage);
+
+            if (newDamage != damage) {
+                e.setDamage(newDamage);
             }
         }
     }
@@ -256,10 +300,14 @@ public abstract class SnowballLogic {
      */
     private static SnowballLogicData getData(Snowball snowball) {
         if (snowball != null) {
-            return inFlight.get(snowball);
-        } else {
-            return SnowballLogicData.EMPTY;
+            SnowballLogicData data = inFlight.get(snowball);
+
+            if (data != null) {
+                return data;
+            }
         }
+
+        return SnowballLogicData.EMPTY;
     }
 
     /**

@@ -19,7 +19,7 @@ public class JetbackSnowballLogic extends SnowballLogic {
     public void launch(Snowball snowball, SnowballInfo info) {
         super.launch(snowball, info);
     
-        LivingEntity shooter = info.shooter;
+        LivingEntity shooter = snowball.getShooter();
 
         double delta = info.amplification / 2.0;
 

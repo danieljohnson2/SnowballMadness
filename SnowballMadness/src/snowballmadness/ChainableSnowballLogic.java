@@ -5,6 +5,7 @@
 package snowballmadness;
 
 import com.google.common.base.Preconditions;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Snowball;
 
 /**
@@ -28,6 +29,17 @@ public abstract class ChainableSnowballLogic extends SnowballLogic {
         if (nextLogic != null) {
             nextLogic.launch(snowball, adjustInfo(snowball, info));
         }
+    }
+
+    @Override
+    public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
+        proposedDamage = super.damage(snowball, info, target, proposedDamage); //To change body of generated methods, choose Tools | Templates.
+
+        if (nextLogic != null) {
+            proposedDamage = nextLogic.damage(snowball, adjustInfo(snowball, info), target, proposedDamage);
+        }
+
+        return proposedDamage;
     }
 
     @Override

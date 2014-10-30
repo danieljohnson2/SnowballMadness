@@ -17,20 +17,22 @@ public class ReversedSnowballLogic extends SnowballLogic {
 
     @Override
     public void launch(Snowball snowball, SnowballInfo info) {
-        super.launch(snowball, info); //To change body of generated methods, choose Tools | Templates.
+        super.launch(snowball, info);
 
+        LivingEntity shooter = snowball.getShooter();
+        
         Location snowballLoc = snowball.getLocation().clone();
         snowballLoc.setY(snowballLoc.getY() - 1);
-        snowballLoc.setDirection(info.shooter.getLocation().getDirection());
+        snowballLoc.setDirection(shooter.getLocation().getDirection());
 
         Vector velocity = snowball.getVelocity().clone();
         velocity = velocity.multiply(info.amplification);
 
-        if (snowballLoc.distance(info.shooter.getLocation()) < 2) {
-            info.shooter.teleport(snowballLoc);
+        if (snowballLoc.distance(shooter.getLocation()) < 2) {
+            shooter.teleport(snowballLoc);
         }
 
-        info.shooter.setVelocity(velocity);
+        shooter.setVelocity(velocity);
 
         snowball.remove();
     }

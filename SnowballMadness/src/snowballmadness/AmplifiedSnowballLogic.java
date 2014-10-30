@@ -4,6 +4,7 @@
  */
 package snowballmadness;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Snowball;
 import org.bukkit.util.Vector;
 
@@ -23,13 +24,23 @@ public class AmplifiedSnowballLogic extends ChainableSnowballLogic {
     }
 
     @Override
+    public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
+        double damage = super.damage(snowball, info, target, proposedDamage);
+
+        if (amplification > 1.0 && damage == 0.0) {
+            damage = 1.0;
+        }
+        return damage * amplification;
+    }
+
+    @Override
     protected SnowballInfo adjustInfo(Snowball snowball, SnowballInfo info) {
         return info.getAmplified(amplification);
     }
 
     @Override
     public String toString() {
-        return String.format("%s -> (x%d) %s",
+        return String.format("%s -> (x%f) %s",
                 super.toString(),
                 amplification,
                 nextLogic);

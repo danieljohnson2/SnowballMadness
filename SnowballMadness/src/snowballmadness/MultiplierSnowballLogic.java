@@ -31,12 +31,12 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         super.hit(snowball, info);
 
         World world = snowball.getWorld();
-        LivingEntity shooter = info.shooter;
+        LivingEntity shooter = snowball.getShooter();
         Location source = snowball.getLocation().clone();
         source.setY(source.getY() + 0.25);
 
         for (int i = 0; i < numberOfSnowballs; ++i) {
-            Snowball sb = world.spawn(source, Snowball.class);
+            Snowball secondary = world.spawn(source, Snowball.class);
 
             Vector vector = Vector.getRandom();
             vector.setX(vector.getX() - 0.5);
@@ -44,9 +44,10 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             vector.setY(0.25);
             vector = vector.multiply(new Vector(info.amplification, 1.0, info.amplification));
 
-            sb.setVelocity(vector);
+            secondary.setShooter(shooter);
+            secondary.setVelocity(vector);
 
-            performLaunch(inventory, sb, info);
+            performLaunch(inventory, secondary, info);
         }
     }
 
