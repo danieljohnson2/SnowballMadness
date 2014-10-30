@@ -90,6 +90,13 @@ public abstract class SnowballLogic {
             case ARROW:
                 return new ProjectileSnowballLogic(Arrow.class);
 
+            case WOOD_SWORD:
+            case STONE_SWORD:
+            case IRON_SWORD:
+            case GOLD_SWORD:
+            case DIAMOND_SWORD:
+                return new SwordSnowballLogic(hint);
+                
             case TNT:
                 return new TNTSnowballLogic(4);
 
