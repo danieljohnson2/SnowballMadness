@@ -162,7 +162,7 @@ public abstract class SnowballLogic {
     public static void performHit(Snowball snowball) {
         SnowballLogicData data = getData(Preconditions.checkNotNull(snowball));
 
-        if (data.logic != null) {
+        if (data != null) {
             try {
                 Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", data.logic, inFlight.size()));
                 data.logic.hit(snowball, data.info);
@@ -175,7 +175,7 @@ public abstract class SnowballLogic {
     public static double performDamage(Snowball snowball, Entity target, double damage) {
         SnowballLogicData data = getData(Preconditions.checkNotNull(snowball));
 
-        if (data.logic != null) {
+        if (data != null) {
             Bukkit.getLogger().info(String.format("Snowball damage: %s [%d]", data.logic, inFlight.size()));
             return data.logic.damage(snowball, data.info, target, damage);
         }
@@ -189,7 +189,7 @@ public abstract class SnowballLogic {
      *
      * @param e The event data.
      */
-    public static void onProjectileLaunch(Plugin plugin, ProjectileLaunchEvent e) {
+    public static void onProjectileLaunch(SnowballMadness plugin, ProjectileLaunchEvent e) {
         Projectile proj = e.getEntity();
         LivingEntity shooter = proj.getShooter();
 
@@ -202,8 +202,8 @@ public abstract class SnowballLogic {
             ItemStack sourceStack = inv.getItem(heldSlot);
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
-                InventorySlice slice = InventorySlice.fromSlot(plugin, player, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball, SnowballInfo.EMPTY);
+                InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
+                SnowballLogic logic = performLaunch(slice, snowball, new SnowballInfo(plugin));
 
                 if (logic != null) {
                     replenishSnowball(plugin, inv, heldSlot);
@@ -288,7 +288,6 @@ public abstract class SnowballLogic {
      */
     private final static class SnowballLogicData {
 
-        public static final SnowballLogicData EMPTY = new SnowballLogicData(null, SnowballInfo.EMPTY);
         public final SnowballLogic logic;
         public final SnowballInfo info;
 
@@ -302,19 +301,15 @@ public abstract class SnowballLogic {
      * This returns the logic and shooter for a snowball that has one.
      *
      * @param snowball The snowball of interest; can be null.
-     * @return The logic and info of the snowball, or the empty data if it is an
-     * illogical snowball or it was null.
+     * @return The logic and info of the snowball, or null if it is an illogical
+     * snowball or it was null.
      */
     private static SnowballLogicData getData(Snowball snowball) {
         if (snowball != null) {
-            SnowballLogicData data = inFlight.get(snowball);
-
-            if (data != null) {
-                return data;
-            }
+            return inFlight.get(snowball);
+        } else {
+            return null;
         }
-
-        return SnowballLogicData.EMPTY;
     }
 
     /**

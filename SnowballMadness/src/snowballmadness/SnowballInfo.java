@@ -17,20 +17,21 @@ import org.bukkit.entity.*;
 public final class SnowballInfo {
 
     /**
-     * This is an info object that contains default values.
+     * This is the plugin being run.
      */
-    public static final SnowballInfo EMPTY = new SnowballInfo(1.0);
+    public SnowballMadness plugin;
     /**
      * This is a modifier on the 'power' of a snowball; different snowballs
      * treat this differently.
      */
     public final double amplification;
 
-    public SnowballInfo() {
-        this.amplification = 1.0;
+    public SnowballInfo(SnowballMadness plugin) {
+        this(plugin, 1.0);
     }
 
-    public SnowballInfo(double amplification) {
+    public SnowballInfo(SnowballMadness plugin, double amplification) {
+        this.plugin = Preconditions.checkNotNull(plugin);
         this.amplification = amplification;
     }
 
@@ -42,6 +43,6 @@ public final class SnowballInfo {
      * @return A new info object.
      */
     public SnowballInfo getAmplified(double factor) {
-        return new SnowballInfo(amplification * factor);
+        return new SnowballInfo(plugin, amplification * factor);
     }
 }

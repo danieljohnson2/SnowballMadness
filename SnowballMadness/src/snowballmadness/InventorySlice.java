@@ -27,19 +27,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 public final class InventorySlice extends AbstractList<ItemStack> {
 
     private static final InventorySlice EMPTY = new InventorySlice();
-    private final Plugin plugin;
     private final Player player;
     private final int x, y;
 
     private InventorySlice() {
-        this.plugin = null;
         this.player = null;
         this.x = 0;
         this.y = 0;
     }
 
-    private InventorySlice(Plugin plugin, Player player, int x, int y) {
-        this.plugin = Preconditions.checkNotNull(plugin);
+    private InventorySlice(Player player, int x, int y) {
         this.player = Preconditions.checkNotNull(player);
         this.x = x;
         this.y = y;
@@ -65,12 +62,12 @@ public final class InventorySlice extends AbstractList<ItemStack> {
      * @param index The index to start at.
      * @return A new slice that starts the the indicated slot.
      */
-    public static InventorySlice fromSlot(Plugin plugin, Player player, int index) {
+    public static InventorySlice fromSlot(Player player, int index) {
         if (index <= 8) {
-            return new InventorySlice(plugin, player, index, 3);
+            return new InventorySlice(player, index, 3);
         } else {
             int i = index - 9;
-            return new InventorySlice(plugin, player, i % 9, i / 9);
+            return new InventorySlice(player, i % 9, i / 9);
         }
     }
 
@@ -106,7 +103,7 @@ public final class InventorySlice extends AbstractList<ItemStack> {
         int offsetY = y - count;
 
         if (offsetY >= 0) {
-            return new InventorySlice(plugin, player, x, offsetY);
+            return new InventorySlice(player, x, offsetY);
         } else {
             return empty();
         }
@@ -131,14 +128,6 @@ public final class InventorySlice extends AbstractList<ItemStack> {
 
             ItemStack previous = inv.getItem(slotIndex);
             inv.setItem(slotIndex, stack);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    player.updateInventory();
-                }
-            }.runTaskLater(plugin, 1);
-
             return previous;
         } else {
             throw new IndexOutOfBoundsException();
