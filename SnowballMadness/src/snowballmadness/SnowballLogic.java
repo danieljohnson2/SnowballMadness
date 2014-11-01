@@ -104,7 +104,7 @@ public abstract class SnowballLogic {
                 return new TNTSnowballLogic(1);
 
             case FIREWORK:
-                return new JetbackSnowballLogic();
+                return new JetpackSnowballLogic();
 
             case SPIDER_EYE:
                 return new ReversedSnowballLogic();

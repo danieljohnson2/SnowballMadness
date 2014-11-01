@@ -13,7 +13,7 @@ import org.bukkit.util.*;
  *
  * @author DanJ
  */
-public class JetbackSnowballLogic extends SnowballLogic {
+public class JetpackSnowballLogic extends SnowballLogic {
 
     @Override
     public void launch(Snowball snowball, SnowballInfo info) {
