@@ -90,6 +90,14 @@ public abstract class SnowballLogic {
             case ARROW:
                 return new ProjectileSnowballLogic(Arrow.class);
 
+            case COBBLESTONE:
+            case SMOOTH_BRICK:
+            case SAND:
+            case GRAVEL:
+                return new BlockPlacementSnowballLogic(hint.getType());
+            //considering adding data values to smooth brick so it randomizes
+            //including mossy, cracked and even silverfish
+
             case WOOD_SWORD:
             case STONE_SWORD:
             case IRON_SWORD:
@@ -108,7 +116,7 @@ public abstract class SnowballLogic {
 
             case FLINT_AND_STEEL:
                 return new FlintAndSteelSnowballLogic(Material.FIRE);
-                
+
             case SPIDER_EYE:
                 return new ReversedSnowballLogic();
 
@@ -124,7 +132,7 @@ public abstract class SnowballLogic {
             case DIRT:
             case GRASS:
                 return new RegenerationSnowballLogic(slice);
-                
+
             default:
                 return null;
         }
