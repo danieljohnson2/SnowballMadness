@@ -4,14 +4,12 @@
  */
 package snowballmadness;
 
-import com.google.common.base.Preconditions;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Snowball;
-import org.bukkit.inventory.ItemStack;
+import java.util.*;
+import com.google.common.base.*;
+import com.google.common.collect.*;
+import org.bukkit.*;
+import org.bukkit.entity.*;
+import org.bukkit.inventory.*;
 
 /**
  * This logic regenerates any chunk it lands in, and also heals players it hits.
@@ -23,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 public class RegenerationSnowballLogic extends SnowballLogic {
 
     private final InventorySlice inventory;
+    private static final HashMap<Long, Long> regenTimeouts = new HashMap<Long, Long>();
 
     public RegenerationSnowballLogic(InventorySlice inventory) {
         this.inventory = Preconditions.checkNotNull(inventory);
@@ -44,12 +43,47 @@ public class RegenerationSnowballLogic extends SnowballLogic {
 
         Location loc = snowball.getLocation();
         Chunk chunk = loc.getBlock().getChunk();
-        chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
 
-        ItemStack bottom = inventory.getBottomItem();
+        if (checkRegenTimer(chunk)) {
+            chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
 
-        if (bottom != null && bottom.getType() == Material.DIRT) {
-            bottom.setType(Material.GRASS);
+            ItemStack bottom = inventory.getBottomItem();
+
+            if (bottom != null && bottom.getType() == Material.DIRT) {
+                bottom.setType(Material.GRASS);
+            }
         }
+    }
+
+    /**
+     * This method checks to see if we can safely regenerate a chunk. We keep a
+     * weak map of timeouts, and we must be after this time to do so. This
+     * method also updates that map with a new time, to be 8 seconds from now.
+     *
+     * @param chunk The chunk to check.
+     * @return True if we should regenerate the chunk.
+     */
+    private static boolean checkRegenTimer(Chunk chunk) {
+        Long key = chunk.getX() | ((long) chunk.getZ()) << 32;
+        long now = System.currentTimeMillis();
+
+        Long time = regenTimeouts.get(key);
+
+        Iterator<Map.Entry<Long, Long>> iter = regenTimeouts.entrySet().iterator();
+
+        // remove any expired entries so we don't leak memory forever
+
+        while (iter.hasNext()) {
+            if (iter.next().getValue() <= now) {
+                iter.remove();
+            }
+        }
+
+        if (time == null || time <= now) {
+            regenTimeouts.put(key, now + 8000);
+            return true;
+        }
+
+        return false;
     }
 }
