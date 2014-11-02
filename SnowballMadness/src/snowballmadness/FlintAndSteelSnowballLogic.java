@@ -13,28 +13,10 @@ import org.bukkit.entity.*;
  *
  * @author DanJ
  */
-public class FlintAndSteelSnowballLogic extends SnowballLogic {
+public class FlintAndSteelSnowballLogic extends BlockPlacementlSnowballLogic {
 
-    @Override
-    public void hit(Snowball snowball, SnowballInfo info) {
-        super.hit(snowball, info);
-
-        Location loc = snowball.getLocation().clone();
-        Block block = loc.getBlock();
-
-        if (block.getType() == Material.AIR && block.getY() > 1) {
-            loc.setY(loc.getY() - 1);
-            block = loc.getBlock();
-        }
-
-        if (block.getType() != Material.AIR) {
-            loc.setY(loc.getY() + 1);
-            block = loc.getBlock();
-        }
-
-        if (block.getType() == Material.AIR) {
-            block.setType(Material.FIRE);
-        }
+    public FlintAndSteelSnowballLogic(Material toPlace) {
+        super(toPlace);
     }
 
     @Override
