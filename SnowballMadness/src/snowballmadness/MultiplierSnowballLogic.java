@@ -37,7 +37,8 @@ public class MultiplierSnowballLogic extends SnowballLogic {
 
         Vector bounce = snowball.getVelocity();
         bounce.setY(-(bounce.getY()));
-        bounce = bounce.multiply(new Vector(info.amplification, 1.0, info.amplification));
+        //we are not going to amplify the bounce because the initial velocity should
+        //be what's amplified. Thus we needn't amplify it again.
 
         Snowball skipper = world.spawn(source, Snowball.class);
         skipper.setShooter(shooter);
@@ -46,7 +47,7 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         performLaunch(inventory, skipper, info);
         //the purpose of this change is to make the first one in the stack always
         //bounce like a skipping rock, for better distance shots and ICBMs
-        //successive snowballs will be directed randomly
+        //successive snowballs will be directed increasingly randomly
 
         for (int i = 1; i < numberOfSnowballs; ++i) {
             Snowball secondary = world.spawn(source, Snowball.class);
@@ -57,6 +58,16 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             vector.setY(0.25);
             vector = vector.multiply(new Vector(info.amplification, 1.0, info.amplification));
 
+            //now we will interpolate between that and bounce.
+            double highvalues = i / 16.0; //if this doesn't return a fractional value it won't work
+            double lowvalues = 1.0 - highvalues;
+            vector = vector.multiply(highvalues);
+            //we've just scaled back our randomness based on how near the snowball number
+            //is to 16: lower i numbers make the random component low
+            vector = vector.add(bounce.multiply(lowvalues));
+            //and we add bounce scaled to the inverse of that amount. Lower i numbers make the
+            //bounce component high. as you keep adding more i you get more randomness and scatter.
+            
             secondary.setShooter(shooter);
             secondary.setVelocity(vector);
 
