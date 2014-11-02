@@ -35,7 +35,20 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         Location source = snowball.getLocation().clone();
         source.setY(source.getY() + 0.25);
 
-        for (int i = 0; i < numberOfSnowballs; ++i) {
+        Vector bounce = snowball.getVelocity();
+        bounce.setY(-(bounce.getY()));
+        bounce = bounce.multiply(new Vector(info.amplification, 1.0, info.amplification));
+
+        Snowball skipper = world.spawn(source, Snowball.class);
+        skipper.setShooter(shooter);
+        skipper.setVelocity(bounce);
+
+        performLaunch(inventory, skipper, info);
+        //the purpose of this change is to make the first one in the stack always
+        //bounce like a skipping rock, for better distance shots and ICBMs
+        //successive snowballs will be directed randomly
+
+        for (int i = 1; i < numberOfSnowballs; ++i) {
             Snowball secondary = world.spawn(source, Snowball.class);
 
             Vector vector = Vector.getRandom();
