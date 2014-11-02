@@ -15,11 +15,11 @@ import org.bukkit.entity.*;
  *
  * @author DanJ
  */
-public class BlockPlacementlSnowballLogic extends SnowballLogic {
+public class BlockPlacementSnowballLogic extends SnowballLogic {
 
     private final Material toPlace;
 
-    public BlockPlacementlSnowballLogic(Material toPlace) {
+    public BlockPlacementSnowballLogic(Material toPlace) {
         this.toPlace = Preconditions.checkNotNull(toPlace);
     }
 

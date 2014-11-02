@@ -13,7 +13,7 @@ import org.bukkit.entity.*;
  *
  * @author DanJ
  */
-public class FlintAndSteelSnowballLogic extends BlockPlacementlSnowballLogic {
+public class FlintAndSteelSnowballLogic extends BlockPlacementSnowballLogic {
 
     public FlintAndSteelSnowballLogic(Material toPlace) {
         super(toPlace);
