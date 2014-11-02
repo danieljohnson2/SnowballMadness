@@ -121,6 +121,10 @@ public abstract class SnowballLogic {
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
 
+            case DIRT:
+            case GRASS:
+                return new RegenerationSnowballLogic(slice);
+                
             default:
                 return null;
         }
