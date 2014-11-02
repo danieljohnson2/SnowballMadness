@@ -64,26 +64,28 @@ public class RegenerationSnowballLogic extends SnowballLogic {
      * @return True if we should regenerate the chunk.
      */
     private static boolean checkRegenTimer(Chunk chunk) {
-        Long key = chunk.getX() | ((long) chunk.getZ()) << 32;
-        long now = System.currentTimeMillis();
+        synchronized (regenTimeouts) {
+            Long key = chunk.getX() | ((long) chunk.getZ()) << 32;
+            long now = System.currentTimeMillis();
 
-        Long time = regenTimeouts.get(key);
+            Long time = regenTimeouts.get(key);
 
-        Iterator<Map.Entry<Long, Long>> iter = regenTimeouts.entrySet().iterator();
+            Iterator<Map.Entry<Long, Long>> iter = regenTimeouts.entrySet().iterator();
 
-        // remove any expired entries so we don't leak memory forever
+            // remove any expired entries so we don't leak memory forever
 
-        while (iter.hasNext()) {
-            if (iter.next().getValue() <= now) {
-                iter.remove();
+            while (iter.hasNext()) {
+                if (iter.next().getValue() <= now) {
+                    iter.remove();
+                }
             }
-        }
 
-        if (time == null || time <= now) {
-            regenTimeouts.put(key, now + 8000);
-            return true;
-        }
+            if (time == null || time <= now) {
+                regenTimeouts.put(key, now + 8000);
+                return true;
+            }
 
-        return false;
+            return false;
+        }
     }
 }
