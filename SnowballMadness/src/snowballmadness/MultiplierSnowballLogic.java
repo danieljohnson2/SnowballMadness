@@ -35,7 +35,7 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         Location source = snowball.getLocation().clone();
         source.setY(source.getY() + 0.25);
 
-        Vector bounce = snowball.getVelocity();
+        Vector bounce = snowball.getVelocity().clone();
         bounce.setY(-(bounce.getY()));
         //we are not going to amplify the bounce because the initial velocity should
         //be what's amplified. Thus we needn't amplify it again.
