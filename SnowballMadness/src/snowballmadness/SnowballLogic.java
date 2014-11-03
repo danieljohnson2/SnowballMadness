@@ -97,6 +97,12 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
+                
+            case WATER_BUCKET:
+                return new BlockPlacementSnowballLogic(Material.WATER);
+                
+            case LAVA_BUCKET:
+                return new BlockPlacementSnowballLogic(Material.LAVA);
 
             case WOOD_SWORD:
             case STONE_SWORD:
