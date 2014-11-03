@@ -24,6 +24,15 @@ public class AmplifiedSnowballLogic extends ChainableSnowballLogic {
     }
 
     @Override
+    public void launch(Snowball snowball, SnowballInfo info) {
+        Vector v = snowball.getVelocity().clone();
+        v.multiply(amplification * info.amplification);
+        snowball.setVelocity(v);
+
+        super.launch(snowball, info);
+    }
+
+    @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
         double damage = super.damage(snowball, info, target, proposedDamage);
 
