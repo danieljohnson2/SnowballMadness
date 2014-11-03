@@ -19,7 +19,7 @@ public final class SnowballInfo {
     /**
      * This is the plugin being run.
      */
-    public SnowballMadness plugin;
+    public final SnowballMadness plugin;
     /**
      * This is a modifier on the 'power' of a snowball; different snowballs
      * treat this differently.

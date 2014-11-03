@@ -41,16 +41,34 @@ public class RegenerationSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        Location loc = snowball.getLocation();
-        Chunk chunk = loc.getBlock().getChunk();
+        if (info.amplification >= 2.0) {
+            Location loc = snowball.getLocation();
+            Chunk chunk = loc.getBlock().getChunk();
 
-        if (checkRegenTimer(chunk)) {
-            chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
+            if (checkRegenTimer(chunk)) {
 
-            ItemStack bottom = inventory.getBottomItem();
+                LivingEntity shooter = snowball.getShooter();
+                if (shooter instanceof HumanEntity
+                        && ((Player) shooter).getGameMode() != GameMode.CREATIVE) {
+                    ItemStack bottom = inventory.getBottomItem();
 
-            if (bottom != null && bottom.getType() == Material.DIRT) {
-                bottom.setType(Material.GRASS);
+                    if (bottom != null && bottom.getType() == Material.GRASS) {
+                        int newAmount = bottom.getAmount() - 1;
+
+                        if (newAmount <= 0) {
+                            inventory.set(0, null);
+                        } else {
+                            bottom.setAmount(newAmount);
+                        }
+                    } else {
+                        // if grass is no longer in inventory, abort. This
+                        // prevent multiplier snowballs from doing too much
+                        // regen.
+                        return;
+                    }
+                }
+
+                chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
             }
         }
     }

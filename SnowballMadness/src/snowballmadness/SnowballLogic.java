@@ -97,10 +97,10 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
-                
+
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
-                
+
             case LAVA_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.LAVA);
 
@@ -135,7 +135,6 @@ public abstract class SnowballLogic {
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
 
-            case DIRT:
             case GRASS:
                 return new RegenerationSnowballLogic(slice);
 
@@ -226,7 +225,7 @@ public abstract class SnowballLogic {
                 InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
                 SnowballLogic logic = performLaunch(slice, snowball, new SnowballInfo(plugin));
 
-                if (logic != null) {
+                if (logic != null && player.getGameMode() != GameMode.CREATIVE) {
                     replenishSnowball(plugin, inv, heldSlot);
                 }
             }

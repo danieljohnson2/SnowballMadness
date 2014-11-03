@@ -56,18 +56,19 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             vector.setX(vector.getX() - 0.5);
             vector.setZ(vector.getZ() - 0.5);
             vector.setY(0.25);
-            vector = vector.multiply(new Vector(info.amplification, 1.0, info.amplification));
+
+            vector.multiply(new Vector(info.amplification, 1.0, info.amplification));
 
             //now we will interpolate between that and bounce.
             double highvalues = i / 16.0; //if this doesn't return a fractional value it won't work
             double lowvalues = 1.0 - highvalues;
-            vector = vector.multiply(highvalues);
+            vector.multiply(highvalues);
             //we've just scaled back our randomness based on how near the snowball number
             //is to 16: lower i numbers make the random component low
-            vector = vector.add(bounce.multiply(lowvalues));
+            vector.add(bounce.multiply(lowvalues));
             //and we add bounce scaled to the inverse of that amount. Lower i numbers make the
             //bounce component high. as you keep adding more i you get more randomness and scatter.
-            
+
             secondary.setShooter(shooter);
             secondary.setVelocity(vector);
 
