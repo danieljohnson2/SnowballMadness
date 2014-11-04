@@ -128,6 +128,10 @@ public abstract class SnowballLogic {
 
             case SUGAR:
                 return new SpeededSnowballLogic(1.5, slice.skip(1));
+                
+            case CAKE:
+                return new SpeededSnowballLogic(3, slice.skip(1));
+                //the cake is a... lazor!
 
             case GLOWSTONE_DUST:
                 return new PoweredSnowballLogic(1.5, slice.skip(1));
