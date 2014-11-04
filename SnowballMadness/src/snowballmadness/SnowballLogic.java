@@ -138,6 +138,22 @@ public abstract class SnowballLogic {
             case GRASS:
                 return new RegenerationSnowballLogic(slice);
 
+            case GHAST_TEAR:
+                return new SpawnSnowballLogic(EntityType.GHAST);
+
+            case STRING:
+                return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 1.0);
+                
+            case EYE_OF_ENDER:
+                return new SpawnSnowballLogic(EntityType.ENDERMAN);
+                
+            case MILK_BUCKET:
+                return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 1.0);
+                        
+            case SKULL_ITEM:
+                SkullType skullType = SkullType.values()[hint.getDurability()];
+                return SpawnSnowballLogic.fromSkullType(skullType);
+
             default:
                 return null;
         }
