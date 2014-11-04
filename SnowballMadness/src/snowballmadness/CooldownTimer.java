@@ -7,12 +7,18 @@ package snowballmadness;
 import java.util.*;
 
 /**
+ * This class tracks cooldowns, to prevent some effects from firing off too
+ * often. For each key value, it keeps a deadline when the cooldown expires, and
+ * until then the check() methods will return false.
+ *
+ * The intent here is that you keep a static field with one of these, so this
+ * method is thread-safe.
  *
  * @author DanJ
  */
 public final class CooldownTimer<TKey> {
 
-    private final HashMap<TKey, Long> regenTimeouts = new HashMap<TKey, Long>();
+    private final HashMap<TKey, Long> expirations = new HashMap<TKey, Long>();
     private final long timeoutMillis;
 
     public CooldownTimer(long timeoutMillis) {
@@ -20,35 +26,54 @@ public final class CooldownTimer<TKey> {
     }
 
     /**
-     * This method checks to see if we can safely regenerate a chunk. We keep a
-     * weak map of timeouts, and we must be after this time to do so. This
-     * method also updates that map with a new time, to be 8 seconds from now.
+     * This method checks to see if the cooldown has expired. This returns true
+     * if it has, or if no cooldown is in effect at all- you can then do
+     * whatever it is you wanted to do. If there's an outstanding cooldown, this
+     * returns false and you should not do it.
      *
-     * @param chunk The chunk to check.
-     * @return True if we should regenerate the chunk.
+     * If this method returns true, it also starts a new cooldown; a second
+     * consecutive call will return false because of this.
+     *
+     * @param key The key identifies which cooldown you want to check.
+     * @return True if the cooldown has expired (or there was no cooldown).
      */
     public boolean check(TKey key) {
-        synchronized (regenTimeouts) {
+        synchronized (expirations) {
             long now = System.currentTimeMillis();
 
-            Long time = regenTimeouts.get(key);
-
-            Iterator<Map.Entry<TKey, Long>> iter = regenTimeouts.entrySet().iterator();
-
-            // remove any expired entries so we don't leak memory forever
-
-            while (iter.hasNext()) {
-                if (iter.next().getValue() <= now) {
-                    iter.remove();
-                }
-            }
+            Long time = expirations.get(key);
 
             if (time == null || time <= now) {
-                regenTimeouts.put(key, now + timeoutMillis);
+                // we know 'key' is no longer in cooldown, so we remove
+                // it, and any other expired keys we can detect.
+                
+                expirations.remove(key);
+                cleanup();
+
+                expirations.put(key, now + timeoutMillis);
                 return true;
             }
 
             return false;
+        }
+    }
+
+    /**
+     * This method removes any cooldowns that have expired, reclaiming memory.
+     * We do this whenever we set up a new cooldown automatically.
+     */
+    public void cleanup() {
+        long now = System.currentTimeMillis();
+
+        synchronized (expirations) {
+            if (!expirations.isEmpty()) {
+                Iterator<Map.Entry<TKey, Long>> iter = expirations.entrySet().iterator();
+                while (iter.hasNext()) {
+                    if (iter.next().getValue() <= now) {
+                        iter.remove();
+                    }
+                }
+            }
         }
     }
 }
