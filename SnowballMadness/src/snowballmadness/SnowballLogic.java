@@ -97,6 +97,12 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
+                
+            case PUMPKIN:
+                return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
+                
+            case SOUL_SAND:
+                return new BlockPlacementSnowballLogic(Material.PORTAL);
 
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
@@ -147,12 +153,27 @@ public abstract class SnowballLogic {
 
             case GHAST_TEAR:
                 return new SpawnSnowballLogic(EntityType.GHAST);
+                
+            case ROTTEN_FLESH:
+                return new SpawnSnowballLogic(EntityType.ZOMBIE);
+                
+            case ENCHANTMENT_TABLE:
+                return new SpawnSnowballLogic(EntityType.WITCH);
+                
+            case GOLD_INGOT:
+                return new SpawnSnowballLogic(EntityType.PIG);
+                
+            case GOLD_BLOCK:
+                return new SpawnSnowballLogic(EntityType.PIG_ZOMBIE);
 
             case STRING:
                 return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 1.0);
 
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
+                
+            case DRAGON_EGG:
+                return new SpawnSnowballLogic(EntityType.ENDER_DRAGON);
 
             case MILK_BUCKET:
                 return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 1.0);
