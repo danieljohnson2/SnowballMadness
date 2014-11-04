@@ -109,6 +109,18 @@ public abstract class SnowballLogic {
 
             case LAVA_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.LAVA);
+                
+            case NETHERRACK:
+                return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
+                
+            case LADDER:
+                return new BlockEmbedSnowballLogic(Material.LADDER, Material.AIR, 256);
+                
+            case DIAMOND_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 256);
+                
+            case DIAMOND_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
 
             case WOOD_SWORD:
             case STONE_SWORD:
