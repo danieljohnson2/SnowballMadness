@@ -88,7 +88,7 @@ public abstract class SnowballLogic {
 
         switch (hint.getType()) {
             case ARROW:
-                return new ProjectileSnowballLogic(Arrow.class);
+                return new ArrowSnowballLogic(hint);
 
             case COBBLESTONE:
             case SMOOTH_BRICK:
