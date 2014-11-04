@@ -21,7 +21,7 @@ public class JetpackSnowballLogic extends SnowballLogic {
     
         LivingEntity shooter = snowball.getShooter();
 
-        double delta = info.amplification / 2.0;
+        double delta = info.power / 2.0;
 
         snowball.setVelocity(new Vector(0, -delta, 0));
 

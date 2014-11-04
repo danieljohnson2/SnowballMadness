@@ -21,28 +21,43 @@ public final class SnowballInfo {
      */
     public final SnowballMadness plugin;
     /**
-     * This is a modifier on the 'power' of a snowball; different snowballs
-     * treat this differently.
+     * This is a modifier on the speed of a snowball; it makes snowballs fly
+     * faster.
      */
-    public final double amplification;
+    public final double speed;
+    /**
+     * This is a modifier on the power of a snowball; different snowballs treat
+     * this differently.
+     */
+    public final double power;
 
     public SnowballInfo(SnowballMadness plugin) {
-        this(plugin, 1.0);
+        this(plugin, 1.0, 1.0);
     }
 
-    public SnowballInfo(SnowballMadness plugin, double amplification) {
+    public SnowballInfo(SnowballMadness plugin, double speed, double power) {
         this.plugin = Preconditions.checkNotNull(plugin);
-        this.amplification = amplification;
+        this.speed = speed;
+        this.power = power;
     }
 
     /**
-     * This returns a new info whose amplification has been scaled by the factor
-     * given.
+     * This returns a new info whose speed has been scaled by the factor given.
      *
-     * @param factor The factor by which we adjust the amplification.
+     * @param factor The factor by which we adjust the speed.
      * @return A new info object.
      */
-    public SnowballInfo getAmplified(double factor) {
-        return new SnowballInfo(plugin, amplification * factor);
+    public SnowballInfo speeded(double factor) {
+        return new SnowballInfo(plugin, speed * factor, power);
+    }
+
+    /**
+     * This returns a new info whose power has been scaled by the factor given.
+     *
+     * @param factor The factor by which we adjust the power.
+     * @return A new info object.
+     */
+    public SnowballInfo powered(double factor) {
+        return new SnowballInfo(plugin, speed, power * factor);
     }
 }

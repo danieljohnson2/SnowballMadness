@@ -10,10 +10,10 @@ import org.bukkit.entity.*;
 
 /**
  * This logic creates an entity at the point of impact. We can create a
- * different, better entity for intensified snowballs (to get cave spiders
- * instead of spiders for instance). You can specify the 'upgradeIntensity'; the
- * pumped up entity is spawned if the snowball is more powerful than this; use
- * 1.0 to indicate an upgrade for a snowball that is at all intensified.
+ * different, better entity for powered snowballs (to get cave spiders instead
+ * of spiders for instance). You can specify the 'upgradePower'; the pumped up
+ * entity is spawned if the snowball is more powerful than this; use 1.0 to
+ * indicate an upgrade for a snowball that is at all powered.
  *
  * We also have special handling for skulls; we can get powered creepers and
  * such this way.
@@ -22,37 +22,41 @@ import org.bukkit.entity.*;
  */
 public class SpawnSnowballLogic extends SnowballLogic {
 
+    private final static CooldownTimer<EntityType> cooldown = new CooldownTimer<EntityType>(1000);
     private final EntityType entityType;
-    private final EntityType intensifiedEntityType;
-    private final double upgradeIntensity;
+    private final EntityType poweredEntityType;
+    private final double upgradePower;
 
     public SpawnSnowballLogic(EntityType entityType) {
         this(entityType, entityType, 1.0);
     }
 
-    public SpawnSnowballLogic(EntityType entityType, EntityType intensifiedEntityType, double upgradeIntensity) {
+    public SpawnSnowballLogic(EntityType entityType, EntityType poweredEntityType, double upgradePower) {
         this.entityType = Preconditions.checkNotNull(entityType);
-        this.intensifiedEntityType = Preconditions.checkNotNull(intensifiedEntityType);
-        this.upgradeIntensity = upgradeIntensity;
+        this.poweredEntityType = Preconditions.checkNotNull(poweredEntityType);
+        this.upgradePower = upgradePower;
     }
 
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        createEntity(snowball.getWorld(), snowball.getLocation(), info);
+
+        if (cooldown.check(entityType)) {
+            createEntity(snowball.getWorld(), snowball.getLocation(), info);
+        }
     }
 
     /**
-     * This method returns the entity type to spawn; we pick the intensified
-     * version if the snowball was at all intensified, according to the 'info'.
+     * This method returns the entity type to spawn; we pick the powered version
+     * if the snowball is sufficiently powered.
      *
      * @param info The info for the snowball; tell us if the snowball was
-     * intensified.
+     * powered.
      * @return The entity type to spawn.
      */
     protected EntityType pickEntityType(SnowballInfo info) {
-        if (info.amplification > upgradeIntensity) {
-            return intensifiedEntityType;
+        if (info.power > upgradePower) {
+            return poweredEntityType;
         } else {
             return entityType;
         }
@@ -98,7 +102,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This logic provides powered creepers when intensified.
+     * This logic provides powered creepers when powered.
      */
     private static class CreeperLogic extends SpawnSnowballLogic {
 
@@ -110,7 +114,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
         protected Entity createEntity(World world, Location location, SnowballInfo info) {
             Creeper creepy = (Creeper) super.createEntity(world, location, info);
 
-            if (info.amplification > 1) {
+            if (info.power > 1) {
                 creepy.setPowered(true);
             }
 
@@ -119,7 +123,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This logic provides villager zombies when intensified.
+     * This logic provides villager zombies when powered.
      */
     private static class ZombieLogic extends SpawnSnowballLogic {
 
@@ -131,7 +135,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
         protected Entity createEntity(World world, Location location, SnowballInfo info) {
             Zombie zombie = (Zombie) super.createEntity(world, location, info);
 
-            if (info.amplification > 1) {
+            if (info.power > 1) {
                 zombie.setVillager(true);
             }
 
@@ -140,8 +144,8 @@ public class SpawnSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This logic provides wither skeletons when not intensified, but
-     * withers when intensified a lot.
+     * This logic provides wither skeletons when not powered, but withers when
+     * powered a lot.
      */
     private static class WitherSkeletonLogic extends SpawnSnowballLogic {
 

@@ -26,7 +26,7 @@ public class ReversedSnowballLogic extends SnowballLogic {
         snowballLoc.setDirection(shooter.getLocation().getDirection());
 
         Vector velocity = snowball.getVelocity().clone();
-        velocity = velocity.multiply(info.amplification);
+        velocity = velocity.multiply(info.speed);
 
         if (snowballLoc.distance(shooter.getLocation()) < 2) {
             shooter.teleport(snowballLoc);

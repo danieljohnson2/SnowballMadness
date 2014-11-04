@@ -21,7 +21,7 @@ public class FlintAndSteelSnowballLogic extends BlockPlacementSnowballLogic {
 
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
-        int extraTicks = (int) (20 * info.amplification);
+        int extraTicks = (int) (20 * info.power);
         target.setFireTicks(target.getFireTicks() + extraTicks);
 
         return super.damage(snowball, info, target, proposedDamage);

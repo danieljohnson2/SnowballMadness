@@ -126,11 +126,14 @@ public abstract class SnowballLogic {
             case SPIDER_EYE:
                 return new ReversedSnowballLogic();
 
+            case SUGAR:
+                return new SpeededSnowballLogic(1.5, slice.skip(1));
+
             case GLOWSTONE_DUST:
-                return new AmplifiedSnowballLogic(1.5, slice.skip(1));
+                return new PoweredSnowballLogic(1.5, slice.skip(1));
 
             case GLOWSTONE:
-                return new AmplifiedSnowballLogic(3, slice.skip(1));
+                return new PoweredSnowballLogic(3, slice.skip(1));
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
@@ -143,13 +146,13 @@ public abstract class SnowballLogic {
 
             case STRING:
                 return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 1.0);
-                
+
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
-                
+
             case MILK_BUCKET:
                 return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 1.0);
-                        
+
             case SKULL_ITEM:
                 SkullType skullType = SkullType.values()[hint.getDurability()];
                 return SpawnSnowballLogic.fromSkullType(skullType);

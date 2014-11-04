@@ -22,7 +22,7 @@ public class TNTSnowballLogic extends SnowballLogic {
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        float size = (float) (snowballSize * info.amplification);
+        float size = (float) (snowballSize * info.power);
         snowball.getWorld().createExplosion(snowball.getLocation(), size);
     }
 

@@ -20,8 +20,8 @@ import org.bukkit.inventory.*;
  */
 public class RegenerationSnowballLogic extends SnowballLogic {
 
+    private final static CooldownTimer<Long> cooldown=new CooldownTimer<Long>(8000);
     private final InventorySlice inventory;
-    private static final HashMap<Long, Long> regenTimeouts = new HashMap<Long, Long>();
 
     public RegenerationSnowballLogic(InventorySlice inventory) {
         this.inventory = Preconditions.checkNotNull(inventory);
@@ -41,7 +41,7 @@ public class RegenerationSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        if (info.amplification >= 2.0) {
+        if (info.power >= 2.0) {
             Location loc = snowball.getLocation();
             Chunk chunk = loc.getBlock().getChunk();
 
@@ -82,28 +82,7 @@ public class RegenerationSnowballLogic extends SnowballLogic {
      * @return True if we should regenerate the chunk.
      */
     private static boolean checkRegenTimer(Chunk chunk) {
-        synchronized (regenTimeouts) {
-            Long key = chunk.getX() | ((long) chunk.getZ()) << 32;
-            long now = System.currentTimeMillis();
-
-            Long time = regenTimeouts.get(key);
-
-            Iterator<Map.Entry<Long, Long>> iter = regenTimeouts.entrySet().iterator();
-
-            // remove any expired entries so we don't leak memory forever
-
-            while (iter.hasNext()) {
-                if (iter.next().getValue() <= now) {
-                    iter.remove();
-                }
-            }
-
-            if (time == null || time <= now) {
-                regenTimeouts.put(key, now + 8000);
-                return true;
-            }
-
-            return false;
-        }
+        Long key = chunk.getX() | ((long) chunk.getZ()) << 32;
+        return cooldown.check(key);
     }
 }

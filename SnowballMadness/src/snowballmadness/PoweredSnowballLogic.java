@@ -9,49 +9,41 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.util.Vector;
 
 /**
- * This is a snowball that flies faster than nomrla, and can apply a second
- * logic that will be amplified too.
+ * This is a snowball that has an increased effect; it increases the power level
+ * for the next logic, and makes the snowball damaging.
  *
  * @author DanJ
  */
-public class AmplifiedSnowballLogic extends ChainableSnowballLogic {
+public class PoweredSnowballLogic extends ChainableSnowballLogic {
 
-    private final double amplification;
+    private final double factor;
 
-    public AmplifiedSnowballLogic(double amplification, InventorySlice nextSlice) {
+    public PoweredSnowballLogic(double factor, InventorySlice nextSlice) {
         super(nextSlice);
-        this.amplification = amplification;
-    }
-
-    @Override
-    public void launch(Snowball snowball, SnowballInfo info) {
-        Vector v = snowball.getVelocity().clone();
-        v.multiply(amplification * info.amplification);
-        snowball.setVelocity(v);
-
-        super.launch(snowball, info);
+        this.factor = factor;
     }
 
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
         double damage = super.damage(snowball, info, target, proposedDamage);
 
-        if (amplification > 1.0 && damage == 0.0) {
+        if (factor > 1.0 && damage == 0.0) {
             damage = 1.0;
         }
-        return damage * amplification;
+        
+        return damage * factor;
     }
 
     @Override
     protected SnowballInfo adjustInfo(Snowball snowball, SnowballInfo info) {
-        return info.getAmplified(amplification);
+        return info.powered(factor);
     }
 
     @Override
     public String toString() {
         return String.format("%s -> (x%f) %s",
                 getClass().getSimpleName(),
-                amplification,
+                factor,
                 nextLogic);
     }
 }
