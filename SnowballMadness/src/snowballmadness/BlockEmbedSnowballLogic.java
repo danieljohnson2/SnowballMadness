@@ -4,6 +4,7 @@ import com.google.common.base.*;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
+import org.bukkit.material.MaterialData;
 
 /**
  * This logic takes in a material to place and possibly a second material (for
@@ -55,7 +56,17 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
         while (!((loc.getY() < 0) || (decrement == 0) || (decrement > 0 && block.getType() == Material.BEDROCK))) {
             //bail if: loc.Y is less than zero OR embedDepth is exactly zero 
             //  OR  (embedDepth > 0 and the block type is bedrock)
+
             block.setType(toPlace);
+
+            if (toPlace == Material.LADDER) {
+                // ladders need a special case to place them on the side of
+                // the shaft! hink. 2 = north, 3 = south, 4 = west, 5 = east.
+                // There has to be a better way than this!
+
+                block.setData((byte) 4);
+            }
+
             //just stepped down, it's above zero and either a replaceable block
             //or bedrock with embedDepth negative. place that sucker!            
             decrement = decrement - 1;
@@ -63,6 +74,5 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
             block = loc.getBlock();
             //step down and go back to re-check the while
         }
-
     }
 }
