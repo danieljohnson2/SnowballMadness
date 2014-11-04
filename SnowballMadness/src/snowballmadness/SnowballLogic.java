@@ -97,12 +97,30 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
+                
+            case PUMPKIN:
+                return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
+                
+            case SOUL_SAND:
+                return new BlockPlacementSnowballLogic(Material.PORTAL);
 
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
 
             case LAVA_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.LAVA);
+                
+            case NETHERRACK:
+                return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
+                
+            case LADDER:
+                return new BlockEmbedSnowballLogic(Material.LADDER, Material.AIR, 256);
+                
+            case DIAMOND_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 256);
+                
+            case DIAMOND_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
 
             case WOOD_SWORD:
             case STONE_SWORD:
@@ -128,6 +146,10 @@ public abstract class SnowballLogic {
 
             case SUGAR:
                 return new SpeededSnowballLogic(1.5, slice.skip(1));
+                
+            case CAKE:
+                return new SpeededSnowballLogic(3, slice.skip(1));
+                //the cake is a... lazor!
 
             case GLOWSTONE_DUST:
                 return new PoweredSnowballLogic(1.5, slice.skip(1));
@@ -143,12 +165,27 @@ public abstract class SnowballLogic {
 
             case GHAST_TEAR:
                 return new SpawnSnowballLogic(EntityType.GHAST);
+                
+            case ROTTEN_FLESH:
+                return new SpawnSnowballLogic(EntityType.ZOMBIE);
+                
+            case ENCHANTMENT_TABLE:
+                return new SpawnSnowballLogic(EntityType.WITCH);
+                
+            case GOLD_INGOT:
+                return new SpawnSnowballLogic(EntityType.PIG);
+                
+            case GOLD_BLOCK:
+                return new SpawnSnowballLogic(EntityType.PIG_ZOMBIE);
 
             case STRING:
                 return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 1.0);
 
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
+                
+            case DRAGON_EGG:
+                return new SpawnSnowballLogic(EntityType.ENDER_DRAGON);
 
             case MILK_BUCKET:
                 return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 1.0);
