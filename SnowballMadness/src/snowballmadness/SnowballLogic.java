@@ -2,7 +2,6 @@ package snowballmadness;
 
 import java.util.*;
 import com.google.common.base.*;
-import com.google.common.collect.*;
 
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -33,6 +32,15 @@ public abstract class SnowballLogic {
      * @param info Other information about the snowball.
      */
     public void launch(Snowball snowball, SnowballInfo info) {
+    }
+
+    /**
+     * this is called every many times every second.
+     *
+     * @param snowball A snowball that gets a chance to do something.
+     * @param info Other information about the snowball.
+     */
+    public void tick(Snowball snowball, SnowballInfo info) {
     }
 
     /**
@@ -93,10 +101,10 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
-                
+
             case PUMPKIN:
                 return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
-                
+
             case SOUL_SAND:
                 return new BlockPlacementSnowballLogic(Material.PORTAL);
 
@@ -105,16 +113,16 @@ public abstract class SnowballLogic {
 
             case LAVA_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.LAVA);
-                
+
             case NETHERRACK:
                 return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
-                
+
             case LADDER:
                 return new BlockEmbedSnowballLogic(Material.LADDER, Material.AIR, 256);
-                
+
             case DIAMOND_ORE:
                 return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 256);
-                
+
             case DIAMOND_BLOCK:
                 return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
 
@@ -124,6 +132,9 @@ public abstract class SnowballLogic {
             case GOLD_SWORD:
             case DIAMOND_SWORD:
                 return new SwordSnowballLogic(slice);
+
+            case TORCH:
+                return new LinkedTrailSnowballLogic(Material.FIRE);
 
             case TNT:
                 return new TNTSnowballLogic(4);
@@ -142,10 +153,10 @@ public abstract class SnowballLogic {
 
             case SUGAR:
                 return new SpeededSnowballLogic(1.5, slice.skip(1));
-                
+
             case CAKE:
                 return new SpeededSnowballLogic(3, slice.skip(1));
-                //the cake is a... lazor!
+            //the cake is a... lazor!
 
             case GLOWSTONE_DUST:
                 return new PoweredSnowballLogic(1.5, slice.skip(1));
@@ -161,16 +172,16 @@ public abstract class SnowballLogic {
 
             case GHAST_TEAR:
                 return new SpawnSnowballLogic(EntityType.GHAST);
-                
+
             case ROTTEN_FLESH:
                 return new SpawnSnowballLogic(EntityType.ZOMBIE);
-                
+
             case ENCHANTMENT_TABLE:
                 return new SpawnSnowballLogic(EntityType.WITCH);
-                
+
             case GOLD_INGOT:
                 return new SpawnSnowballLogic(EntityType.PIG);
-                
+
             case GOLD_BLOCK:
                 return new SpawnSnowballLogic(EntityType.PIG_ZOMBIE);
 
@@ -179,7 +190,7 @@ public abstract class SnowballLogic {
 
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
-                
+
             case DRAGON_EGG:
                 return new SpawnSnowballLogic(EntityType.ENDER_DRAGON);
 
@@ -281,6 +292,19 @@ public abstract class SnowballLogic {
                     replenishSnowball(plugin, inv, heldSlot);
                 }
             }
+        }
+    }
+
+    /**
+     * This method calls tick() on each snowball that has any logic.
+     */
+    public static void onTick() {
+        for (Map.Entry<Snowball, SnowballLogicData> e : inFlight.entrySet()) {
+            Snowball snowball = e.getKey();
+            SnowballLogic logic = e.getValue().logic;
+            SnowballInfo info = e.getValue().info;
+
+            logic.tick(snowball, info);
         }
     }
 
@@ -403,5 +427,28 @@ public abstract class SnowballLogic {
      */
     public void end(Snowball snowball) {
         inFlight.remove(snowball);
+    }
+    ////////////////////////////////////////////////////////////////
+    // Utilitu Methods
+    //
+
+    /**
+     * This returns the of the nearest non-air block underneath 'location' that
+     * is directly over the ground. If 'locaiton' is inside the ground, we'll
+     * return a new copy of the same location.
+     *
+     * @param location The starting location; this is not modified.
+     * @return A new location describing the place found.
+     */
+    public static Location getGroundUnderneath(Location location) {
+        Location loc = location.clone();
+
+        for (;;) {
+            if (loc.getBlock().isEmpty()) {
+                loc.add(0, -1, 0);
+            } else {
+                return loc;
+            }
+        }
     }
 }
