@@ -35,6 +35,7 @@ public class LinkedTrailSnowballLogic extends SnowballLogic {
 
     private final Material toPlace;
     private Location previousLocation;
+    private Location firstLocation;
 
     public LinkedTrailSnowballLogic(Material toPlace) {
         this.toPlace = Preconditions.checkNotNull(toPlace);
@@ -44,10 +45,26 @@ public class LinkedTrailSnowballLogic extends SnowballLogic {
     }
 
     @Override
+    public void launch(Snowball snowball, SnowballInfo info) {
+        super.launch(snowball, info);
+        firstLocation = snowball.getLocation();
+    }
+
+    @Override
     public void tick(Snowball snowball, SnowballInfo info) {
         super.tick(snowball, info);
 
         Location currentLocation = snowball.getLocation().clone();
+
+        // want to avoid doing anything until we get far enough from
+        // the thrower.
+        if (firstLocation != null) {
+            if (firstLocation.distance(currentLocation) < 0.5) {
+                return;
+            } else {
+                firstLocation = null;
+            }
+        }
 
         if (previousLocation == null) {
             previousLocation = currentLocation;
