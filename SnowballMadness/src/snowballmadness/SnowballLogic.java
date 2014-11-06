@@ -179,6 +179,9 @@ public abstract class SnowballLogic {
             case ENCHANTMENT_TABLE:
                 return new SpawnSnowballLogic(EntityType.WITCH);
 
+            case GOLD_NUGGET:
+                return new ItemDropSnowballLogic(Material.PORK, 1);
+
             case GOLD_INGOT:
                 return new SpawnSnowballLogic(EntityType.PIG);
 
