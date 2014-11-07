@@ -102,11 +102,15 @@ public abstract class SnowballLogic {
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
 
-            case PUMPKIN:
+            case ENDER_STONE:
                 return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
 
-            case SOUL_SAND:
+            case QUARTZ_ORE:
                 return new BlockPlacementSnowballLogic(Material.PORTAL);
+            //fixed these so they are harder to get! Both work!
+            //The end portals are persistent, stack, and cannot be seen from
+            //underneath (NASTY trap) and the nether portal shards are very
+            //visible and a block update makes them go away again
 
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
@@ -202,7 +206,7 @@ public abstract class SnowballLogic {
 
             case MILK_BUCKET:
                 return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 8.0);
-                
+
             case JACK_O_LANTERN:
                 return new SpawnSnowballLogic(EntityType.SKELETON, EntityType.WITHER_SKULL, 8.0);
 
