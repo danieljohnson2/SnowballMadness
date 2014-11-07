@@ -177,7 +177,7 @@ public abstract class SnowballLogic {
                 return new SpawnSnowballLogic(EntityType.ZOMBIE);
 
             case ENCHANTMENT_TABLE:
-                return new SpawnSnowballLogic(EntityType.WITCH);
+                return new SpawnSnowballLogic(EntityType.WITCH, EntityType.ENDER_CRYSTAL, 8.0);
 
             case GOLD_NUGGET:
                 return new ItemDropSnowballLogic(Material.PORK, 1);
@@ -186,19 +186,19 @@ public abstract class SnowballLogic {
                 return new SpawnSnowballLogic(EntityType.PIG);
 
             case GOLD_BLOCK:
-                return new SpawnSnowballLogic(EntityType.PIG_ZOMBIE);
+                return new SpawnSnowballLogic(EntityType.PIG, EntityType.PIG_ZOMBIE, 8.0);
 
             case STRING:
-                return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 1.0);
+                return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 8.0);
 
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
 
             case DRAGON_EGG:
-                return new SpawnSnowballLogic(EntityType.ENDER_DRAGON);
+                return new SpawnSnowballLogic(EntityType.CHICKEN, EntityType.ENDER_DRAGON, 8.0);
 
             case MILK_BUCKET:
-                return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 1.0);
+                return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 8.0);
 
             case SKULL_ITEM:
                 SkullType skullType = SkullType.values()[hint.getDurability()];
