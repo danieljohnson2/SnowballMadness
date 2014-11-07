@@ -447,7 +447,7 @@ public abstract class SnowballLogic {
         Location loc = location.clone();
 
         for (;;) {
-            if (loc.getBlock().isEmpty()) {
+            if (loc.getBlock().isEmpty()||(loc.getBlock().getType() == Material.LEAVES)) {
                 loc.add(0, -1, 0);
             } else {
                 return loc;
