@@ -202,6 +202,9 @@ public abstract class SnowballLogic {
 
             case MILK_BUCKET:
                 return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 8.0);
+                
+            case JACK_O_LANTERN:
+                return new SpawnSnowballLogic(EntityType.SKELETON, EntityType.WITHER_SKULL, 8.0);
 
             case SKULL_ITEM:
                 SkullType skullType = SkullType.values()[hint.getDurability()];
