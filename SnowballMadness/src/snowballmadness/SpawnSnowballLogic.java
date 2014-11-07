@@ -110,7 +110,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
         protected Entity createEntity(World world, Location location, SnowballInfo info) {
             Creeper creepy = (Creeper) super.createEntity(world, location, info);
 
-            if (info.power > 1) {
+            if (info.power > 8) {
                 creepy.setPowered(true);
             }
 
@@ -131,7 +131,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
         protected Entity createEntity(World world, Location location, SnowballInfo info) {
             Zombie zombie = (Zombie) super.createEntity(world, location, info);
 
-            if (info.power > 1) {
+            if (info.power > 8) {
                 zombie.setVillager(true);
             }
 
