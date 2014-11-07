@@ -22,7 +22,6 @@ public class BouncySnowballLogic extends SnowballLogic {
     public BouncySnowballLogic(int numberOfSlimeballs, InventorySlice inventory) {
         this.numberOfSlimeballs = numberOfSlimeballs;
         this.inventory = Preconditions.checkNotNull(inventory);
-
     }
 
     @Override
@@ -44,7 +43,17 @@ public class BouncySnowballLogic extends SnowballLogic {
         skipper.setShooter(shooter);
         skipper.setVelocity(bounce);
 
-        performLaunch(inventory, skipper, info);
+        if (numberOfSlimeballs <= 1) {
+            performLaunch(inventory, skipper, info);
+        } else {
+            // notice we reuse the same inventory here, but we reduce the number of slimeballs
+            // by one. This way next bounce carries the same behavior as this one, until
+            // the slimeballs run out.
+
+            SnowballLogic nextLogic = new BouncySnowballLogic(numberOfSlimeballs - 1, inventory);
+            performLaunch(nextLogic, skipper, info);
+        }
+
         //this should produce one bounce without any trouble
         //two possibilities for completing it.
         //One, it bounces forever until it hits somewhere with a solid block over where it hit
