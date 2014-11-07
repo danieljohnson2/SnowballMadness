@@ -166,6 +166,9 @@ public abstract class SnowballLogic {
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
+                
+            case SLIME_BALL:
+                return new BouncySnowballLogic(hint.getAmount(), slice.skip(1));
 
             case GRASS:
                 return new RegenerationSnowballLogic(slice);
