@@ -24,9 +24,9 @@ public class ProjectileSnowballLogic extends SnowballLogic {
         super.launch(snowball, info);
 
         World world = snowball.getWorld();
-       Vector velocity = snowball.getVelocity();
-       float speed = (float) (info.speed);
-       velocity.multiply(speed);
+        Vector velocity = snowball.getVelocity();
+        float speed = (float) (info.speed);
+        velocity.multiply(speed);
 
         Projectile projectile = world.spawn(snowball.getLocation(), projectileClass);
         projectile.setShooter(snowball.getShooter());
