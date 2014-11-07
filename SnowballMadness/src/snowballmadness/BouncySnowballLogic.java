@@ -37,7 +37,7 @@ public class BouncySnowballLogic extends SnowballLogic {
         bounce.setY(-(bounce.getY()));
         //bounce.multiply(numberOfSlimeballs);
         //alternate, we can to multiply the bounce by the number of slimeballs.
-        //This can send glowstone TNT bombs into the stratosphere!
+        //This can send glowstone TNT bombs into the stratosphere! Worth considering
 
         Snowball skipper = world.spawn(source, Snowball.class);
         skipper.setShooter(shooter);
