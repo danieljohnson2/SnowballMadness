@@ -15,6 +15,7 @@ import org.bukkit.util.*;
  * @author christopherjohnson
  */
 public class BouncySnowballLogic extends SnowballLogic {
+
     private final int numberOfSlimeballs;
     private final InventorySlice inventory;
 
@@ -35,8 +36,9 @@ public class BouncySnowballLogic extends SnowballLogic {
 
         Vector bounce = snowball.getVelocity().clone();
         bounce.setY(-(bounce.getY()));
-        //we are not going to amplify the bounce because the initial velocity should
-        //be what's amplified. Thus we needn't amplify it again.
+        bounce.multiply(numberOfSlimeballs);
+        //for fun, we are going to multiply the bounce by the number of slimeballs.
+        //This can send glowstone TNT bombs into the stratosphere!
 
         Snowball skipper = world.spawn(source, Snowball.class);
         skipper.setShooter(shooter);
@@ -55,6 +57,8 @@ public class BouncySnowballLogic extends SnowballLogic {
     @Override
     public String toString() {
         return String.format("%s -> (x%d) %s",
-                super.toString());
+                super.toString(),
+                numberOfSlimeballs,
+                createLogic(inventory));
     }
 }
