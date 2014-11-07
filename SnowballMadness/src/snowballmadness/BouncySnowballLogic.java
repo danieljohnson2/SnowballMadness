@@ -35,8 +35,8 @@ public class BouncySnowballLogic extends SnowballLogic {
 
         Vector bounce = snowball.getVelocity().clone();
         bounce.setY(-(bounce.getY()));
-        bounce.multiply(numberOfSlimeballs);
-        //for fun, we are going to multiply the bounce by the number of slimeballs.
+        //bounce.multiply(numberOfSlimeballs);
+        //alternate, we can to multiply the bounce by the number of slimeballs.
         //This can send glowstone TNT bombs into the stratosphere!
 
         Snowball skipper = world.spawn(source, Snowball.class);
