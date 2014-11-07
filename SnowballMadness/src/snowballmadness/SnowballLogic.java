@@ -110,7 +110,7 @@ public abstract class SnowballLogic {
             //fixed these so they are harder to get! Both work!
             //The end portals are persistent, stack, and cannot be seen from
             //underneath (NASTY trap) and the nether portal shards are very
-            //visible and a block update makes them go away again
+            //visible and a block update makes them go away again.
 
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
