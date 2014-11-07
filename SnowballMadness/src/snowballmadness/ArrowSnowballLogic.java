@@ -23,7 +23,7 @@ public class ArrowSnowballLogic extends SnowballLogic {
         World world = snowball.getWorld();
 
         Vector velocity = snowball.getVelocity();
-        float speed = (float) (2.5 * info.speed);
+        float speed = (float) (info.speed);
 
         if (info.power > 1.0) {
             for (int i = 0; i < arrowCount; ++i) {
@@ -36,7 +36,6 @@ public class ArrowSnowballLogic extends SnowballLogic {
             Arrow arrow = world.spawnArrow(snowball.getLocation(), velocity, speed, 0);
             arrow.setShooter(snowball.getShooter());
         }
-
         snowball.remove();
     }
 }
