@@ -166,7 +166,7 @@ public abstract class SnowballLogic {
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
-                
+
             case SLIME_BALL:
                 return new BouncySnowballLogic(hint.getAmount(), slice.skip(1));
 
@@ -232,14 +232,26 @@ public abstract class SnowballLogic {
         SnowballLogic logic = createLogic(inventory);
 
         if (logic != null) {
-            logic.start(snowball, info);
-
-            Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
-
-            logic.launch(snowball, info);
+            performLaunch(logic, snowball, info);
         }
 
         return logic;
+    }
+
+    /**
+     * This overload of performLaunch takes the logic to associate with the
+     * snowball instead of an inventory.
+     *
+     * @param logic The logic to apply to the snowball; can't be null.
+     * @param snowball The snowball to be launched.
+     * @param info The info record that describes the snowball.
+     */
+    public static void performLaunch(SnowballLogic logic, Snowball snowball, SnowballInfo info) {
+        logic.start(snowball, info);
+
+        Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
+
+        logic.launch(snowball, info);
     }
 
     /**
@@ -450,7 +462,7 @@ public abstract class SnowballLogic {
         Location loc = location.clone();
 
         for (;;) {
-            if (loc.getBlock().isEmpty()||(loc.getBlock().getType() == Material.LEAVES)) {
+            if (loc.getBlock().isEmpty() || (loc.getBlock().getType() == Material.LEAVES)) {
                 loc.add(0, -1, 0);
             } else {
                 return loc;
