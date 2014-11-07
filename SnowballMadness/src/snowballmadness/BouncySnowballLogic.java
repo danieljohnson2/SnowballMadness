@@ -15,10 +15,11 @@ import org.bukkit.util.*;
  * @author christopherjohnson
  */
 public class BouncySnowballLogic extends SnowballLogic {
-
+    private final int numberOfSlimeballs;
     private final InventorySlice inventory;
 
-    public BouncySnowballLogic(InventorySlice inventory) {
+    public BouncySnowballLogic(int numberOfSlimeballs, InventorySlice inventory) {
+        this.numberOfSlimeballs = numberOfSlimeballs;
         this.inventory = Preconditions.checkNotNull(inventory);
 
     }
