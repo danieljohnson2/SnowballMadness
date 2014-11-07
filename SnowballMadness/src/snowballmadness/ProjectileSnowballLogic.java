@@ -3,6 +3,7 @@ package snowballmadness;
 import com.google.common.base.Preconditions;
 import org.bukkit.World;
 import org.bukkit.entity.*;
+import org.bukkit.util.*;
 
 /**
  * This logic replaces the snowball itself with a different object that gets the
@@ -23,10 +24,13 @@ public class ProjectileSnowballLogic extends SnowballLogic {
         super.launch(snowball, info);
 
         World world = snowball.getWorld();
+       Vector velocity = snowball.getVelocity();
+       float speed = (float) (info.speed);
+       velocity.multiply(speed);
 
         Projectile projectile = world.spawn(snowball.getLocation(), projectileClass);
         projectile.setShooter(snowball.getShooter());
-        projectile.setVelocity(snowball.getVelocity());
+        projectile.setVelocity(velocity);
 
         snowball.remove();
     }
