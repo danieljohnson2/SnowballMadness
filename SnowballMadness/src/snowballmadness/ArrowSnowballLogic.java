@@ -24,15 +24,17 @@ public class ArrowSnowballLogic extends SnowballLogic {
 
         Vector velocity = snowball.getVelocity();
         float speed = (float) (2.5 * info.speed);
-        float spread = (float) ((arrowCount * 8) / info.power);
 
-        for (int i = 0; i < arrowCount; ++i) {
-            Arrow arrow = world.spawnArrow(snowball.getLocation(), velocity, speed, spread);
-            arrow.setShooter(snowball.getShooter());
-
-            if (info.power > 1.0) {
+        if (info.power > 1.0) {
+            for (int i = 0; i < arrowCount; ++i) {
+                float spread = (float) ((arrowCount * 8) / info.power);
+                Arrow arrow = world.spawnArrow(snowball.getLocation(), velocity, speed, spread);
+                arrow.setShooter(snowball.getShooter());
                 arrow.setFireTicks((int) (info.power * 50));
             }
+        } else {
+            Arrow arrow = world.spawnArrow(snowball.getLocation(), velocity, speed, 0);
+            arrow.setShooter(snowball.getShooter());
         }
 
         snowball.remove();
