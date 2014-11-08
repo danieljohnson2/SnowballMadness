@@ -24,20 +24,18 @@ public class BlockPlacementSnowballLogic extends SnowballLogic {
         super.hit(snowball, info);
 
         Location loc = snowball.getLocation().clone();
-        Block block = loc.getBlock();
 
-        if (block.getType() == Material.AIR && block.getY() > 1) {
+        if (loc.getBlock().getType() == Material.AIR && loc.getY() > 1) {
             loc.setY(loc.getY() - 1);
-            block = loc.getBlock();
         }
 
-        if (block.getType() != Material.AIR) {
+        if (loc.getBlock().getType() != Material.AIR) {
             loc.setY(loc.getY() + 1);
-            block = loc.getBlock();
         }
 
-        if (block.getType() == Material.AIR) {
-            block.setType(toPlace);
+        Block target = loc.getBlock();
+        if (target.getType() == Material.AIR) {
+            target.setType(toPlace);
         }
     }
 }
