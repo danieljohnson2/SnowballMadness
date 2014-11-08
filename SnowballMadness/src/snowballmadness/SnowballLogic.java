@@ -96,6 +96,9 @@ public abstract class SnowballLogic {
 
             case COBBLESTONE:
             case SMOOTH_BRICK:
+            case BOOKSHELF:
+            case BRICK:
+            case ANVIL:
             case SAND:
             case GRAVEL:
                 return new BlockPlacementSnowballLogic(hint.getType());
@@ -111,7 +114,7 @@ public abstract class SnowballLogic {
             //The end portals are persistent, stack, and cannot be seen from
             //underneath (NASTY trap) and the nether portal shards are very
             //visible and a block update makes them go away again.
-
+                
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
 
@@ -173,7 +176,7 @@ public abstract class SnowballLogic {
 
             case SLIME_BALL:
                 return new BouncySnowballLogic(hint.getAmount(), slice.skip(1));
-                
+
             case QUARTZ_BLOCK:
                 return new KapwingSnowballLogic(hint.getAmount(), slice.skip(1));
 
