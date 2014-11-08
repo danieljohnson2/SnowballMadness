@@ -10,7 +10,10 @@ import org.bukkit.entity.*;
 import org.bukkit.util.*;
 
 /**
- * This snowball logic spawns
+ * This snowball logic spawns a new bounce of the snowball for every slimeball
+ * you have in the modifier stack. They bounce for a very long time, but are
+ * still affected by explosions, so things can get very silly very fast.
+ * They lose momentum, so forever-bouncing does not mean forever travelling.
  *
  * @author christopherjohnson
  */
@@ -35,9 +38,6 @@ public class BouncySnowballLogic extends SnowballLogic {
 
         Vector bounce = snowball.getVelocity().clone();
         bounce.setY(-(bounce.getY()));
-        //bounce.multiply(numberOfSlimeballs);
-        //alternate, we can to multiply the bounce by the number of slimeballs.
-        //This can send glowstone TNT bombs into the stratosphere! Worth considering
 
         Snowball skipper = world.spawn(source, Snowball.class);
         skipper.setShooter(shooter);
