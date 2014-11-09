@@ -96,6 +96,7 @@ public abstract class SnowballLogic {
 
             case COBBLESTONE:
             case SMOOTH_BRICK:
+            case OBSIDIAN:
             case BOOKSHELF:
             case BRICK:
             case SAND:
@@ -103,6 +104,9 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
+
+            case ENDER_PEARL:
+                return new BlockPlacementSnowballLogic(Material.ENDER_CHEST);
 
             case ANVIL:
                 return new AnvilSnowballLogic();
@@ -409,6 +413,8 @@ public abstract class SnowballLogic {
     // Logic Association
     //
     private final static WeakHashMap<Snowball, SnowballLogicData> inFlight = new WeakHashMap<Snowball, SnowballLogicData>();
+    private static int approximateInFlightCount = 0;
+    private static long inFlightSyncDeadline = 0;
 
     /**
      * this class just holds the snowball logic and info for a snowball; the
@@ -424,6 +430,23 @@ public abstract class SnowballLogic {
             this.logic = logic;
             this.info = info;
         }
+    }
+
+    /**
+     * This returns the number of snowballs (that have attached logic) that are
+     * currently in flight. This may count snowballs that have been unloaded or
+     * otherwise destroyed for a time; it is not exact.
+     *
+     * @return The number of in-flight snowballs.
+     */
+    public static int getInFlightCount() {
+        long now = System.currentTimeMillis();
+
+        if (inFlightSyncDeadline <= now) {
+            inFlightSyncDeadline = now + 1000;
+            approximateInFlightCount = inFlight.size();
+        }
+        return approximateInFlightCount;
     }
 
     /**
@@ -450,6 +473,8 @@ public abstract class SnowballLogic {
      */
     public void start(Snowball snowball, SnowballInfo info) {
         inFlight.put(snowball, new SnowballLogicData(this, info));
+
+        approximateInFlightCount++;
     }
 
     /**
@@ -459,6 +484,7 @@ public abstract class SnowballLogic {
      * @param snowball The snowball to deregister.
      */
     public void end(Snowball snowball) {
+        approximateInFlightCount--;
         inFlight.remove(snowball);
     }
     ////////////////////////////////////////////////////////////////
