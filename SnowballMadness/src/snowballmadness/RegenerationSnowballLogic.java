@@ -53,16 +53,30 @@ public class RegenerationSnowballLogic extends SnowballLogic {
         }
     }
 
+    /**
+     * This overload of clearInventory() will clear the inventory of the victim
+     * if it is a player, but do nothing if it is not.
+     *
+     * @param victim The player to clear, or not.
+     */
     private static void clearInventory(Object victim) {
         if (victim instanceof Player) {
             clearInventory((Player) victim);
         }
     }
 
+    /**
+     * This removes everything from the player given, so they have no items. It
+     * even removes armor. It does not affect creative-mode players (like me on
+     * my server!)
+     *
+     * @param victim The player who is to be enlightened.
+     */
     private static void clearInventory(Player victim) {
         if (victim.getGameMode() != GameMode.CREATIVE) {
             PlayerInventory playerInv = victim.getInventory();
             playerInv.clear();
+            playerInv.setArmorContents(new ItemStack[4]);
         }
     }
 
