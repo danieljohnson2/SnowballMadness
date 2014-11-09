@@ -6,6 +6,7 @@ import com.google.common.collect.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
+import org.bukkit.projectiles.ProjectileSource;
 
 /**
  * This logic regenerates any chunk it lands in, and also heals players it hits.
@@ -16,7 +17,7 @@ import org.bukkit.inventory.*;
  */
 public class RegenerationSnowballLogic extends SnowballLogic {
 
-    private final static CooldownTimer<Long> cooldown=new CooldownTimer<Long>(8000);
+    private final static CooldownTimer<Long> cooldown = new CooldownTimer<Long>(8000);
     private final InventorySlice inventory;
 
     public RegenerationSnowballLogic(InventorySlice inventory) {
@@ -37,35 +38,31 @@ public class RegenerationSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        if (info.power >= 2.0) {
-            Location loc = snowball.getLocation();
-            Chunk chunk = loc.getBlock().getChunk();
+        Location loc = snowball.getLocation();
+        Chunk chunk = loc.getBlock().getChunk();
 
-            if (checkRegenTimer(chunk)) {
+        if (checkRegenTimer(chunk)) {
+            ProjectileSource shooter = snowball.getShooter();
+            clearInventory(shooter);
 
-                LivingEntity shooter = snowball.getShooter();
-                if (shooter instanceof HumanEntity
-                        && ((Player) shooter).getGameMode() != GameMode.CREATIVE) {
-                    ItemStack bottom = inventory.getBottomItem();
-
-                    if (bottom != null && bottom.getType() == Material.GRASS) {
-                        int newAmount = bottom.getAmount() - 1;
-
-                        if (newAmount <= 0) {
-                            inventory.set(0, null);
-                        } else {
-                            bottom.setAmount(newAmount);
-                        }
-                    } else {
-                        // if grass is no longer in inventory, abort. This
-                        // prevent multiplier snowballs from doing too much
-                        // regen.
-                        return;
-                    }
-                }
-
-                chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
+            for (Entity entity : chunk.getEntities()) {
+                clearInventory(entity);
             }
+
+            chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
+        }
+    }
+
+    private static void clearInventory(Object victim) {
+        if (victim instanceof Player) {
+            clearInventory((Player) victim);
+        }
+    }
+
+    private static void clearInventory(Player victim) {
+        if (victim.getGameMode() != GameMode.CREATIVE) {
+            PlayerInventory playerInv = victim.getInventory();
+            playerInv.clear();
         }
     }
 

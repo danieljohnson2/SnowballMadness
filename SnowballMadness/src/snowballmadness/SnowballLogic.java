@@ -187,6 +187,7 @@ public abstract class SnowballLogic {
                 return new KapwingSnowballLogic(hint.getAmount(), slice.skip(1));
 
             case GRASS:
+            case DIRT:
                 return new RegenerationSnowballLogic(slice);
 
             case GHAST_TEAR:
