@@ -18,7 +18,7 @@ import org.bukkit.entity.*;
  */
 public class SpawnSnowballLogic extends SnowballLogic {
 
-    private final static CooldownTimer<EntityType> cooldown = new CooldownTimer<EntityType>(1000);
+    private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(100);
     private final EntityType entityType;
     private final EntityType poweredEntityType;
     private final double upgradePower;
@@ -37,7 +37,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        if (cooldown.check(entityType)) {
+        if (cooldown.check("")) {
             createEntity(snowball.getWorld(), snowball.getLocation(), info);
         }
     }

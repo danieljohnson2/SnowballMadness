@@ -3,6 +3,7 @@ package snowballmadness;
 import com.google.common.base.Preconditions;
 import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.*;
 
 /**
@@ -27,7 +28,7 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         super.hit(snowball, info);
 
         World world = snowball.getWorld();
-        LivingEntity shooter = snowball.getShooter();
+        ProjectileSource shooter = snowball.getShooter();
         Location source = snowball.getLocation().clone();
         source.setY(source.getY() + 0.25);
 
