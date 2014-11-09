@@ -1,6 +1,11 @@
 package snowballmadness;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import net.minecraft.util.com.google.common.io.FileWriteMode;
+import net.minecraft.util.com.google.common.io.Files;
+import net.minecraft.util.org.apache.commons.io.Charsets;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
@@ -20,6 +25,53 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class SnowballMadness extends JavaPlugin implements Listener {
 
     private BukkitRunnable ticker;
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+
+        if (new File("NUKE_WORLDS").exists()) {
+            deleteRecursively(new File("world"));
+            deleteRecursively(new File("world_nether"));
+            deleteRecursively(new File("world_the_end"));
+            clearJsonFile(new File("banned-players.json"));
+            clearJsonFile(new File("banned-ips.json"));
+        }
+    }
+
+    /**
+     * This deletes a directory and all its contents, because Java does not
+     * provide that. Stupid Java!
+     *
+     * @param directory The directory (or file) to delete.
+     */
+    private static void deleteRecursively(File directory) {
+        String[] listedFiles = directory.list();
+
+        if (listedFiles != null) {
+            for (String subfile : listedFiles) {
+                File sf = new File(directory, subfile);
+                deleteRecursively(sf);
+            }
+        }
+
+        directory.delete();
+    }
+
+    /**
+     * This method removes the content of a JSON file, which we need to do
+     * because when we are loading, it's too late for Minecraft to recreate such
+     * a file. So we just empty it before it is read.
+     *
+     * @param file The JSON file to overwrite with empty content.
+     */
+    private static void clearJsonFile(File file) {
+        try {
+            Files.asCharSink(file, Charsets.US_ASCII).write("[]");
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     @Override
     public void onEnable() {
@@ -49,7 +101,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             ticker = null;
         }
 
-        HandlerList.unregisterAll((JavaPlugin)this);
+        HandlerList.unregisterAll((JavaPlugin) this);
         super.onDisable();
     }
 
@@ -57,7 +109,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     public void onProjectileLaunch(ProjectileLaunchEvent e) {
         SnowballLogic.onProjectileLaunch(this, e);
     }
-    
+
     @EventHandler
     public void onProjectileHit(ProjectileHitEvent e) {
         SnowballLogic.onProjectileHit(e);
