@@ -50,6 +50,10 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                 snowball.getWorld().generateTree(loc, TreeType.TREE);
                 //if we can read the sapling type we can generate whatever tree
                 //we want: that would be ideal. Boosted creates giants, clearly!
+            } else if (toCap == Material.REDSTONE_BLOCK) {
+                snowball.getWorld().strikeLightning(loc);
+                //if boosted, in this case we want to spawn a creeper
+                //or perhaps just spawn the creeper and then hit him with the lightning
             } else {
                 block.setType(toCap); //we set the cap and prepare to step downward
             }

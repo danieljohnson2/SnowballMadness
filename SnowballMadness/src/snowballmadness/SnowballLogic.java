@@ -130,6 +130,9 @@ public abstract class SnowballLogic {
             case SAPLING:
                 return new BlockEmbedSnowballLogic(Material.DIRT, Material.SAPLING, 1);
                 //override sapling inside Embed logic to spawn a tree
+                
+            case REDSTONE_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.REDSTONE_BLOCK, 1);
 
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
