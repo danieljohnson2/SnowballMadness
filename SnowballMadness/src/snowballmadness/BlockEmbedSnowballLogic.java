@@ -46,7 +46,13 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
         }
 
         if (block.getType() == Material.AIR) {
-            block.setType(toCap); //we set the cap and prepare to step downward
+            if (toCap == Material.SAPLING) {
+                snowball.getWorld().generateTree(loc, TreeType.TREE);
+                //if we can read the sapling type we can generate whatever tree
+                //we want: that would be ideal. Boosted creates giants, clearly!
+            } else {
+                block.setType(toCap); //we set the cap and prepare to step downward
+            }
             loc.setY(loc.getY() - 1);
             block = loc.getBlock();
         }

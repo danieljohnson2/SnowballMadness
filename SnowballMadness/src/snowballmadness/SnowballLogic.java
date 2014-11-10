@@ -114,12 +114,22 @@ public abstract class SnowballLogic {
             case ENDER_STONE:
                 return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
 
-            case QUARTZ_ORE:
-                return new BlockPlacementSnowballLogic(Material.PORTAL);
+            case QUARTZ:
+                return new BlockEmbedSnowballLogic(Material.OBSIDIAN, Material.PORTAL, 1);
             //fixed these so they are harder to get! Both work!
             //The end portals are persistent, stack, and cannot be seen from
             //underneath (NASTY trap) and the nether portal shards are very
             //visible and a block update makes them go away again.
+                
+            case COAL:
+                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.FIRE, 1);
+                
+            case COAL_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.COAL_ORE, Material.AIR, 256);
+                
+            case SAPLING:
+                return new BlockEmbedSnowballLogic(Material.DIRT, Material.SAPLING, 1);
+                //override sapling inside Embed logic to spawn a tree
 
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
