@@ -33,6 +33,13 @@ public class KnockbackSnowballLogic extends SnowballLogic {
         this.poweredStrength = poweredStrength;
     }
 
+    /**
+     * This creates a knockback snowball logic given the material; we somtimes
+     * use a subclass fro special effects.
+     *
+     * @param weaponUsed The item being used with the snowball.
+     * @return The new logic.
+     */
     public static KnockbackSnowballLogic fromMaterial(Material weaponUsed) {
         switch (weaponUsed) {
             case BONE:
