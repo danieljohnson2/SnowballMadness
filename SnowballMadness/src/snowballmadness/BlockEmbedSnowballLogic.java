@@ -28,6 +28,77 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
         this.embedDepth = embedDepth;
     }
 
+    /**
+     * This method creates a logic for a material that you supply; we have many
+     * special cases here!
+     *
+     * @param material The material being used with the snowball.
+     * @return The new logic.
+     */
+    public static BlockEmbedSnowballLogic fromMaterial(Material material) {
+        switch (material) {
+            case QUARTZ:
+                return new BlockEmbedSnowballLogic(Material.OBSIDIAN, Material.PORTAL, 1);
+            //fixed these so they are harder to get! Both work!
+            //The end portals are persistent, stack, and cannot be seen from
+            //underneath (NASTY trap) and the nether portal shards are very
+            //visible and a block update makes them go away again.
+
+            case COAL:
+                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.FIRE, 1);
+
+            case COAL_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.COAL_ORE, Material.AIR, 256);
+
+            case SAPLING:
+                return new BlockEmbedSnowballLogic(Material.DIRT, Material.SAPLING, 1) {
+                    @Override
+                    protected void placeCapBlock(Block block) {
+                        //if we can read the sapling type we can generate whatever tree
+                        //we want: that would be ideal. Boosted creates giants, clearly!
+                        block.getWorld().generateTree(block.getLocation(), TreeType.TREE);
+                    }
+                };
+
+            case REDSTONE_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.REDSTONE_BLOCK, 1) {
+                    @Override
+                    protected void placeCapBlock(Block block) {
+                        //if boosted, in this case we want to spawn a creeper
+                        //or perhaps just spawn the creeper and then hit him with the lightning
+
+                        block.getWorld().strikeLightning(block.getLocation());
+                    }
+                };
+
+            case NETHERRACK:
+                return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
+
+            case LADDER:
+                return new BlockEmbedSnowballLogic(Material.LADDER, Material.AIR, 256) {
+                    @Override
+                    protected void placeShaftBlock(Block block) {
+                        super.placeShaftBlock(block);
+
+                        // ladders need a special case to place them on the side of
+                        // the shaft! hink. 2 = north, 3 = south, 4 = west, 5 = east.
+                        // There has to be a better way than this!
+
+                        block.setData((byte) 4);
+                    }
+                };
+
+            case DIAMOND_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 256);
+
+            case DIAMOND_BLOCK:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
+
+            default:
+                return new BlockEmbedSnowballLogic(material, material, 1);
+        }
+    }
+
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
@@ -46,17 +117,7 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
         }
 
         if (block.getType() == Material.AIR) {
-            if (toCap == Material.SAPLING) {
-                snowball.getWorld().generateTree(loc, TreeType.TREE);
-                //if we can read the sapling type we can generate whatever tree
-                //we want: that would be ideal. Boosted creates giants, clearly!
-            } else if (toCap == Material.REDSTONE_BLOCK) {
-                snowball.getWorld().strikeLightning(loc);
-                //if boosted, in this case we want to spawn a creeper
-                //or perhaps just spawn the creeper and then hit him with the lightning
-            } else {
-                block.setType(toCap); //we set the cap and prepare to step downward
-            }
+            placeCapBlock(block);//we set the cap and prepare to step downward
             loc.setY(loc.getY() - 1);
             block = loc.getBlock();
         }
@@ -67,15 +128,7 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
             //bail if: loc.Y is less than zero OR embedDepth is exactly zero 
             //  OR  (embedDepth > 0 and the block type is bedrock)
 
-            block.setType(toPlace);
-
-            if (toPlace == Material.LADDER) {
-                // ladders need a special case to place them on the side of
-                // the shaft! hink. 2 = north, 3 = south, 4 = west, 5 = east.
-                // There has to be a better way than this!
-
-                block.setData((byte) 4);
-            }
+            placeShaftBlock(block);
 
             //just stepped down, it's above zero and either a replaceable block
             //or bedrock with embedDepth negative. place that sucker!            
@@ -84,5 +137,25 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
             block = loc.getBlock();
             //step down and go back to re-check the while
         }
+    }
+
+    /**
+     * This method applies the cap block; you can override it do something
+     * different though, like strike with lightning.
+     *
+     * @param block The block to be updated.
+     */
+    protected void placeCapBlock(Block block) {
+        block.setType(toCap);
+    }
+
+    /**
+     * This method applies the shaft block; you can override it to do something
+     * fancier.
+     *
+     * @param block The block to be updated.
+     */
+    protected void placeShaftBlock(Block block) {
+        block.setType(toPlace);
     }
 }

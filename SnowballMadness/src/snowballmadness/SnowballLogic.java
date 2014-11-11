@@ -123,43 +123,22 @@ public abstract class SnowballLogic {
             case ENDER_STONE:
                 return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
 
-            case QUARTZ:
-                return new BlockEmbedSnowballLogic(Material.OBSIDIAN, Material.PORTAL, 1);
-            //fixed these so they are harder to get! Both work!
-            //The end portals are persistent, stack, and cannot be seen from
-            //underneath (NASTY trap) and the nether portal shards are very
-            //visible and a block update makes them go away again.
-
-            case COAL:
-                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.FIRE, 1);
-
-            case COAL_BLOCK:
-                return new BlockEmbedSnowballLogic(Material.COAL_ORE, Material.AIR, 256);
-
-            case SAPLING:
-                return new BlockEmbedSnowballLogic(Material.DIRT, Material.SAPLING, 1);
-            //override sapling inside Embed logic to spawn a tree
-
-            case REDSTONE_BLOCK:
-                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.REDSTONE_BLOCK, 1);
-
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
 
             case LAVA_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.LAVA);
 
+            case QUARTZ:
+            case COAL:
+            case COAL_BLOCK:
+            case SAPLING:
+            case REDSTONE_BLOCK:
             case NETHERRACK:
-                return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
-
             case LADDER:
-                return new BlockEmbedSnowballLogic(Material.LADDER, Material.AIR, 256);
-
             case DIAMOND_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 256);
-
             case DIAMOND_BLOCK:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
+                return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
             case WOOD_SWORD:
             case STONE_SWORD:
@@ -175,7 +154,7 @@ public abstract class SnowballLogic {
             case COBBLE_WALL:
             case NETHER_FENCE:
             case FEATHER:
-                return  KnockbackSnowballLogic.fromMaterial(hint.getType());
+                return KnockbackSnowballLogic.fromMaterial(hint.getType());
 
             case TORCH:
                 return new LinkedTrailSnowballLogic(Material.FIRE);
