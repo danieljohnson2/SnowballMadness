@@ -22,58 +22,66 @@ import org.bukkit.util.Vector;
  */
 public class KnockbackSnowballLogic extends SnowballLogic {
 
-    private final Material weaponUsed;
+    private final double strength, poweredStrength;
 
-    public KnockbackSnowballLogic(Material weaponUsed) {
-        this.weaponUsed = Preconditions.checkNotNull(weaponUsed);
-        //we won't need a 'hit' method as we are overriding damage
+    public KnockbackSnowballLogic(double strength) {
+        this(strength, strength);
+    }
+
+    public KnockbackSnowballLogic(double strength, double poweredStrength) {
+        this.strength = strength;
+        this.poweredStrength = poweredStrength;
+    }
+
+    public static KnockbackSnowballLogic fromMaterial(Material weaponUsed) {
+        switch (weaponUsed) {
+            case BONE:
+                return new KnockbackSnowballLogic(8);
+
+            case FENCE:
+                return new KnockbackSnowballLogic(10);
+
+            case COBBLE_WALL:
+                return new KnockbackSnowballLogic(16);
+
+            case NETHER_FENCE:
+                return new KnockbackSnowballLogic(24);
+
+            case BLAZE_ROD:
+                return new KnockbackSnowballLogic(12) {
+                    @Override
+                    public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
+                        target.setFireTicks(target.getFireTicks() + (int) (100 * info.power));
+                        return super.damage(snowball, info, target, proposedDamage);
+                    }
+                };
+
+            case FEATHER:
+                //you could have knocked me over with a feather!
+                return new KnockbackSnowballLogic(2, 32);
+
+            default:
+                return new KnockbackSnowballLogic(4);
+        }
     }
 
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
-        if (target instanceof Entity) {
+        double effectiveStrength = info.power > 8 ? poweredStrength : strength;
+        effectiveStrength *= info.power;
 
+        // hows this for de-obfuscated?
+        Vector velocity = target.getVelocity().clone();
+        velocity.add(target.getLocation().toVector());
+        velocity.subtract(snowball.getLocation().toVector());
+        velocity.normalize();
+        velocity.multiply(effectiveStrength);
 
-            double weapon = 4; //STICK is default
+        //power also determines how much air time you're getting. No power means little air time,
+        double boost = Math.abs(velocity.getX()) + Math.abs(velocity.getZ());
+        velocity.setY(boost * info.power);
 
-            if (weaponUsed == Material.BONE) {
-                weapon = 8;
-            }
-            if (weaponUsed == Material.FENCE) {
-                weapon = 10;
-            }
-            if (weaponUsed == Material.BLAZE_ROD) {
-                weapon = 12;
-                target.setFireTicks(target.getFireTicks() + (int) (100 * info.power));
-            }
-            if (weaponUsed == Material.COBBLE_WALL) {
-                weapon = 16;
-            }
-            if (weaponUsed == Material.NETHER_FENCE) {
-                weapon = 24;
-            }
-            if (weaponUsed == Material.FEATHER) {
-                weapon = 2;
-                if (info.power > 8) {
-                    weapon = 32;
-                    //you could have knocked me over with a feather!
-                }
-            }
-
-            weapon = weapon * info.power;
-            
-            target.setVelocity(target.getVelocity().add(target.getLocation().toVector().subtract(snowball.getLocation().toVector()).normalize().multiply(weapon)));
-            //this is ugly, I need to de-obfuscate it. Some guy on the internet likes making enormous composite calculations.
-            //Initial attempts to de-obfuscate started to get unwanted results
-           
-            Vector lift = target.getVelocity().clone();
-            double boost = Math.abs(lift.getX()) + Math.abs(lift.getZ());
-            lift.setY(boost * info.power);
-            target.setVelocity(lift);
-            //power also determines how much air time you're getting. No power means little air time,
-
-        }
-
+        target.setVelocity(velocity);
         return 0;
     }
 }

@@ -175,7 +175,7 @@ public abstract class SnowballLogic {
             case COBBLE_WALL:
             case NETHER_FENCE:
             case FEATHER:
-                return new KnockbackSnowballLogic(hint.getType());
+                return  KnockbackSnowballLogic.fromMaterial(hint.getType());
 
             case TORCH:
                 return new LinkedTrailSnowballLogic(Material.FIRE);
