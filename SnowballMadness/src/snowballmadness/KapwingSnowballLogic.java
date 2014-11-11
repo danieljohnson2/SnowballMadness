@@ -44,8 +44,7 @@ public class KapwingSnowballLogic extends SnowballLogic {
         skipper.setShooter(shooter);
         skipper.setVelocity(bounce);
 
-       performLaunch(inventory, skipper, info);
-        
+        performLaunch(inventory, skipper, info);
     }
 
     @Override
