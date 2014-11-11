@@ -110,13 +110,13 @@ public abstract class SnowballLogic {
 
             case ANVIL:
                 return new AnvilSnowballLogic();
-                
+
             case WATCH:
                 return new WatchSnowballLogic();
-                
+
             case REDSTONE:
                 return new StartRainLogic();
-                
+
             case CACTUS:
                 return new StopRainLogic();
 
@@ -129,17 +129,17 @@ public abstract class SnowballLogic {
             //The end portals are persistent, stack, and cannot be seen from
             //underneath (NASTY trap) and the nether portal shards are very
             //visible and a block update makes them go away again.
-                
+
             case COAL:
                 return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.FIRE, 1);
-                
+
             case COAL_BLOCK:
                 return new BlockEmbedSnowballLogic(Material.COAL_ORE, Material.AIR, 256);
-                
+
             case SAPLING:
                 return new BlockEmbedSnowballLogic(Material.DIRT, Material.SAPLING, 1);
-                //override sapling inside Embed logic to spawn a tree
-                
+            //override sapling inside Embed logic to spawn a tree
+
             case REDSTONE_BLOCK:
                 return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.REDSTONE_BLOCK, 1);
 
@@ -167,6 +167,15 @@ public abstract class SnowballLogic {
             case GOLD_SWORD:
             case DIAMOND_SWORD:
                 return new SwordSnowballLogic(slice);
+
+            case STICK:
+            case BONE:
+            case BLAZE_ROD:
+            case FENCE:
+            case COBBLE_WALL:
+            case NETHER_FENCE:
+            case FEATHER:
+                return new KnockbackSnowballLogic(hint.getType());
 
             case TORCH:
                 return new LinkedTrailSnowballLogic(Material.FIRE);
