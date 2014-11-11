@@ -110,6 +110,15 @@ public abstract class SnowballLogic {
 
             case ANVIL:
                 return new AnvilSnowballLogic();
+                
+            case WATCH:
+                return new WatchSnowballLogic();
+                
+            case REDSTONE:
+                return new StartRainLogic();
+                
+            case CACTUS:
+                return new StopRainLogic();
 
             case ENDER_STONE:
                 return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);

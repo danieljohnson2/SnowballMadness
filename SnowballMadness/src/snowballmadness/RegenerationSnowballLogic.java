@@ -17,7 +17,7 @@ import org.bukkit.projectiles.ProjectileSource;
  */
 public class RegenerationSnowballLogic extends SnowballLogic {
 
-    private final static CooldownTimer<Long> cooldown = new CooldownTimer<Long>(8000);
+    private final static CooldownTimer<Long> cooldown = new CooldownTimer<Long>(1000);
     private final InventorySlice inventory;
 
     public RegenerationSnowballLogic(InventorySlice inventory) {
@@ -46,10 +46,22 @@ public class RegenerationSnowballLogic extends SnowballLogic {
             clearInventory(shooter);
 
             for (Entity entity : chunk.getEntities()) {
+                if (entity instanceof Snowball) {
+                    entity.remove();
+                }
+                //we are going to wipe all the snowballs while clearing
+                //player inventories. The snowballs have been getting stuck.
+                //however, this bit might not be fixing that.
+                
                 clearInventory(entity);
             }
 
             chunk.getWorld().regenerateChunk(chunk.getX(), chunk.getZ());
+            chunk.getWorld().unloadChunk(chunk);
+            chunk.getWorld().loadChunk(chunk);
+            //further attempts to handle snowballs getting stuck
+            //if multiplied multiplier regen snowballs are spammed,
+            //the server locks up. Trying to avoid this.
         }
     }
 
@@ -83,7 +95,10 @@ public class RegenerationSnowballLogic extends SnowballLogic {
     /**
      * This method checks to see if we can safely regenerate a chunk. We keep a
      * weak map of timeouts, and we must be after this time to do so. This
-     * method also updates that map with a new time, to be 8 seconds from now.
+     * method also updates that map with a new time, to be a second from now.
+     * This is changed because the player case now strips inventories, making it
+     * impossible to fire rapidly: but a mod in creative mode can rapidfire
+     * regen if desired. Multipliers are not recommended though!
      *
      * @param chunk The chunk to check.
      * @return True if we should regenerate the chunk.
