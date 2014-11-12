@@ -156,8 +156,23 @@ public abstract class SnowballLogic {
             case FEATHER:
                 return KnockbackSnowballLogic.fromMaterial(hint.getType());
 
+            case LEAVES: //add more as appropriate, this is powerful
+                return new BoxSnowballLogic(hint.getType());
+
+            case BUCKET:
+                return new BoxSnowballLogic(Material.AIR);
+
             case TORCH:
                 return new LinkedTrailSnowballLogic(Material.FIRE);
+
+            case FENCE_GATE:
+                return new LinkedTrailSnowballLogic(Material.FENCE);
+
+            case BOAT:
+                return new LinkedTrailSnowballLogic(Material.STATIONARY_WATER);
+
+            //case WATER_LILY:
+            //  return new LinkedTrailSnowballLogic(Material.WATER_LILY); need a method that will stop at the surface of water
 
             case TNT:
                 return new TNTSnowballLogic(4);
@@ -514,10 +529,23 @@ public abstract class SnowballLogic {
         Location loc = location.clone();
 
         for (;;) {
-            if (loc.getBlock().isEmpty() || (loc.getBlock().getType() == Material.LEAVES)) {
-                loc.add(0, -1, 0);
-            } else {
-                return loc;
+            switch (loc.getBlock().getType()) {
+                case AIR:
+                case WATER:
+                case STATIONARY_WATER:
+                case LEAVES:
+                case LONG_GRASS:
+                case DOUBLE_PLANT:
+                case LAVA:
+                case SNOW:
+                case WATER_LILY:
+                case RED_ROSE:
+                case YELLOW_FLOWER:
+                case DEAD_BUSH:
+                    loc.add(0, -1, 0);
+                    break;
+                default:
+                    return loc;
             }
         }
     }

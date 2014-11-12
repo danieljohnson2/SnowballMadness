@@ -81,8 +81,13 @@ public class LinkedTrailSnowballLogic extends SnowballLogic {
                     target.add(previousLocation);
 
                     target = getGroundUnderneath(target);
-                    target.add(0, 1, 0);
-                    target.getBlock().setType(toPlace);
+                    if  ((target.getBlock().getType() != toPlace))
+                            {
+                        target.add(0, 1, 0);
+                        target.getBlock().setType(toPlace);
+                    }
+                    //suggestion from NetBeans. This means place if the underlying block isn't same as the one being placed,
+                    //also place the water lily if the underlying block is Stationary Water. Yay machine logic!
                 }
 
                 previousLocation = currentLocation;
