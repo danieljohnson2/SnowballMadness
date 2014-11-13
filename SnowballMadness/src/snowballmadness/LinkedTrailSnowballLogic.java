@@ -3,6 +3,8 @@ package snowballmadness;
 import com.google.common.base.Preconditions;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import static snowballmadness.SnowballLogic.getGroundUnderneath;
 
@@ -79,21 +81,45 @@ public class LinkedTrailSnowballLogic extends SnowballLogic {
                     target.multiply(offset / dist);
                     target.add(previousLocation);
 
-                    target = getGroundUnderneath(target);
-                    if (target.getBlock().getType() != toPlace) {
-                        if (target.getBlock().getType() != Material.WATER) {
-                            target.add(0, 1, 0);
-                            //if we are layering on top of water we convert it to
-                            //source blocks to smooth it
-                        }
-                        target.getBlock().setType(toPlace);
-                        if (toPlace == Material.STATIONARY_WATER) {
-                            target.getBlock().setData((byte) 0);
-                        }
+                    Block block = findTargetBlock(target);
+
+                    if (block != null) {
+                        placeBlock(block);
                     }
                 }
                 previousLocation = currentLocation;
             }
+        }
+    }
+
+    /**
+     * This method takes a location in the air, and finds the block to place in,
+     * typically underneath it.
+     *
+     * @param location The starting location.
+     * @return The target block, or null if none can be found.
+     */
+    protected Block findTargetBlock(Location location) {
+        Location target = getGroundUnderneath(location);
+        Block block = target.getBlock();
+        Material material = block.getType();
+
+        if (material != toPlace && material != Material.WATER) {
+            block = block.getRelative(BlockFace.UP);
+        }
+
+        return block;
+    }
+
+    /**
+     * This method updates the target block.
+     *
+     * @param target The block to update.
+     */
+    protected void placeBlock(Block target) {
+        target.setType(toPlace);
+        if (toPlace == Material.STATIONARY_WATER) {
+            target.setData((byte) 0);
         }
     }
 }

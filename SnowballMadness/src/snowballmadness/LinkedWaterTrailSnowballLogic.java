@@ -7,6 +7,7 @@ package snowballmadness;
 import com.google.common.base.Preconditions;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import static snowballmadness.SnowballLogic.getGroundUnderneath;
 
@@ -16,66 +17,26 @@ import static snowballmadness.SnowballLogic.getGroundUnderneath;
  *
  * @author christopherjohnson
  */
-public class LinkedWaterTrailSnowballLogic extends SnowballLogic {
-
-    private final Material toPlace;
-    private Location previousLocation;
-    private Location firstLocation;
+public class LinkedWaterTrailSnowballLogic extends LinkedTrailSnowballLogic {
 
     public LinkedWaterTrailSnowballLogic(Material toPlace) {
-        this.toPlace = Preconditions.checkNotNull(toPlace);
-        //we won't need a 'hit' method as we won't care
-        //however, this should compile now as it's a real class
-        //and does a thing.
+        super(toPlace);
     }
 
     @Override
-    public void launch(Snowball snowball, SnowballInfo info) {
-        super.launch(snowball, info);
-        firstLocation = snowball.getLocation();
-    }
+    protected Block findTargetBlock(Location location) {
+        Location target = location.clone();
 
-    @Override
-    public void tick(Snowball snowball, SnowballInfo info) {
-        super.tick(snowball, info);
-
-        Location currentLocation = snowball.getLocation().clone();
-
-        // want to avoid doing anything until we get far enough from
-        // the thrower.
-        if (firstLocation != null) {
-            if (firstLocation.distance(currentLocation) < 0.5) {
-                return;
-            } else {
-                firstLocation = null;
-            }
+        while (target.getBlock().getType() == Material.AIR) {
+            target.add(0, -1, 0);
         }
 
-        if (previousLocation == null) {
-            previousLocation = currentLocation;
-        } else {
-            double dist = previousLocation.distance(currentLocation);
-
-            if (dist >= 1.0) {
-                Location delta = currentLocation.clone();
-                delta.subtract(previousLocation);
-
-                for (double offset = 0; offset <= dist; ++offset) {
-                    Location target = delta.clone();
-                    target.multiply(offset / dist);
-                    target.add(previousLocation);
-
-                   while (target.getBlock().getType() == Material.AIR) {
-                        target.add(0, -1, 0);
-                    }
-                    //chase down in the most primitive way possible
-                    if ((target.getBlock().getType() == Material.STATIONARY_WATER)) {
-                        target.add(0, 1, 0);
-                        target.getBlock().setType(toPlace);
-                    }
-                }
-                previousLocation = currentLocation;
-            }
+        //chase down in the most primitive way possible
+        if ((target.getBlock().getType() == Material.STATIONARY_WATER)) {
+            target.add(0, 1, 0);
+            return target.getBlock();
         }
+
+        return null; // no water, no lilly!
     }
 }
