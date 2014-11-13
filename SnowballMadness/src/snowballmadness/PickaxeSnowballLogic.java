@@ -43,6 +43,8 @@ public class PickaxeSnowballLogic extends SnowballLogic {
         }
 
         final int radius = (int) (Math.sqrt(baseTool * info.power) * baseTool);
+        final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
+
         //size is heavily dependent on tool type, power expands so aggressively with
         //doubling that we must control it. Max will still be very huge.
         final int diameter = (int) (radius * 2);
@@ -56,12 +58,20 @@ public class PickaxeSnowballLogic extends SnowballLogic {
         final int endY = Math.min(world.getMaxHeight(), beginY + radius);
         final int endZ = beginZ + diameter;
 
+        final Location locationBuffer = new Location(world, 0, 0, 0);
+
         for (int x = beginX; x < endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
                 for (int y = beginY; y <= endY; ++y) {
-                    Block beingMined = world.getBlockAt(x, y, z);
-                    if (canMine(beingMined, baseTool * info.power)) {
-                        beingMined.setType(Material.AIR);
+                    locationBuffer.setX(x + 0.5);
+                    locationBuffer.setY(y + 0.5);
+                    locationBuffer.setZ(z + 0.5);
+
+                    if (snowballLoc.distanceSquared(locationBuffer) <= distanceSquaredLimit) {
+                        final Block beingMined = world.getBlockAt(x, y, z);
+                        if (canMine(beingMined, baseTool * info.power)) {
+                            beingMined.setType(Material.AIR);
+                        }
                     }
                 }
             }
