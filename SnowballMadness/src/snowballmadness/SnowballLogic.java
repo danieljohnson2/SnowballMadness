@@ -145,6 +145,13 @@ public abstract class SnowballLogic {
             case GOLD_SWORD:
             case DIAMOND_SWORD:
                 return new SwordSnowballLogic(slice);
+                
+            case WOOD_PICKAXE:
+            case STONE_PICKAXE:
+            case IRON_PICKAXE:
+            case GOLD_PICKAXE:
+            case DIAMOND_PICKAXE:
+                return new PickaxeSnowballLogic(hint.getType());
 
             case STICK:
             case BONE:
@@ -211,7 +218,7 @@ public abstract class SnowballLogic {
 
             case CAKE:
                 return new SpeededSnowballLogic(3, slice.skip(1));
-            //the cake is a... lazor!
+                //the cake is a... lazor!
 
             case BEACON:
                 return new SpeededSnowballLogic(4, slice.skip(1));

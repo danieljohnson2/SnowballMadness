@@ -19,7 +19,7 @@ public class SwordSnowballLogic extends DurabilityDrainSnowballLogic {
     public SwordSnowballLogic(InventorySlice inventory) {
         super(inventory);
         this.damage = damages.get(inventory.getBottomItem().getType());
-    }
+     }
 
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
