@@ -8,6 +8,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -64,6 +65,40 @@ public abstract class SnowballLogic {
      * @param info Other information about the snowball.
      */
     public void hit(Snowball snowball, SnowballInfo info) {
+    }
+
+    /**
+     * This method returns the snowball to its thrower; by default we'll put an
+     * additional snowball in the slot this one came from, provided that slot is
+     * empty or contains snowballs (but fewer than 15 of them).
+     *
+     * @param snowball The snowball that is to be returned to its thrower.
+     * @param info The associated info of the snowball, which includes the
+     * inventory slot it came from.
+     */
+    public void replenish(Snowball snowball, final SnowballInfo info) {
+        ProjectileSource shooter = snowball.getShooter();
+
+        if (shooter instanceof Player) {
+            Player player = (Player) shooter;
+
+            if (player.getGameMode() != GameMode.CREATIVE) {
+                PlayerInventory inventory = player.getInventory();
+                ItemStack replacing = inventory.getItem(info.launchSlotNumber);
+
+                if (replacing == null) {
+                    inventory.setItem(info.launchSlotNumber, new ItemStack(Material.SNOW_BALL));
+                } else if (replacing.getType() == Material.SNOW_BALL) {
+                    int oldCount = replacing.getAmount();
+                    int newCount = Math.min(16, oldCount + 1);
+
+                    if (oldCount != newCount) {
+                        inventory.setItem(info.launchSlotNumber,
+                                new ItemStack(Material.SNOW_BALL, newCount));
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -215,7 +250,7 @@ public abstract class SnowballLogic {
 
             case BEACON:
                 return new SpeededSnowballLogic(4, slice.skip(1));
-                //the beacon is the REAL lazor.
+            //the beacon is the REAL lazor.
 
             case GLOWSTONE_DUST:
                 return new PoweredSnowballLogic(1.5, slice.skip(1));
@@ -225,8 +260,8 @@ public abstract class SnowballLogic {
 
             case NETHER_STAR:
                 return new PoweredSnowballLogic(4, slice.skip(1));
-                //nuclear option. Beacon/netherstar designed to be insane
-                //overkill but not that cost-effective, plus more unwieldy.
+            //nuclear option. Beacon/netherstar designed to be insane
+            //overkill but not that cost-effective, plus more unwieldy.
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
@@ -339,7 +374,7 @@ public abstract class SnowballLogic {
                 Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", data.logic, inFlight.size()));
                 data.logic.hit(snowball, data.info);
             } finally {
-                data.logic.end(snowball);
+                data.logic.end(snowball, data.info);
             }
         }
     }
@@ -375,11 +410,8 @@ public abstract class SnowballLogic {
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
                 InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball, new SnowballInfo(plugin));
-
-                if (logic != null && player.getGameMode() != GameMode.CREATIVE) {
-                    replenishSnowball(plugin, inv, heldSlot);
-                }
+                SnowballInfo info = new SnowballInfo(plugin, heldSlot);
+                performLaunch(slice, snowball, info);
             }
         }
     }
@@ -415,38 +447,6 @@ public abstract class SnowballLogic {
                 e.setDamage(newDamage);
             }
         }
-    }
-
-    /**
-     * This method increments the number of snowballs in the slot indicated; but
-     * it does this after a brief delay since changes made during the launch are
-     * ignored. If the indicated slot contains something that is not a snowball,
-     * we don't update it. If it is empty, we put one snowball in there.
-     *
-     * @param plugin The plugin, used to schedule the update.
-     * @param inventory The inventory to update.
-     * @param slotIndex The slot to update.
-     */
-    private static void replenishSnowball(Plugin plugin, final PlayerInventory inventory, final int slotIndex) {
-
-        // ugh. We must delay the inventory update or it won't take.
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                ItemStack replacing = inventory.getItem(slotIndex);
-
-                if (replacing == null) {
-                    inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL));
-                } else if (replacing.getType() == Material.SNOW_BALL) {
-                    int oldCount = replacing.getAmount();
-                    int newCount = Math.min(16, oldCount + 1);
-
-                    if (oldCount != newCount) {
-                        inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL, newCount));
-                    }
-                }
-            }
-        }.runTaskLater(plugin, 1);
     }
 
     /**
@@ -535,9 +535,17 @@ public abstract class SnowballLogic {
      *
      * @param snowball The snowball to deregister.
      */
-    public void end(Snowball snowball) {
+    public void end(final Snowball snowball, final SnowballInfo info) {
         approximateInFlightCount--;
         inFlight.remove(snowball);
+
+        // ugh. We must delay the inventory update or it won't take.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                replenish(snowball, info);
+            }
+        }.runTaskLater(info.plugin, 1);
     }
     ////////////////////////////////////////////////////////////////
     // Utilitu Methods
