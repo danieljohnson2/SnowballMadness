@@ -196,10 +196,13 @@ public abstract class SnowballLogic {
                 return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
 
             case SUGAR:
-                return new SpeededSnowballLogic(1.5, slice.skip(1));
+                return new SpeededSnowballLogic(1.6, slice.skip(1));
                 
             case BOW:
-                return new SpeededSnowballLogic(1.75, slice.skip(1));
+                return new SpeededSnowballLogic(1.8, slice.skip(1));
+                
+            case COOKIE:
+                return new SpeededSnowballLogic(2, slice.skip(1));
 
             case CAKE:
                 return new SpeededSnowballLogic(3, slice.skip(1));
