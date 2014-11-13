@@ -64,7 +64,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                     while (iterateY <= endY) {
                         loc.setY(iterateY);
                         Block target = loc.getBlock();
-                        if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)) {
+                        if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)||(target.getType() == Material.STATIONARY_LAVA)) {
                             target.setType(toPlace);
                         }
                         iterateY = iterateY + 1;
@@ -74,7 +74,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                     //however, boxes can make air inside water or lava
                     loc.setY(iterateY);
                     Block target = loc.getBlock();
-                    if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)) {
+                    if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)||(target.getType() == Material.STATIONARY_LAVA)) {
                         target.setType(toPlace);
                     }
                     iterateY = iterateY + 1;
@@ -82,7 +82,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                     while (iterateY < endY) {
                         loc.setY(iterateY);
                         target = loc.getBlock();
-                        if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)) {
+                        if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)||(target.getType() == Material.STATIONARY_LAVA)) {
                             target.setType(Material.AIR);
                         }
                         iterateY = iterateY + 1;
@@ -90,7 +90,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                     //hollow space, replaces water and lava, exits when top plane is reached
                     loc.setY(iterateY);
                     target = loc.getBlock();
-                    if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)) {
+                    if ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)||(target.getType() == Material.STATIONARY_LAVA)) {
                         target.setType(toPlace);
                     }
                     //top plane and done with this vertical slice
@@ -108,6 +108,6 @@ public class BoxSnowballLogic extends SnowballLogic {
 
 //public boolean isFluid(Material toTest){
 //this.Material = target.getType();
-//return ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA))
+//return ((target.getType() == Material.AIR)||(target.getType() == Material.WATER)||(target.getType() == Material.STATIONARY_WATER)||(target.getType() == Material.LAVA)||(target.getType() == Material.STATIONARY_LAVA))
 //}
 //nope, but you can see what I'm going for here

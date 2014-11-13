@@ -95,7 +95,6 @@ public abstract class SnowballLogic {
                 return new ArrowSnowballLogic(hint);
 
             case COBBLESTONE:
-            case SMOOTH_BRICK:
             case OBSIDIAN:
             case BOOKSHELF:
             case BRICK:
@@ -156,8 +155,12 @@ public abstract class SnowballLogic {
             case FEATHER:
                 return KnockbackSnowballLogic.fromMaterial(hint.getType());
 
-            case LEAVES: //add more as appropriate, this is powerful
+            case LEAVES:
+            case STONE:
+            case SMOOTH_BRICK:
                 return new BoxSnowballLogic(hint.getType());
+                //all structures that can be broken with any pick, but can be
+                //large with use of glowstone. Provides a defensive game
 
             case BUCKET:
                 return new BoxSnowballLogic(Material.AIR);
@@ -171,8 +174,8 @@ public abstract class SnowballLogic {
             case BOAT:
                 return new LinkedTrailSnowballLogic(Material.STATIONARY_WATER);
 
-            //case WATER_LILY:
-            //  return new LinkedTrailSnowballLogic(Material.WATER_LILY); need a method that will stop at the surface of water
+            case WATER_LILY:
+              return new LinkedWaterTrailSnowballLogic(Material.WATER_LILY);
 
             case TNT:
                 return new TNTSnowballLogic(4);
@@ -188,9 +191,15 @@ public abstract class SnowballLogic {
 
             case SPIDER_EYE:
                 return new ReversedSnowballLogic();
+                
+            case FERMENTED_SPIDER_EYE:
+                return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
 
             case SUGAR:
                 return new SpeededSnowballLogic(1.5, slice.skip(1));
+                
+            case BOW:
+                return new SpeededSnowballLogic(1.75, slice.skip(1));
 
             case CAKE:
                 return new SpeededSnowballLogic(3, slice.skip(1));
