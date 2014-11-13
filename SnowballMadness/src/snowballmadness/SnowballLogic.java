@@ -213,11 +213,20 @@ public abstract class SnowballLogic {
                 return new SpeededSnowballLogic(3, slice.skip(1));
             //the cake is a... lazor!
 
+            case BEACON:
+                return new SpeededSnowballLogic(4, slice.skip(1));
+                //the beacon is the REAL lazor.
+
             case GLOWSTONE_DUST:
                 return new PoweredSnowballLogic(1.5, slice.skip(1));
 
             case GLOWSTONE:
                 return new PoweredSnowballLogic(3, slice.skip(1));
+
+            case NETHER_STAR:
+                return new PoweredSnowballLogic(4, slice.skip(1));
+                //nuclear option. Beacon/netherstar designed to be insane
+                //overkill but not that cost-effective, plus more unwieldy.
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
@@ -548,7 +557,7 @@ public abstract class SnowballLogic {
         for (;;) {
             // just in case we have a shaft to the void, we  need
             // to give up before we reach it.
-            
+
             if (loc.getBlockY() <= 0) {
                 return loc;
             }

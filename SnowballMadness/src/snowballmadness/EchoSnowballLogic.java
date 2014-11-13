@@ -20,7 +20,6 @@ import org.bukkit.util.*;
  */
 public class EchoSnowballLogic extends SnowballLogic {
 
-    private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(8);
     private final static int inFlightSnowballLimit = 256;
     private final int numberOfSnowballs;
     private final InventorySlice inventory;
@@ -60,7 +59,7 @@ public class EchoSnowballLogic extends SnowballLogic {
 
         for (int i = 1; i < numberOfSnowballs; ++i) {
             if ((source.getY() <= i) || (getInFlightCount() >= inFlightSnowballLimit)) {
-                //bail, it's already beyond redonkulous. Useless going over 1000
+                //bail, it's already beyond redonkulous. Useless going much over 256
                 //though I have seen 6000/7000 uncontrolled
                 //also note, if we have loads of snowballs down around bedrock
                 //we start not bothering with them, what more can they do?
@@ -72,14 +71,14 @@ public class EchoSnowballLogic extends SnowballLogic {
                 vector.setY(vector.getY() - 0.5);
                 vector.setZ(vector.getZ() - 0.5);
 
-                vector.multiply(new Vector(info.speed * 8, info.speed * 8, info.speed * 8));
+                vector.multiply(new Vector(info.speed * 10, info.speed * 10, info.speed * 10));
 
                 //now we will interpolate between that and bounce.
-                double highvalues = i / 256.0; //if this doesn't return a fractional value it won't work
+                double highvalues = i / 512.0; //if this doesn't return a fractional value it won't work
                 double lowvalues = 1.0 - highvalues;
                 vector.multiply(highvalues);
                 //we've just scaled back our randomness based on how near the snowball number
-                //is to 16: lower i numbers make the random component low
+                //is to 512: lower i numbers make the random component low
                 vector.add(bounce.multiply(lowvalues));
                 //and we add bounce scaled to the inverse of that amount. Lower i numbers make the
                 //bounce component high. as you keep adding more i you get more randomness and scatter.

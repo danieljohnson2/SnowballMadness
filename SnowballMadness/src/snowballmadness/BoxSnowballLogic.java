@@ -4,7 +4,6 @@
  */
 package snowballmadness;
 
-import com.google.common.base.*;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
@@ -55,7 +54,24 @@ public class BoxSnowballLogic extends SnowballLogic {
         // back to the client, so we can set the blocks in any order. This one
         // is convenient!
 
-        for (int x = beginX; x <= endX; ++x) {
+        // beginX is our initial solid wall
+        if (wallMaterial != null) {
+            for (int z = beginZ; z <= endZ; ++z) {
+                for (int y = beginY; y <= endY; ++y) {
+                    Block target = world.getBlockAt(beginX, y, z);
+                    if (canReplace(target)) {
+                        replaceBlock(target, wallMaterial);
+                    }
+                }
+            }
+        }
+
+        //least efficient method used for hollow section. If we did not need to
+        //hollow this out, we could just do each wall directly, but we're filling
+        //with air. For a truly huge box, it'd be preferable to do the walls and
+        //then fill the center: for 3x3x3 or 5x5x5 it's pointless. Our largest box
+        //begins to flirt with this issue.
+        for (int x = beginX + 1; x < endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
                 for (int y = beginY; y <= endY; ++y) {
                     final boolean isWallBlock =
@@ -74,15 +90,34 @@ public class BoxSnowballLogic extends SnowballLogic {
                 }
             }
         }
+
+        //endX is our final wall
+        if (wallMaterial != null) {
+            for (int z = beginZ; z <= endZ; ++z) {
+                for (int y = beginY; y <= endY; ++y) {
+                    Block target = world.getBlockAt(endX, y, z);
+                    if (canReplace(target)) {
+                        replaceBlock(target, wallMaterial);
+                    }
+                }
+            }
+        }
+        //this implementation is sort of a compromise between Dan making the code
+        //as elegant and plain as possible, and Chris insisting on some videogamey
+        //efficiency hacks. Off to devise an even crazier power-boost so as to
+        //illustrate the need for execution efficiency :D
+
+
+
     }
 
     /**
      * This method is called on each block that is to be updated, and by default
-     * simply calls setType() on nit. You can override this to set metadata or
+     * simply calls setType() on it. You can override this to set metadata or
      * make other changes.
      *
      * This method is not called if the material would be null because null was
-     * passed tot he constructor. It is also nto called if canReplace() returns
+     * passed to the constructor. It is also not called if canReplace() returns
      * false.
      *
      * @param target The block to update.
@@ -106,6 +141,11 @@ public class BoxSnowballLogic extends SnowballLogic {
                 || material == Material.WATER
                 || material == Material.STATIONARY_WATER
                 || material == Material.LAVA
-                || material == Material.STATIONARY_LAVA;
+                || material == Material.STATIONARY_LAVA
+                || material == Material.LONG_GRASS
+                || material == Material.RED_ROSE
+                || material == Material.YELLOW_FLOWER;
+        //including some of the ground cover blocks as they seem like
+        //glitches when they block wall placement
     }
 }

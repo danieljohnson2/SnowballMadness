@@ -39,10 +39,6 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
         switch (material) {
             case QUARTZ:
                 return new BlockEmbedSnowballLogic(Material.OBSIDIAN, Material.PORTAL, 1);
-            //fixed these so they are harder to get! Both work!
-            //The end portals are persistent, stack, and cannot be seen from
-            //underneath (NASTY trap) and the nether portal shards are very
-            //visible and a block update makes them go away again.
 
             case COAL:
                 return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.FIRE, 1);
@@ -81,7 +77,7 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                         super.placeShaftBlock(block);
 
                         // ladders need a special case to place them on the side of
-                        // the shaft! hink. 2 = north, 3 = south, 4 = west, 5 = east.
+                        // the shaft! 2 = north, 3 = south, 4 = west, 5 = east.
                         // There has to be a better way than this!
 
                         block.setData((byte) 4);

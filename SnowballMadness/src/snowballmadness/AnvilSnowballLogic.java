@@ -9,7 +9,7 @@ import org.bukkit.block.*;
 import org.bukkit.entity.*;
 
 /**
- * This logic drop anvils on the point of impact. It works by placing an anvil
+ * This logic drops anvils on the point of impact. It works by placing an anvil
  * block up to 64 blocks above the impact. Minecraft gravity does the rest.
  *
  * @author DanJ
