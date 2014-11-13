@@ -161,9 +161,9 @@ public abstract class SnowballLogic {
             case IRON_FENCE:
             case WEB:
                 return new BoxSnowballLogic(hint.getType());
-                //all structures that can be broken with any pick, but can be
-                //large with use of glowstone. Provides a defensive game
-                
+            //all structures that can be broken with any pick, but can be
+            //large with use of glowstone. Provides a defensive game
+
             case GLASS_BOTTLE:
                 return new BoxSnowballLogic(Material.GLASS);
 
@@ -176,11 +176,11 @@ public abstract class SnowballLogic {
             case FENCE_GATE:
                 return new LinkedTrailSnowballLogic(Material.FENCE);
 
-            case BOAT:
+            case CAULDRON_ITEM:
                 return new LinkedTrailSnowballLogic(Material.STATIONARY_WATER);
 
             case WATER_LILY:
-              return new LinkedWaterTrailSnowballLogic(Material.WATER_LILY);
+                return new LinkedWaterTrailSnowballLogic(Material.WATER_LILY);
 
             case TNT:
                 return new TNTSnowballLogic(4);
@@ -196,16 +196,16 @@ public abstract class SnowballLogic {
 
             case SPIDER_EYE:
                 return new ReversedSnowballLogic();
-                
+
             case FERMENTED_SPIDER_EYE:
                 return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
 
             case SUGAR:
                 return new SpeededSnowballLogic(1.6, slice.skip(1));
-                
+
             case BOW:
                 return new SpeededSnowballLogic(1.8, slice.skip(1));
-                
+
             case COOKIE:
                 return new SpeededSnowballLogic(2, slice.skip(1));
 
