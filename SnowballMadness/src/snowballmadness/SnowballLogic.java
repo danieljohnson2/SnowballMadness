@@ -546,6 +546,13 @@ public abstract class SnowballLogic {
         Location loc = location.clone();
 
         for (;;) {
+            // just in case we have a shaft to the void, we  need
+            // to give up before we reach it.
+            
+            if (loc.getBlockY() <= 0) {
+                return loc;
+            }
+
             switch (loc.getBlock().getType()) {
                 case AIR:
                 case WATER:
