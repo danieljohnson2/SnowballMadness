@@ -45,8 +45,32 @@ public class SparseTrailSnowballLogic extends SnowballLogic {
     public void tick(Snowball snowball, SnowballInfo info) {
         super.tick(snowball, info);
 
-        Location target = getGroundUnderneath(snowball.getLocation());
+        Block target = findTargetBlock(snowball.getLocation());
+
+        if (target != null) {
+            placeBlock(target);
+        }
+    }
+
+    /**
+     * This method takes a location in the air, and finds the block to place in,
+     * typically underneath it.
+     *
+     * @param location The starting location.
+     * @return The target block, or null if none can be found.
+     */
+    protected Block findTargetBlock(Location location) {
+        Location target = getGroundUnderneath(location);
         target.add(0, 1, 0);
-        target.getBlock().setType(toPlace);
+        return target.getBlock();
+    }
+
+    /**
+     * This method updates the target block.
+     *
+     * @param target The block to update.
+     */
+    protected void placeBlock(Block target) {
+        target.setType(toPlace);
     }
 }
