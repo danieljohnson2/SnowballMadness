@@ -48,3 +48,15 @@ public class ArrowSnowballLogic extends SnowballLogic {
         snowball.remove();
     }
 }
+    
+ /*   @Override
+        public void onProjectileHit(ProjectileHitEvent event) {
+            Entity entity = event.getEntity();
+            if (entity.getType() == EntityType.ARROW) {
+                entity.remove();
+            }
+        }  //this is outside what I understand, but was somebody's code for
+         // removing arrows stuck in the ground. I'd like our arrows to not
+         // leave tile entities stuck to blocks. More anti-lag cleanup.
+}
+} */
