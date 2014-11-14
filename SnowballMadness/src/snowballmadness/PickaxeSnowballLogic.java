@@ -1,6 +1,7 @@
 package snowballmadness;
 
 import com.google.common.base.*;
+import java.util.Random;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
@@ -41,18 +42,18 @@ public class PickaxeSnowballLogic extends SnowballLogic {
             case WOOD_PICKAXE:
             //nothing
         }
-
-        final int radius = (int) (Math.sqrt(baseTool * info.power) * baseTool);
+        final double totalEffectiveness = baseTool * info.power;
+        final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
 
         //size is heavily dependent on tool type, power expands so aggressively with
         //doubling that we must control it. Max will still be very huge.
         final int diameter = (int) (radius * 2);
         World world = snowball.getWorld();
-
+        Random rand = new Random();
         Location snowballLoc = snowball.getLocation().clone();
         final int beginX = snowballLoc.getBlockX() - radius;
-        final int beginY = Math.max(0, snowballLoc.getBlockY() - baseTool);
+        final int beginY = Math.max(0, snowballLoc.getBlockY() - 1);
         final int beginZ = snowballLoc.getBlockZ() - radius;
         final int endX = beginX + diameter;
         final int endY = Math.min(world.getMaxHeight(), beginY + radius);
@@ -62,14 +63,20 @@ public class PickaxeSnowballLogic extends SnowballLogic {
 
         for (int x = beginX; x < endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
+                boolean roofMod = rand.nextBoolean();
+                double moddedRoof = distanceSquaredLimit;
+                if (roofMod) {
+                    moddedRoof = distanceSquaredLimit + totalEffectiveness;
+                }
+                //being calculated column by column, so it's still fast
+                //value required is squared, remember: not a fixed amount
                 for (int y = beginY; y <= endY; ++y) {
                     locationBuffer.setX(x + 0.5);
-                    locationBuffer.setY(y + 0.5);
+                    locationBuffer.setY(y);
                     locationBuffer.setZ(z + 0.5);
-
-                    if (snowballLoc.distanceSquared(locationBuffer) <= distanceSquaredLimit) {
+                    if (snowballLoc.distanceSquared(locationBuffer) < moddedRoof) {
                         final Block beingMined = world.getBlockAt(x, y, z);
-                        if (canMine(beingMined, baseTool * info.power)) {
+                        if (canMine(beingMined, totalEffectiveness)) {
                             beingMined.setType(Material.AIR);
                         }
                     }
