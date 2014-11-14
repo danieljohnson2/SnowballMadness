@@ -146,7 +146,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
     private static class WitherSkeletonLogic extends SpawnSnowballLogic {
 
         public WitherSkeletonLogic() {
-            super(EntityType.SKELETON, EntityType.WITHER, 8);
+            super(EntityType.SKELETON, EntityType.WITHER, 15);
         }
 
         @Override
