@@ -26,21 +26,15 @@ public final class SnowballInfo {
      * this differently.
      */
     public final double power;
-    /**
-     * This is the slot number in the shooter's inventory that the snowball was
-     * fired from.
-     */
-    public final int launchSlotNumber;
 
-    public SnowballInfo(SnowballMadness plugin, int launchSlotNumber) {
-        this(plugin, 1.0, 1.0, launchSlotNumber);
+    public SnowballInfo(SnowballMadness plugin) {
+        this(plugin, 1.0, 1.0);
     }
 
-    public SnowballInfo(SnowballMadness plugin, double speed, double power, int launchSlotNumber) {
+    public SnowballInfo(SnowballMadness plugin, double speed, double power) {
         this.plugin = Preconditions.checkNotNull(plugin);
         this.speed = speed;
         this.power = power;
-        this.launchSlotNumber = launchSlotNumber;
     }
 
     /**
@@ -50,7 +44,7 @@ public final class SnowballInfo {
      * @return A new info object.
      */
     public SnowballInfo speeded(double factor) {
-        return new SnowballInfo(plugin, speed * factor, power, launchSlotNumber);
+        return new SnowballInfo(plugin, speed * factor, power);
     }
 
     /**
@@ -60,6 +54,6 @@ public final class SnowballInfo {
      * @return A new info object.
      */
     public SnowballInfo powered(double factor) {
-        return new SnowballInfo(plugin, speed, power * factor, launchSlotNumber);
+        return new SnowballInfo(plugin, speed, power * factor);
     }
 }
