@@ -30,7 +30,7 @@ public class ArrowSnowballLogic extends SnowballLogic {
         // side. If that happens, the client sees the arrow drop to
         // the ground.
 
-        location.add(velocity);
+        location.add(velocity.normalize());
 
         float speed = (float) (info.speed);
 
