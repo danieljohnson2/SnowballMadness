@@ -209,21 +209,21 @@ public abstract class SnowballLogic {
                     case 8226: //swiftness II gives you lightning, hollow
                         return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
                     case 8227: //fire resist II gives you lava, you'll need to resist
-                        return new SphereSnowballLogic(Material.STATIONARY_LAVA, Material.STATIONARY_LAVA);
+                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
                     case 8228://poison II gives you feeeshapocalypse under glass!!
                         return new SphereSnowballLogic(Material.GLASS, Material.MONSTER_EGG);
                     case 8229: //instant health II gives you a brick house to hide in
                         return new SphereSnowballLogic(Material.BRICK, Material.AIR);
                     case 8230: //night vision II gives you a obsidian meteor of ultimate dark
-                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.OBSIDIAN);
+                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
                     case 8232: //weakness II gives you a diamond meteor, ahahaha mine all mine!
                         return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
                     case 8233: //strength II gives you a smoothbrick fort armored with obsidian
-                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
+                        return new BoxSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
                     case 8234: //slowness II entirely encases you in webbing!
                         return new SphereSnowballLogic(Material.WEB, Material.WEB);
                     case 8236: //harming II tries to encase you in bedrock!
-                        return new SphereSnowballLogic(Material.BEDROCK, Material.BEDROCK);
+                        return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
                     case 8238: //invisibility II is a wood sphere filled with books to hide yourself in
                         return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
                     default:
