@@ -145,7 +145,7 @@ public abstract class SnowballLogic {
             case GOLD_SWORD:
             case DIAMOND_SWORD:
                 return new SwordSnowballLogic(slice);
-                
+
             case WOOD_PICKAXE:
             case STONE_PICKAXE:
             case IRON_PICKAXE:
@@ -171,8 +171,64 @@ public abstract class SnowballLogic {
             //all structures that can be broken with any pick, but can be
             //large with use of glowstone. Provides a defensive game
 
+            case GLASS:
+                return new BoxSnowballLogic(Material.GLASS, Material.AIR);
+
             case GLASS_BOTTLE:
-                return new BoxSnowballLogic(Material.GLASS);
+                return new SphereSnowballLogic(Material.GLASS, Material.AIR);
+
+            case POTION:
+                short potionID = hint.getDurability();
+                switch (potionID) {
+                    case 0: //water bottle gives you water sphere
+                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
+                    case 8193: //regen gives you a glass sphere to hide in
+                        return new SphereSnowballLogic(Material.GLASS, Material.AIR);
+                    case 8194: //swiftness gives you lightning
+                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
+                    case 8195: //fire resist gives you lava, you'll need to resist
+                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
+                    case 8196://poison gives you feeeshapocalypse!
+                        return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+                    case 8197: //instant health gives you a dirt meteor, why not
+                        return new SphereSnowballLogic(Material.GRASS, Material.DIRT);
+                    case 8198: //night vision gives you a black meteor of ultimate dark
+                        return new SphereSnowballLogic(Material.COAL_BLOCK, Material.COAL_ORE);
+                    case 8200: //weakness gives you a gold meteor. Have fun defending that, Midas!
+                        return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
+                    case 8201: //strength gives you glowstone, with which you can make attacks stronger
+                        return new SphereSnowballLogic(Material.GLASS, Material.GLOWSTONE);
+                    case 8202: //slowness makes a web border
+                        return new SphereSnowballLogic(Material.WEB, Material.AIR);
+                    case 8204: //harming tries to imprison you in bedrock!
+                        return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
+                    case 8206: //invisibility is a glass sphere (not really invisible)
+                        return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
+                    case 8225: //regen II gives you a lit-up sphere to hide in
+                        return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
+                    case 8226: //swiftness II gives you lightning, hollow
+                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
+                    case 8227: //fire resist II gives you lava, you'll need to resist
+                        return new SphereSnowballLogic(Material.STATIONARY_LAVA, Material.STATIONARY_LAVA);
+                    case 8228://poison II gives you feeeshapocalypse under glass!!
+                        return new SphereSnowballLogic(Material.GLASS, Material.MONSTER_EGG);
+                    case 8229: //instant health II gives you a brick house to hide in
+                        return new SphereSnowballLogic(Material.BRICK, Material.AIR);
+                    case 8230: //night vision II gives you a obsidian meteor of ultimate dark
+                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.OBSIDIAN);
+                    case 8232: //weakness II gives you a diamond meteor, ahahaha mine all mine!
+                        return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
+                    case 8233: //strength II gives you a smoothbrick fort armored with obsidian
+                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
+                    case 8234: //slowness II entirely encases you in webbing!
+                        return new SphereSnowballLogic(Material.WEB, Material.WEB);
+                    case 8236: //harming II tries to encase you in bedrock!
+                        return new SphereSnowballLogic(Material.BEDROCK, Material.BEDROCK);
+                    case 8238: //invisibility II is a wood sphere filled with books to hide yourself in
+                        return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
+                    default:
+                }
+
 
             case BUCKET:
                 return new BoxSnowballLogic(Material.AIR);
@@ -218,11 +274,11 @@ public abstract class SnowballLogic {
 
             case CAKE:
                 return new SpeededSnowballLogic(3, slice.skip(1));
-                //the cake is a... lazor!
+            //the cake is a... lazor!
 
             case BEACON:
                 return new SpeededSnowballLogic(4, slice.skip(1));
-                //the beacon is the REAL lazor.
+            //the beacon is the REAL lazor.
 
             case GLOWSTONE_DUST:
                 return new PoweredSnowballLogic(1.5, slice.skip(1));
@@ -232,8 +288,8 @@ public abstract class SnowballLogic {
 
             case NETHER_STAR:
                 return new PoweredSnowballLogic(4, slice.skip(1));
-                //nuclear option. Beacon/netherstar designed to be insane
-                //overkill but not that cost-effective, plus more unwieldy.
+            //nuclear option. Beacon/netherstar designed to be insane
+            //overkill but not that cost-effective, plus more unwieldy.
 
             case SNOW_BALL:
                 return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
