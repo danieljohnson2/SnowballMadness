@@ -176,6 +176,8 @@ public abstract class SnowballLogic {
 
             case GLASS_BOTTLE:
                 return new SphereSnowballLogic(Material.GLASS, Material.AIR);
+                //these two enable a sort of minigame: try not to get encased in glass
+                //against other players who are trying to encase you
 
             case POTION:
                 short potionID = hint.getDurability();
@@ -314,7 +316,11 @@ public abstract class SnowballLogic {
                 return new SpawnSnowballLogic(EntityType.WITCH, EntityType.ENDER_CRYSTAL, 8.0);
 
             case GOLD_NUGGET:
-                return new ItemDropSnowballLogic(Material.PORK, 1);
+            case LEATHER:
+            case IRON_INGOT:
+                return new ItemDropSnowballLogic(hint.getType());
+                //developing ItemDropSnowball to be a randomizer, it won't be
+                //heavily used so it can be full of special cases
 
             case GOLD_INGOT:
                 return new SpawnSnowballLogic(EntityType.PIG);
