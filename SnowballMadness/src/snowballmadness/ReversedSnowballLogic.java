@@ -11,18 +11,25 @@ import org.bukkit.util.*;
  */
 public class ReversedSnowballLogic extends SnowballLogic {
 
+    private final double extraSpeed;
+
+    public ReversedSnowballLogic(double extraSpeed) {
+        this.extraSpeed = extraSpeed;
+    }
+
     @Override
     public void launch(Snowball snowball, SnowballInfo info) {
         super.launch(snowball, info);
 
         LivingEntity shooter = snowball.getShooter();
-        
+
         Location snowballLoc = snowball.getLocation().clone();
         snowballLoc.setY(snowballLoc.getY() - 1);
         snowballLoc.setDirection(shooter.getLocation().getDirection());
 
         Vector velocity = snowball.getVelocity().clone();
         velocity = velocity.multiply(info.speed);
+        velocity = velocity.multiply(extraSpeed);
 
         if (snowballLoc.distance(shooter.getLocation()) < 2) {
             shooter.teleport(snowballLoc);

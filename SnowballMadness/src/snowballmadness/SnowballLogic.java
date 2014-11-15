@@ -186,27 +186,31 @@ public abstract class SnowballLogic {
                         return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
                         
                    case 16: //awkward potion made with netherwart gives you TNT
-                        return new BoxSnowballLogic(Material.TNT, Material.AIR);
+                        return new SphereSnowballLogic(Material.TNT, Material.AIR);
                         
                    case 32: //thick potion made with glowstone dust gives you glowstone (potency)
                         return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
                         
                    case 64: //mundane potion (extended) made with redstone gives you redstone (duration)
                         return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
+                       //these are the only ways to get glowstone, redstone or TNT
+                       //tnt is a gag. awk—warrrd! If you have the Nether you should be able
+                       //to get that much gunpowder anyway. Hollow to minimize the amount.
                         
-                    case 8193: //regen 0:45 gives you a glass sphere to hide in
-                        return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-                    case 8257: //regen 2:00 gives you a glass sphere to hide in
-                        return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-                    case 8225: //regen II gives you a glass box to hide in
-                        return new BoxSnowballLogic(Material.GLASS, Material.AIR);
+                    case 8193: //regen 0:45 requires ghast tear, rare
+                        return new RegenerationSnowballLogic(slice);
+                    case 8257: //regen 2:00 
+                        return new RegenerationSnowballLogic(slice);
+                    case 8225: //regen II 
+                        return new RegenerationSnowballLogic(slice);
+                        //Regenerate chunks. Perhaps without stripping inventories?
 
-                    case 8194: //swiftness 3:00 (sugar)
-                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
+                    case 8194: //swiftness 3:00 (sugar) like spider eye, but more so
+                        return new ReversedSnowballLogic(3);
                     case 8258: //swiftness 8:00 (sugar, redstone)
-                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
-                    case 8226: //swiftness II (sugar, glowstone)
-                        return new BoxSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
+                        return new ReversedSnowballLogic(4);
+                    case 8226: //swiftness II (sugar, glowstone) absurd speeds
+                        return new ReversedSnowballLogic(12);
 
                     case 8195: //fire resist 3:00 (magma cream) gives you a lava sphere
                         return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
@@ -241,21 +245,26 @@ public abstract class SnowballLogic {
                         return new BoxSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
                     case 8228://poison II (+glowstone) gives you feeeshapocalypse under glass!!
                         return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+                        //with this one, it would be great to also spawn a silverfish and throw splash poison
+                        //alternately, we can do a 'turn your blocks to feesh' effect
 
                     case 8200: //weakness 1:30 (strength/regen+fermented spider eye)
                         return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
                     case 8264: //weakness 4:00 (those extended w. redstone + fermented spider eye)
                         return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
+                        //would be good as just the splash potions
 
                     case 8202: //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web border
                         return new SphereSnowballLogic(Material.WEB, Material.AIR);
                     case 8266: //slowness 4:00 makes a web border (spam to encase)
                         return new BoxSnowballLogic(Material.WEB, Material.AIR);
+                        //webs are good effects
 
                     case 8204: //harming tries to imprison you in bedrock!
                         return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
                     case 8236: //harming II tries to embox you in bedrock!
                         return new BoxSnowballLogic(Material.BEDROCK, Material.AIR);
+                        //alternately
                     default:
                 }
 
@@ -288,7 +297,7 @@ public abstract class SnowballLogic {
                 return new FlintAndSteelSnowballLogic(Material.FIRE);
 
             case SPIDER_EYE:
-                return new ReversedSnowballLogic();
+                return new ReversedSnowballLogic(1);
 
             case FERMENTED_SPIDER_EYE:
                 return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
