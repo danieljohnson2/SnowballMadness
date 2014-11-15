@@ -182,7 +182,7 @@ public abstract class SnowballLogic {
             case POTION:
                 short potionID = hint.getDurability();
                 switch (potionID) {
-                    case 0: //water bottle gives you water sphere
+                    case 0: //water bottle gives you water sphere.
                         return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
                         
                    case 16: //awkward potion made with netherwart gives you TNT
