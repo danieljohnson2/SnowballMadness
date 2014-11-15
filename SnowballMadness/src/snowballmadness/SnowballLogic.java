@@ -176,58 +176,86 @@ public abstract class SnowballLogic {
 
             case GLASS_BOTTLE:
                 return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-                //these two enable a sort of minigame: try not to get encased in glass
-                //against other players who are trying to encase you
+            //these two enable a sort of minigame: try not to get encased in glass
+            //against other players who are trying to encase you
 
             case POTION:
                 short potionID = hint.getDurability();
                 switch (potionID) {
                     case 0: //water bottle gives you water sphere
                         return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
-                    case 8193: //regen gives you a glass sphere to hide in
+                        
+                   case 16: //awkward potion made with netherwart gives you TNT
+                        return new BoxSnowballLogic(Material.TNT, Material.AIR);
+                        
+                   case 32: //thick potion made with glowstone dust gives you glowstone (potency)
+                        return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
+                        
+                   case 64: //mundane potion (extended) made with redstone gives you redstone (duration)
+                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
+                        
+                    case 8193: //regen 0:45 gives you a glass sphere to hide in
                         return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-                    case 8194: //swiftness gives you lightning
+                    case 8257: //regen 2:00 gives you a glass sphere to hide in
+                        return new SphereSnowballLogic(Material.GLASS, Material.AIR);
+                    case 8225: //regen II gives you a glass box to hide in
+                        return new BoxSnowballLogic(Material.GLASS, Material.AIR);
+
+                    case 8194: //swiftness 3:00 (sugar)
                         return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
-                    case 8195: //fire resist gives you lava, you'll need to resist
+                    case 8258: //swiftness 8:00 (sugar, redstone)
+                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
+                    case 8226: //swiftness II (sugar, glowstone)
+                        return new BoxSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
+
+                    case 8195: //fire resist 3:00 (magma cream) gives you a lava sphere
                         return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
-                    case 8196://poison gives you feeeshapocalypse!
+                    case 8259: //fire resist 8:00 (magma cream, redstone) gives you a lava box
+                        return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
+
+                    case 8197: //instant health gives you a fish bowl to relax you
+                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
+                    case 8229: //instant health II gives you a fish tank to relax you
+                        return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
+
+                    case 8198: //night vision 3:00 (golden carrot) gives you a obsidian sphere
+                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
+                    case 8262: //night vision 8:00 (golden carrot, redstone) gives you a obsidian box
+                        return new BoxSnowballLogic(Material.OBSIDIAN, Material.AIR);
+
+                    case 8201: //strength 3:00 (blaze powder) gives you a stone fort to carve up
+                        return new SphereSnowballLogic(Material.SMOOTH_BRICK, Material.SMOOTH_BRICK);
+                    case 8265: //strength 8:00 (blaze powder, redstone) gives you armored box
+                        return new BoxSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
+                    case 8233: //strength II (blaze powder, glowstone) gives you the death star!
+                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
+
+                    case 8206: //invisibility 3:00 (night vision + spider eye) is a crystal ball
+                        return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
+                    case 8270: //invisibility 8:00 (that plus redstone) is a wood sphere filled with books
+                        return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
+
+                    case 8196://poison 0:45 (spider eye) gives you feeeshapocalypse!
                         return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
-                    case 8197: //instant health gives you a dirt meteor, why not
-                        return new SphereSnowballLogic(Material.GRASS, Material.DIRT);
-                    case 8198: //night vision gives you a black meteor of ultimate dark
-                        return new SphereSnowballLogic(Material.COAL_BLOCK, Material.COAL_ORE);
-                    case 8200: //weakness gives you a gold meteor. Have fun defending that, Midas!
+                    case 8260://poison 2:00 (+redstone) gives you square feeeshapocalypse!
+                        return new BoxSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+                    case 8228://poison II (+glowstone) gives you feeeshapocalypse under glass!!
+                        return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+
+                    case 8200: //weakness 1:30 (strength/regen+fermented spider eye)
                         return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
-                    case 8201: //strength gives you glowstone, with which you can make attacks stronger
-                        return new SphereSnowballLogic(Material.GLASS, Material.GLOWSTONE);
-                    case 8202: //slowness makes a web border
+                    case 8264: //weakness 4:00 (those extended w. redstone + fermented spider eye)
+                        return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
+
+                    case 8202: //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web border
                         return new SphereSnowballLogic(Material.WEB, Material.AIR);
+                    case 8266: //slowness 4:00 makes a web border (spam to encase)
+                        return new BoxSnowballLogic(Material.WEB, Material.AIR);
+
                     case 8204: //harming tries to imprison you in bedrock!
                         return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
-                    case 8206: //invisibility is a glass sphere (not really invisible)
-                        return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
-                    case 8225: //regen II gives you a lit-up sphere to hide in
-                        return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
-                    case 8226: //swiftness II gives you lightning, hollow
-                        return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
-                    case 8227: //fire resist II gives you lava, you'll need to resist
-                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
-                    case 8228://poison II gives you feeeshapocalypse under glass!!
-                        return new SphereSnowballLogic(Material.GLASS, Material.MONSTER_EGG);
-                    case 8229: //instant health II gives you a brick house to hide in
-                        return new SphereSnowballLogic(Material.BRICK, Material.AIR);
-                    case 8230: //night vision II gives you a obsidian meteor of ultimate dark
-                        return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
-                    case 8232: //weakness II gives you a diamond meteor, ahahaha mine all mine!
-                        return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
-                    case 8233: //strength II gives you a smoothbrick fort armored with obsidian
-                        return new BoxSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
-                    case 8234: //slowness II entirely encases you in webbing!
-                        return new SphereSnowballLogic(Material.WEB, Material.WEB);
-                    case 8236: //harming II tries to encase you in bedrock!
-                        return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
-                    case 8238: //invisibility II is a wood sphere filled with books to hide yourself in
-                        return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
+                    case 8236: //harming II tries to embox you in bedrock!
+                        return new BoxSnowballLogic(Material.BEDROCK, Material.AIR);
                     default:
                 }
 
@@ -319,8 +347,8 @@ public abstract class SnowballLogic {
             case LEATHER:
             case IRON_INGOT:
                 return new ItemDropSnowballLogic(hint.getType());
-                //developing ItemDropSnowball to be a randomizer, it won't be
-                //heavily used so it can be full of special cases
+            //developing ItemDropSnowball to be a randomizer, it won't be
+            //heavily used so it can be full of special cases
 
             case GOLD_INGOT:
                 return new SpawnSnowballLogic(EntityType.PIG);
