@@ -366,7 +366,7 @@ public abstract class SnowballLogic {
     }
 
     private static SnowballLogic createPotionLogic(PotionEffectType effectType, int tier, int durationTicks, InventorySlice slice) {
-        final int ticksPerSec = 20;
+        final int ticksPerSec = 1200; // I don't know why, but it is
 
         if (effectType.equals(PotionEffectType.REGENERATION)) {
             //regen 0:45 requires ghast tear, rare
