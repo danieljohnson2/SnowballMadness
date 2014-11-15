@@ -322,9 +322,9 @@ public abstract class SnowballLogic {
 
             switch (damage) {
                 case 8261:
-                    return createPotionLogic(PotionEffectType.HEAL, 0, 0);
+                    return createPotionLogic(PotionEffectType.HEAL, 0, 0, slice);
                 case 8268:
-                    return createPotionLogic(PotionEffectType.HARM, 0, 0);
+                    return createPotionLogic(PotionEffectType.HARM, 0, 0, slice);
                 default:
                     System.out.println("Failed potion id: " + damage);
                     return null;
@@ -333,104 +333,137 @@ public abstract class SnowballLogic {
 
         Collection<PotionEffect> effects = potion.getEffects();
         if (effects.isEmpty()) {
-            // this is the empty bottle case
-            return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
+
+            int damage = itemStack.getDurability();
+
+            switch (damage) {
+                case 0: //water bottle gives you water sphere.
+                    return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
+
+                case 16: //awkward potion made with netherwart gives you TNT
+                    return new SphereSnowballLogic(Material.TNT, Material.AIR);
+
+                case 32: //thick potion made with glowstone dust gives you glowstone (potency)
+                    return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
+
+                case 64: //mundane potion (extended) made with redstone gives you redstone (duration)
+                    return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
+                //these are the only ways to get glowstone, redstone or TNT
+                //tnt is a gag. awk—warrrd! If you have the Nether you should be able
+                //to get that much gunpowder anyway. Hollow to minimize the amount.
+
+                default:
+                    return null;
+            }
         }
 
         PotionEffect effect = effects.iterator().next();
-        return createPotionLogic(effect.getType(), effect.getAmplifier(), effect.getDuration());
+        return createPotionLogic(
+                effect.getType(),
+                effect.getAmplifier(),
+                effect.getDuration(),
+                slice);
     }
 
-    private static SnowballLogic createPotionLogic(PotionEffectType effectType, int tier, int durationTicks) {
+    private static SnowballLogic createPotionLogic(PotionEffectType effectType, int tier, int durationTicks, InventorySlice slice) {
         final int ticksPerSec = 20;
 
         if (effectType.equals(PotionEffectType.REGENERATION)) {
-            if (tier == 0) {
-                // regen gives you a glass house to regneerate in
-                return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-            } else {
-                // regen gives you a better lit house to regneerate in
-                return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
-            }
+            //regen 0:45 requires ghast tear, rare
+            return new RegenerationSnowballLogic(slice);
         } else if (effectType.equals(PotionEffectType.SPEED)) {
-            if (tier == 0) {
-                //swiftness gives you lightning
-                return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.REDSTONE_ORE);
+            if (tier == 1) {
+                //swiftness II (sugar, glowstone) absurd speeds
+                return new ReversedSnowballLogic(12);
+            } else if (durationTicks < 5 * ticksPerSec) {
+                //swiftness 3:00 (sugar) like spider eye, but more so
+                return new ReversedSnowballLogic(3);
             } else {
-                //swiftness II gives you lightning, hollow
-                return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
+                //swiftness 8:00 (sugar, redstone)
+                return new ReversedSnowballLogic(4);
             }
         } else if (effectType.equals(PotionEffectType.FIRE_RESISTANCE)) {
-            if (tier == 0) {
-                //fire resist gives you lava, you'll need to resist
+            if (durationTicks < 5 * ticksPerSec) {
+                //fire resist 3:00 (magma cream) gives you a lava sphere
                 return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
             } else {
-                //fire resist II gives you lava, you'll need to resist
-                return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
+                //fire resist 8:00 (magma cream, redstone) gives you a lava box
+                return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
             }
         } else if (effectType.equals(PotionEffectType.POISON)) {
             // NOTE: doesn't work, fish are not blocks.
-            if (tier == 0) {
+            if (tier == 1) {
+                //poison II (+glowstone) gives you feeeshapocalypse under glass!!
+                return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+            } else if (durationTicks < 1 * ticksPerSec) {
                 //poison gives you feeeshapocalypse!
                 return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
             } else {
-                //poison II gives you feeeshapocalypse under glass!!
-                return new SphereSnowballLogic(Material.GLASS, Material.MONSTER_EGG);
+                //poison 2:00 (+redstone) gives you square feeeshapocalypse!
+                return new BoxSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
             }
+
+            //with this one, it would be great to also spawn a silverfish and throw splash poison
+            //alternately, we can do a 'turn your blocks to feesh' effect
         } else if (effectType.equals(PotionEffectType.HEAL)) {
             if (tier == 0) {
-                //instant health gives you a dirt meteor, why not
-                return new SphereSnowballLogic(Material.GRASS, Material.DIRT);
+                //instant health gives you a fish bowl to relax you
+                return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
             } else {
-                //instant health II gives you a brick house to hide in
-                return new SphereSnowballLogic(Material.BRICK, Material.AIR);
+                //instant health II gives you a fish tank to relax you
+                return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
             }
         } else if (effectType.equals(PotionEffectType.NIGHT_VISION)) {
             if (durationTicks < 5 * ticksPerSec) {
-                //night vision gives you a black meteor of ultimate dark
-                return new SphereSnowballLogic(Material.COAL_BLOCK, Material.COAL_ORE);
-            } else {
-                //night vision II gives you a obsidian meteor of ultimate dark
+                //night vision 3:00 (golden carrot) gives you a obsidian sphere
                 return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
+            } else {
+                //night vision 8:00 (golden carrot, redstone) gives you a obsidian box
+                return new BoxSnowballLogic(Material.OBSIDIAN, Material.AIR);
             }
         } else if (effectType.equals(PotionEffectType.WEAKNESS)) {
             if (durationTicks < 2 * ticksPerSec) {
-                //weakness gives you a gold meteor. Have fun defending that, Midas!
+                //weakness 1:30 (strength/regen+fermented spider eye)
                 return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
             } else {
-                //weakness II gives you a diamond meteor, ahahaha mine all mine!
+                //weakness 4:00 (those extended w. redstone + fermented spider eye)
                 return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
+                //would be good as just the splash potions
             }
         } else if (effectType.equals(PotionEffectType.INCREASE_DAMAGE)) {
-            if (tier == 0) {
-                //strength gives you glowstone, with which you can make attacks stronger
-                return new SphereSnowballLogic(Material.GLASS, Material.GLOWSTONE);
+            if (tier == 1) {
+                //strength II (blaze powder, glowstone) gives you the death star!
+                return new SphereSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
+            } else if (durationTicks < 5 * ticksPerSec) {
+                ///strength 3:00 (blaze powder) gives you a stone fort to carve up
+                return new SphereSnowballLogic(Material.SMOOTH_BRICK, Material.SMOOTH_BRICK);
             } else {
-                //strength II gives you a smoothbrick fort armored with obsidian
+                //strength 8:00 (blaze powder, redstone) gives you armored box
                 return new BoxSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
             }
         } else if (effectType.equals(PotionEffectType.SLOW)) {
             if (durationTicks < 2 * ticksPerSec) {
-                //slowness makes a web border
+                //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web border
                 return new SphereSnowballLogic(Material.WEB, Material.AIR);
             } else {
-                //slowness II entirely encases you in webbing!
-                return new SphereSnowballLogic(Material.WEB, Material.WEB);
+                //slowness 4:00 makes a web border (spam to encase)
+                return new BoxSnowballLogic(Material.WEB, Material.AIR);
+                //webs are good effects
             }
         } else if (effectType.equals(PotionEffectType.HARM)) {
             if (tier == 0) {
                 //harming tries to imprison you in bedrock!
                 return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
             } else {
-                //harming II tries to encase you in bedrock!
+                //harming II tries to embox you in bedrock!
                 return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
             }
         } else if (effectType.equals(PotionEffectType.INVISIBILITY)) {
             if (durationTicks < 5 * ticksPerSec) {
-                //invisibility is a glass sphere (not really invisible)
+                //invisibility 3:00 (night vision + spider eye) is a crystal ball
                 return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
             } else {
-                //invisibility II is a wood sphere filled with books to hide yourself in
+                //invisibility 8:00 (that plus redstone) is a wood sphere filled with books
                 return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
             }
         }
