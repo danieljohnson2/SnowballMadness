@@ -7,7 +7,6 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.*;
-import org.bukkit.potion.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -181,7 +180,7 @@ public abstract class SnowballLogic {
             //against other players who are trying to encase you
 
             case POTION:
-                return createPotionLogic(hint);
+               return PotionInfo.fromItemStack(hint).createPotionLogic();
 
             case BUCKET:
                 return new BoxSnowballLogic(Material.AIR);
@@ -303,215 +302,9 @@ public abstract class SnowballLogic {
         }
     }
 
-    /**
-     * This method decodes the potion data for a potion, and creates a suitable
-     * snowball logic for the potion, which should be the first item in the
-     * slice given.
-     *
-     * @param itemStack The potion item stack that's triggering this snowball
-     * logic.
-     * @return The snowball logic to use, or null for none.
-     */
-    private static SnowballLogic createPotionLogic(ItemStack itemStack) {
-        Potion potion;
-
-        try {
-            potion = Potion.fromItemStack(itemStack);
-        } catch (IllegalArgumentException e) {
-            // buggy old bukkit fails on instant health I;
-            // it's a known issue that the devs dismissed like
-            // idiots. Bug #BUKKIT-4612.
-
-            // This means we can't do intant health I without
-            // doing out own potion parsing code. I'll just
-            // hack this for now.
-
-            int damage = itemStack.getDurability();
-
-            switch (damage) {
-                case 8261:
-                    return createPotionLogic(PotionEffectType.HEAL, 0, 0);
-                case 8268:
-                    return createPotionLogic(PotionEffectType.HARM, 0, 0);
-                default:
-                    Bukkit.getLogger().warning(String.format("Unable to interpret potion data for potion ID: ", damage));
-                    return null;
-            }
-        }
-
-        Collection<PotionEffect> effects = potion.getEffects();
-
-        if (effects.isEmpty()) {
-
-            int damage = itemStack.getDurability();
-
-            switch (damage) {
-                case 0: //water bottle gives you water sphere.
-                    return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
-
-                case 16: //awkward potion made with netherwart gives you TNT
-                    return new SphereSnowballLogic(Material.TNT, Material.AIR);
-
-                case 32: //thick potion made with glowstone dust gives you glowstone (potency)
-                    return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
-
-                case 64: //mundane potion (extended) made with redstone gives you redstone (duration)
-                    return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
-                //these are the only ways to get glowstone, redstone or TNT
-                //tnt is a gag. awk—warrrd! If you have the Nether you should be able
-                //to get that much gunpowder anyway. Hollow to minimize the amount.
-
-                default:
-                    return null;
-            }
-        }
-
-        PotionEffect effect = effects.iterator().next();
-        return createPotionLogic(
-                effect.getType(),
-                effect.getAmplifier(),
-                effect.getDuration());
-    }
-
-    /**
-     * This method creates the snowball logic for a potion describes by the
-     * parameters. The slice given is used
-     *
-     * @param effectType The potion type.
-     * @param tier 0 for Tier I, 1 for Tier II
-     * @param durationTicks Duration of effect, in 1200ths of a second.
-     * @return The snowball logic created, or null if none could be found.
-     */
-    private static SnowballLogic createPotionLogic(PotionEffectType effectType, int tier, int durationTicks) {
-        final int ticksPerSec = 1200; // I don't know why, but it is
-
-        if (effectType.equals(PotionEffectType.REGENERATION)) {
-            //regen 0:45 requires ghast tear, rare
-            return new RegenerationSnowballLogic();
-        } else if (effectType.equals(PotionEffectType.SPEED)) {
-            if (tier == 1) {
-                //swiftness II (sugar, glowstone) absurd speeds
-                return new ReversedSnowballLogic(12);
-            } else if (durationTicks < 5 * ticksPerSec) {
-                //swiftness 3:00 (sugar) like spider eye, but more so
-                //WITCH FARMABLE. Spawn them 11 blocks away and they will drink these to get closer.
-                return new ReversedSnowballLogic(3);
-            } else {
-                //swiftness 8:00 (sugar, redstone)
-                return new ReversedSnowballLogic(4);
-            }
-        } else if (effectType.equals(PotionEffectType.FIRE_RESISTANCE)) {
-            if (durationTicks < 5 * ticksPerSec) {
-                //fire resist 3:00 (magma cream) gives you a tiny lava box.
-                //Will set delayed fires, glass doesn't replace leaves so they catch.
-                //WITCH FARMABLE. Spawn them in lava or over fire, they will drink these to survive.
-                return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
-            } else {
-                //fire resist 8:00 (magma cream, redstone) gives you a massive fireball!
-                //We have to manage fire entities, I think, this is another server killer
-                //but it is AWESOME. You can literally burn lakes dry with this thing.
-                return new SphereSnowballLogic(Material.FIRE, Material.FIRE);
-            }
-        } else if (effectType.equals(PotionEffectType.POISON)) {
-            // This would be a great place for a 'replace stone with monster egg' bomb.
-            // I'll see what I can do. Done properly, it will replace all 'simulatable' blocks
-            // with feesh, that being stone, smooth brick variants and I think cobblestone.
-            // Radius will expand with strength of potion, always sphere. High power equals
-            // VERY LARGE AREA turned entirely to feesh. Ideally we also spawn one and then hit
-            // the feesh in the area with poison effect, setting off the trap (for high levels)
-            // There is also an argument for leaving it untriggered. 
-            if (tier == 1) {
-                //poison II (+glowstone) gives you bigger globe feeeshapocalypse!
-                return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
-            } else if (durationTicks < 1 * ticksPerSec) {
-                //poison gives you feeeshapocalypse! Box is smaller, 3x3 for unpowered
-                return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
-            } else {
-                //poison 2:00 (+redstone) gives you bigger globe feeeshapocalypse!
-                return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
-            }
-        } else if (effectType.equals(PotionEffectType.HEAL)) {
-            if (tier == 0) {
-                //instant health gives you a tiny fish tank to relax you
-                //WITCH FARMABLE, quick spawn/kill in a one block high space will
-                //produce lots of these. You have to be quick, of course.
-                //Saves you finding watermelons and gold!
-                return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
-            } else {
-                //instant health II gives you a big fish bowl to relax you
-                return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
-            }
-        } else if (effectType.equals(PotionEffectType.NIGHT_VISION)) {
-            if (durationTicks < 5 * ticksPerSec) {
-                //night vision 3:00 (golden carrot) gives you a obsidian cube
-                return new BoxSnowballLogic(Material.OBSIDIAN, Material.OBSIDIAN);
-            } else {
-                //night vision 8:00 (golden carrot, redstone) gives you a obsidian sphere
-                return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
-            }
-        } else if (effectType.equals(PotionEffectType.WEAKNESS)) {
-            if (durationTicks < 2 * ticksPerSec) {
-                //weakness 1:30 (strength/regen+fermented spider eye) Gold ball
-                return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
-            } else {
-                //weakness 4:00 (those extended w. redstone + fermented spider eye) Diamond ball
-                return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
-            }
-        } else if (effectType.equals(PotionEffectType.INCREASE_DAMAGE)) {
-            if (tier == 1) {
-                //strength II (blaze powder, glowstone) gives you the death star!
-                return new SphereSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
-            } else if (durationTicks < 5 * ticksPerSec) {
-                ///strength 3:00 (blaze powder) gives you a stone fort to carve up
-                return new SphereSnowballLogic(Material.SMOOTH_BRICK, Material.SMOOTH_BRICK);
-            } else {
-                //strength 8:00 (blaze powder, redstone) gives you super death star!
-                return new SphereSnowballLogic(Material.BEDROCK, Material.SMOOTH_BRICK);
-            }
-        } else if (effectType.equals(PotionEffectType.SLOW)) {
-            if (durationTicks < 2 * ticksPerSec) {
-                //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web 3x3
-                return new BoxSnowballLogic(Material.WEB, Material.WEB);
-            } else {
-                //slowness 4:00 makes a web sphere, hollow (spam to encase)
-                return new SphereSnowballLogic(Material.WEB, Material.AIR);
-                //webs are good effects
-            }
-        } else if (effectType.equals(PotionEffectType.HARM)) {
-            if (tier == 0) {
-                //harming tries to imprison you in obsidian! Will not make complete sphere
-                //unless target is a block in midair. Surfaces/solids not replaced.
-                return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
-            } else {
-                //harming II tries to imprison you in bedrock! Will not make complete sphere
-                //unless target is a block in midair. Surfaces/solids not replaced.
-                return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
-            }
-        } else if (effectType.equals(PotionEffectType.WATER_BREATHING)) {
-            if (durationTicks < 5 * ticksPerSec) {
-                //water breathing 3:00 gives you a hollow sphere for now.
-                //WITCH FARMABLE potion, easily. Spawn them and kill them while drowning them.
-                return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-            } else {
-                //water breathing 8:00 gives you a hollow sphere for now, will be different
-                return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-            }
-        } else if (effectType.equals(PotionEffectType.INVISIBILITY)) {
-            if (durationTicks < 5 * ticksPerSec) {
-                //invisibility 3:00 (night vision + spider eye) is a crystal ball
-                return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
-            } else {
-                //invisibility 8:00 (that plus redstone) is a wood sphere filled with books
-                return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
-            }
-        }
-
-        return null;
-    }
     ////////////////////////////////////////////////////////////////
     // Event Handling
     //
-
     /**
      * This method processes a new snowball, executing its launch() method and
      * also recording it so the hit() method can be called later.
