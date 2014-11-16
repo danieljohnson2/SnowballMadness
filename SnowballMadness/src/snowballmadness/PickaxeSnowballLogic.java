@@ -115,13 +115,12 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                 || (material == Material.BEDROCK && (tool > 63)) //double nether star diamond removes ALL!
                 //this leaves a void floor beneath. OP tools are dangerous! you best be standing on some kind of ore!
 
-                || (material == Material.DIAMOND_ORE && ((tool < 2)||(tool > 15)))
-                || (material == Material.LAPIS_ORE && ((tool < 2)||(tool > 15)))
-                || (material == Material.GOLD_ORE && ((tool < 2)||(tool > 15)))
-                || (material == Material.REDSTONE_ORE && ((tool < 2)||(tool > 15)))
-                || (material == Material.EMERALD_ORE && ((tool < 2)||(tool > 15)));
-        //worse than plain iron and you lose valuables!
-        //also, anything over glowstone block no longer leaves ore in midair.
+                || (material == Material.DIAMOND_ORE && (tool > 15))
+                || (material == Material.LAPIS_ORE && (tool > 15))
+                || (material == Material.GOLD_ORE && (tool > 15))
+                || (material == Material.REDSTONE_ORE && (tool > 15))
+                || (material == Material.EMERALD_ORE && (tool > 15));
+        //anything over glowstone block no longer leaves ore in midair.
         //You wouldn't be able to reach it anyway.
         //this power becomes a cave-maker.
     }
