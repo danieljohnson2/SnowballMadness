@@ -3,6 +3,7 @@ package snowballmadness;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * This logic makes a box out of the material you give it, varying the
@@ -15,16 +16,22 @@ public class SphereSnowballLogic extends SnowballLogic {
 
     private final Material wallMaterial;
     private final Material fillMaterial;
+    private final ItemStack dropStack;
 
     public SphereSnowballLogic(Material wallMaterial) {
-        this(wallMaterial, Material.AIR);
+        this(wallMaterial, Material.AIR, null);
     }
 
     public SphereSnowballLogic(Material wallMaterial, Material fillMaterial) {
+        this(wallMaterial, fillMaterial, null);
+    }
+
+    public SphereSnowballLogic(Material wallMaterial, Material fillMaterial, ItemStack dropStack) {
         // we allow nulls here, with the meaning 'don't touch the blocks at
         // all'.
         this.wallMaterial = wallMaterial;
         this.fillMaterial = fillMaterial;
+        this.dropStack = dropStack;
     }
 
     @Override
@@ -34,11 +41,10 @@ public class SphereSnowballLogic extends SnowballLogic {
         final double totalEffectiveness = baseTool * info.power;
         final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
-         final int diameter = (int) (radius * 2);
-    
+        final int diameter = (int) (radius * 2);
+
         World world = snowball.getWorld();
         Location snowballLoc = snowball.getLocation().clone();
-        Material replacement;
 
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
@@ -58,17 +64,17 @@ public class SphereSnowballLogic extends SnowballLogic {
         for (int x = beginX; x <= endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
                 for (int y = beginY; y <= endY; ++y) {
-                    replacement = fillMaterial;
+                    Material replacement = fillMaterial;
                     locationBuffer.setX(x);
                     locationBuffer.setY(y);
                     locationBuffer.setZ(z);
-                    if (snowballLoc.distanceSquared(locationBuffer) > ((distanceSquaredLimit * 0.9)-9.0)) {
+                    if (snowballLoc.distanceSquared(locationBuffer) > ((distanceSquaredLimit * 0.9) - 9.0)) {
                         replacement = wallMaterial;
                     }
                     if (snowballLoc.distanceSquared(locationBuffer) <= distanceSquaredLimit) {
                         Block target = world.getBlockAt(x, y, z);
                         if (canReplace(target)) {
-                            target.setType(replacement);
+                            replace(target, replacement);
                         }
                     }
                 }
@@ -96,5 +102,22 @@ public class SphereSnowballLogic extends SnowballLogic {
                 || material == Material.YELLOW_FLOWER;
         //including some of the ground cover blocks as they seem like
         //glitches when they block wall placement
+    }
+
+    /**
+     * This method actually performs replacement. If there is a drop stack, this
+     * will also drop that stack in each non-solid block.
+     *
+     * @param target The block to replace.
+     * @param replacement The material to place.
+     */
+    protected void replace(Block target, Material replacement) {
+        if (replacement != null) {
+            target.setType(replacement);
+        }
+
+        if (dropStack != null && !target.getType().isSolid()) {
+            target.getWorld().dropItem(target.getLocation(), dropStack.clone());
+        }
     }
 }

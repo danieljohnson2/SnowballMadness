@@ -213,17 +213,20 @@ public final class PotionInfo {
                 // VERY LARGE AREA turned entirely to feesh. Ideally we also spawn one and then hit
                 // the feesh in the area with poison effect, setting off the trap (for high levels)
                 // There is also an argument for leaving it untriggered. 
-
+                
                 switch (info.getAwesomeness()) {
                     case 0:
-                        //poison gives you feeeshapocalypse! Box is smaller, 3x3 for unpowered
-                        return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+                        //poison gives you feeeshapocalypse! Not a proper fishbowl though
+                        return new SphereSnowballLogic(Material.GLASS, Material.AIR,
+                                new ItemStack(Material.RAW_FISH, 1));
                     case 1:
-                        //poison 2:00 (+redstone) gives you bigger globe feeeshapocalypse!
-                        return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+                        //poison 2:00 (+redstone) gives a proper feeeshbowl!
+                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER,
+                                new ItemStack(Material.RAW_FISH, 1));
                     default:
-                        //poison II (+glowstone) gives you bigger globe feeeshapocalypse!
-                        return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
+                        //poison II (+glowstone) gives you lunch. 
+                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA,
+                                new ItemStack(Material.COOKED_FISH, 1));
                 }
             }
         },
