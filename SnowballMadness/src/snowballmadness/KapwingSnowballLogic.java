@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package snowballmadness;
 
 import com.google.common.base.Preconditions;
@@ -10,6 +6,11 @@ import org.bukkit.entity.*;
 import org.bukkit.util.*;
 
 /**
+ * This logic provides a bouncing snowball; it can be used to 'skip' snowballs
+ * long distances, or just to bounce in place for a long time. The snowball gets
+ * as many bounces as there quartz block triggering this logic.
+ *
+ * NOTE: If I remember my Klingon, this should be spelled "Qapwing".
  *
  * @author christopherjohnson
  */
