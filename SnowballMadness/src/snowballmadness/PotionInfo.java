@@ -5,6 +5,7 @@
 package snowballmadness;
 
 import com.google.common.base.*;
+import com.google.common.collect.ImmutableMap;
 import org.bukkit.*;
 import org.bukkit.inventory.*;
 
@@ -75,22 +76,15 @@ public final class PotionInfo {
      * @return The potion info describing the potion.
      */
     public static PotionInfo fromID(int potionID) {
-        int effectID = potionID & 0x000F;
         boolean isTierII = (potionID & 0x0020) != 0;
         boolean hasExtendedDuration = (potionID & 0x0040) != 0;
         boolean isSplash = (potionID & 0x4000) != 0;
 
-        Effect effect = Effect.values()[effectID];
+        Effect effect = Effect.fromPotionID(potionID);
         Tier tier = isTierII ? Tier.II : Tier.I;
-
-        Alias alias = Alias.NONE;
-
-        for (Alias a : Alias.values()) {
-            if (a.matchesPotionID(potionID)) {
-                alias = a;
-                break;
-            }
-        }
+        Alias alias = effect == Effect.NONE
+                ? Alias.fromPotionID(potionID)
+                : Alias.NONE;
 
         return new PotionInfo(effect, tier, alias, hasExtendedDuration, isSplash);
     }
@@ -117,21 +111,52 @@ public final class PotionInfo {
     }
 
     /**
+     * This method is a shortcut to check if the potion has any awesomeness; a
+     * lame potion has none, so it is neither extended nor Tier-II.
+     *
+     * @return True if the potion is lame.
+     */
+    public boolean isLame() {
+        return getAwesomeness() == 0;
+    }
+
+    /**
      * This method creates the snowball logic for a potion described by this
      * info object.
      *
      * @return The snowball logic created, or null if none could be found.
      */
     public SnowballLogic createPotionLogic() {
-        switch (effect) {
-            case NONE:
-                return alias.createWaterBottleLogic();
+        return effect.createLogic(this);
+    }
 
-            case REGENERATION:
+    /**
+     * This lists the possible effects for potions; equivalent to Bukkit's
+     * PotionEffectType, but this is a real enum so we can switch on it.
+     * However, the key logic to generate a snowball is provided as a method
+     * that we override in each case.
+     */
+    public enum Effect {
+
+        NONE(0) {
+            // we use this when the ID is not known, which makes stuff
+            // like clear and sparking potions map to NONE.
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                return info.alias.createWaterBottleLogic();
+            }
+        },
+        REGENERATION(1) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
                 //regen 0:45 requires ghast tear, rare
                 return new RegenerationSnowballLogic();
-            case SWIFTNESS:
-                switch (getAwesomeness()) {
+            }
+        },
+        SWIFTNESS(2) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                switch (info.getAwesomeness()) {
                     case 0:
                         //swiftness 3:00 (sugar) like spider eye, but more so
                         //WITCH FARMABLE. Spawn them 11 blocks away and they will drink these to get closer.
@@ -141,13 +166,16 @@ public final class PotionInfo {
                         //swiftness 8:00 (sugar, redstone)
                         return new ReversedSnowballLogic(4);
 
-                    case 2:
-                    case 3:
+                    default:
                         //swiftness II (sugar, glowstone) absurd speeds
                         return new ReversedSnowballLogic(12);
                 }
-            case FIRE_RESISTANCE:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        FIRE_RESISTANCE(3) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //fire resist 3:00 (magma cream) gives you a tiny lava box.
                     //Will set delayed fires, glass doesn't replace leaves so they catch.
                     //WITCH FARMABLE. Spawn them in lava or over fire, they will drink these to survive.
@@ -158,7 +186,11 @@ public final class PotionInfo {
                     //but it is AWESOME. You can literally burn lakes dry with this thing.
                     return new SphereSnowballLogic(Material.FIRE, Material.FIRE);
                 }
-            case POISON:
+            }
+        },
+        POISON(4) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
                 // This would be a great place for a 'replace stone with monster egg' bomb.
                 // I'll see what I can do. Done properly, it will replace all 'simulatable' blocks
                 // with feesh, that being stone, smooth brick variants and I think cobblestone.
@@ -167,20 +199,23 @@ public final class PotionInfo {
                 // the feesh in the area with poison effect, setting off the trap (for high levels)
                 // There is also an argument for leaving it untriggered. 
 
-                switch (getAwesomeness()) {
+                switch (info.getAwesomeness()) {
                     case 0:
                         //poison gives you feeeshapocalypse! Box is smaller, 3x3 for unpowered
                         return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
                     case 1:
                         //poison 2:00 (+redstone) gives you bigger globe feeeshapocalypse!
                         return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
-                    case 2:
-                    case 3:
+                    default:
                         //poison II (+glowstone) gives you bigger globe feeeshapocalypse!
                         return new SphereSnowballLogic(Material.MONSTER_EGG, Material.MONSTER_EGG);
                 }
-            case HEALING:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        HEALING(5) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //instant health gives you a tiny fish tank to relax you
                     //WITCH FARMABLE, quick spawn/kill in a one block high space will
                     //produce lots of these. You have to be quick, of course.
@@ -190,38 +225,53 @@ public final class PotionInfo {
                     //instant health II gives you a big fish bowl to relax you
                     return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
                 }
-            case NIGHT_VISION:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        NIGHT_VISION(6) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //night vision 3:00 (golden carrot) gives you a obsidian cube
                     return new BoxSnowballLogic(Material.OBSIDIAN, Material.OBSIDIAN);
                 } else {
                     //night vision 8:00 (golden carrot, redstone) gives you a obsidian sphere
                     return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
                 }
-            case WEAKNESS:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        // #7 - 'clear' potion series 
+        WEAKNESS(8) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //weakness 1:30 (strength/regen+fermented spider eye) Gold ball
                     return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
                 } else {
                     //weakness 4:00 (those extended w. redstone + fermented spider eye) Diamond ball
                     return new SphereSnowballLogic(Material.DIAMOND_BLOCK, Material.DIAMOND_ORE);
                 }
-            case STRENGTH:
-                switch (getAwesomeness()) {
+            }
+        },
+        STRENGTH(9) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                switch (info.getAwesomeness()) {
                     case 0:
                         ///strength 3:00 (blaze powder) gives you a stone fort to carve up
                         return new SphereSnowballLogic(Material.SMOOTH_BRICK, Material.SMOOTH_BRICK);
                     case 1:
                         //strength 8:00 (blaze powder, redstone) gives you super death star!
                         return new SphereSnowballLogic(Material.BEDROCK, Material.SMOOTH_BRICK);
-                    case 2:
-                    case 3:
+                    default:
                         //strength II (blaze powder, glowstone) gives you the death star!
                         return new SphereSnowballLogic(Material.OBSIDIAN, Material.SMOOTH_BRICK);
                 }
-
-            case SLOWNESS:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        SLOWNESS(10) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web 3x3
                     return new BoxSnowballLogic(Material.WEB, Material.WEB);
                 } else {
@@ -229,8 +279,19 @@ public final class PotionInfo {
                     return new SphereSnowballLogic(Material.WEB, Material.AIR);
                     //webs are good effects
                 }
-            case HARMING:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        LEAPING(11) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                // this is to be added in Minecraft 1.8.1; we can't use it.
+                return null;
+            }
+        },
+        HARMING(12) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //harming tries to imprison you in obsidian! Will not make complete sphere
                     //unless target is a block in midair. Surfaces/solids not replaced.
                     return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
@@ -239,8 +300,12 @@ public final class PotionInfo {
                     //unless target is a block in midair. Surfaces/solids not replaced.
                     return new SphereSnowballLogic(Material.BEDROCK, Material.AIR);
                 }
-            case WATER_BREATHING:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        WATER_BREATHING(13) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //water breathing 3:00 gives you a hollow sphere for now.
                     //WITCH FARMABLE potion, easily. Spawn them and kill them while drowning them.
                     return new SphereSnowballLogic(Material.GLASS, Material.AIR);
@@ -248,59 +313,70 @@ public final class PotionInfo {
                     //water breathing 8:00 gives you a hollow sphere for now, will be different
                     return new SphereSnowballLogic(Material.GLASS, Material.AIR);
                 }
-            case INVISIBILITY:
-                if (getAwesomeness() == 0) {
+            }
+        },
+        INVISIBILITY(14) {
+            @Override
+            public SnowballLogic createLogic(PotionInfo info) {
+                if (info.isLame()) {
                     //invisibility 3:00 (night vision + spider eye) is a crystal ball
                     return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
                 } else {
                     //invisibility 8:00 (that plus redstone) is a wood sphere filled with books
                     return new SphereSnowballLogic(Material.WOOD, Material.BOOKSHELF);
                 }
-        }
-
-        return null;
-    }
-
-    /**
-     * This lists the possible effects for potions; equivalent to Bukkit's
-     * PotionEffectType, but this is a real enum so we can switch on it.
-     */
-    public enum Effect {
-
-        NONE(0) {
-            @Override
-            public boolean matchesEffectID(int effectID) {
-                // Three effect IDs have no effect, but they have
-                // different aliases instead.
-                return effectID == 0 || effectID == 7 || effectID == 15;
             }
-        },
-        REGENERATION(1),
-        SWIFTNESS(2),
-        FIRE_RESISTANCE(3),
-        POISON(4),
-        HEALING(5),
-        NIGHT_VISION(6),
-        // #7 - 'clear' potion series 
-        WEAKNESS(8),
-        STRENGTH(9),
-        SLOWNESS(10),
-        LEAPING(11),
-        HARMING(12),
-        WATER_BREATHING(13),
-        INVISIBILITY(14);
+        };
         // #15 - 'thin' potion series 
         private final int id;
+        private static final ImmutableMap<Integer, Effect> effectsByID;
 
         Effect(int id) {
             this.id = id;
         }
 
-        public boolean matchesEffectID(int effectID) {
-            return id == effectID;
+        static {
+            ImmutableMap.Builder<Integer, Effect> b = ImmutableMap.builder();
+
+            for (Effect effect : values()) {
+                b.put(effect.id, effect);
+            }
+
+            effectsByID = b.build();
         }
+
+        /**
+         * This method obtains the effect that comes from a potion with the
+         * given ID. We just look it up from the low four bits; if the potionID
+         * has an invalid effect, this returns NONE.
+         *
+         * @param potionID The potion ID to analyze.
+         * @return The effect of the potion, or NONE if it has none.
+         */
+        public static Effect fromPotionID(int potionID) {
+            Effect effect = effectsByID.get(potionID & 0x000F);
+
+            if (effect == null) {
+                return NONE;
+            } else {
+                return effect;
+            }
+        }
+
+        /**
+         * This creates the logic appropriate for the effect; may return null to
+         * produce no special logic.
+         *
+         * @param info The info describing the potion.
+         * @return The new logic for the snowball, or null for no new logic.
+         */
+        public abstract SnowballLogic createLogic(PotionInfo info);
     }
 
+    /**
+     * Tier indicates whether this potion is 'powered up'; we use an enum to
+     * avoid confusing 0 based numbering.
+     */
     public enum Tier {
 
         I, II
@@ -315,26 +391,12 @@ public final class PotionInfo {
 
         NONE(0x00) {
             @Override
-            public boolean matchesPotionID(int potionID) {
-                // 'none' is for all-bits zero; anything else
-                // is 'mundane'.
-                return potionID == 0;
-            }
-
-            @Override
             public SnowballLogic createWaterBottleLogic() {
                 //water bottle gives you water sphere.
                 return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
             }
         },
         MUNDANE(0x00) {
-            @Override
-            public boolean matchesPotionID(int potionID) {
-                // 'mundane' is the same as 'NONE', except any bit outside
-                // the low nybble is set.
-                return super.matchesPotionID(potionID) && potionID != 0;
-            }
-
             @Override
             public SnowballLogic createWaterBottleLogic() {
                 //mundane potion (extended) made with redstone gives you redstone (duration)
@@ -366,25 +428,45 @@ public final class PotionInfo {
         SPARKLING(0x2F),
         STINKY(0x3F);
         private final int id;
+        private static final ImmutableMap<Integer, Alias> aliasesByID;
 
         Alias(int id) {
             this.id = id;
         }
 
-        public int getID() {
-            return id;
+        static {
+            ImmutableMap.Builder<Integer, Alias> b = ImmutableMap.builder();
+
+            for (Alias alias : values()) {
+                // NONE is a special case for when the whole potion ID is 0!
+
+                if (alias != NONE) {
+                    b.put(alias.id, alias);
+                }
+            }
+
+            aliasesByID = b.build();
         }
 
         /**
-         * This checks to see if the potion ID should have the alias given. This
-         * returns NONE for most potion IDs, but a specific list will be
-         * recognized.
+         * This returns the alias that applies for the potion given; potionID 0
+         * returns NONE. Any potion with a normal effect will also return NONE.
          *
          * @param potionID The potion ID to analyze.
          * @return True if this alias describes the potion.
          */
-        public boolean matchesPotionID(int potionID) {
-            return (potionID & 0xFF) == id;
+        public static Alias fromPotionID(int potionID) {
+            if (potionID == 0) {
+                return NONE;
+            }
+
+            Alias alias = aliasesByID.get(potionID & 0x3F);
+
+            if (alias == null) {
+                return NONE;
+            } else {
+                return alias;
+            }
         }
 
         /**
