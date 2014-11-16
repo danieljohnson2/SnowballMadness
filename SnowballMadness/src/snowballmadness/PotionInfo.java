@@ -111,23 +111,39 @@ public final class PotionInfo {
     }
 
     /**
-     * This method is a shortcut to check if the potion has any awesomeness; a
-     * lame potion has none, so it is neither extended nor Tier-II.
-     *
-     * @return True if the potion is lame.
-     */
-    public boolean isLame() {
-        return getAwesomeness() == 0;
-    }
-
-    /**
      * This method creates the snowball logic for a potion described by this
      * info object.
      *
      * @return The snowball logic created, or null if none could be found.
      */
     public SnowballLogic createPotionLogic() {
+        System.out.print("Firing: " + this);
         return effect.createLogic(this);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(effect);
+
+        if (effect == Effect.NONE && alias != Alias.NONE) {
+            b.append("[");
+            b.append(alias);
+            b.append("]");
+        }
+
+        b.append(" Tier ");
+        b.append(tier);
+
+        if (isSplash) {
+            b.append(" splash");
+        }
+
+        if (hasExtendedDuration) {
+            b.append(" extended");
+        }
+
+        return b.toString();
     }
 
     /**
@@ -175,7 +191,7 @@ public final class PotionInfo {
         FIRE_RESISTANCE(3) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (!info.hasExtendedDuration) {
                     //fire resist 3:00 (magma cream) gives you a tiny lava box.
                     //Will set delayed fires, glass doesn't replace leaves so they catch.
                     //WITCH FARMABLE. Spawn them in lava or over fire, they will drink these to survive.
@@ -215,7 +231,7 @@ public final class PotionInfo {
         HEALING(5) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (info.tier == Tier.I) {
                     //instant health gives you a tiny fish tank to relax you
                     //WITCH FARMABLE, quick spawn/kill in a one block high space will
                     //produce lots of these. You have to be quick, of course.
@@ -230,7 +246,7 @@ public final class PotionInfo {
         NIGHT_VISION(6) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (!info.hasExtendedDuration) {
                     //night vision 3:00 (golden carrot) gives you a obsidian cube
                     return new BoxSnowballLogic(Material.OBSIDIAN, Material.OBSIDIAN);
                 } else {
@@ -243,7 +259,7 @@ public final class PotionInfo {
         WEAKNESS(8) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (!info.hasExtendedDuration) {
                     //weakness 1:30 (strength/regen+fermented spider eye) Gold ball
                     return new SphereSnowballLogic(Material.GOLD_BLOCK, Material.GOLD_ORE);
                 } else {
@@ -271,7 +287,7 @@ public final class PotionInfo {
         SLOWNESS(10) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (!info.hasExtendedDuration) {
                     //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web 3x3
                     return new BoxSnowballLogic(Material.WEB, Material.WEB);
                 } else {
@@ -291,7 +307,7 @@ public final class PotionInfo {
         HARMING(12) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (info.tier == Tier.I) {
                     //harming tries to imprison you in obsidian! Will not make complete sphere
                     //unless target is a block in midair. Surfaces/solids not replaced.
                     return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
@@ -305,7 +321,7 @@ public final class PotionInfo {
         WATER_BREATHING(13) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (!info.hasExtendedDuration) {
                     //water breathing 3:00 gives you a hollow sphere for now.
                     //WITCH FARMABLE potion, easily. Spawn them and kill them while drowning them.
                     return new SphereSnowballLogic(Material.GLASS, Material.AIR);
@@ -318,7 +334,7 @@ public final class PotionInfo {
         INVISIBILITY(14) {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
-                if (info.isLame()) {
+                if (!info.hasExtendedDuration) {
                     //invisibility 3:00 (night vision + spider eye) is a crystal ball
                     return new SphereSnowballLogic(Material.GLASS, Material.GLASS);
                 } else {
