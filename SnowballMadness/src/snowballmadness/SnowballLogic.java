@@ -181,7 +181,7 @@ public abstract class SnowballLogic {
             //against other players who are trying to encase you
 
             case POTION:
-                return createPotionLogic(slice);
+                return createPotionLogic(hint);
 
             case BUCKET:
                 return new BoxSnowballLogic(Material.AIR);
@@ -255,7 +255,7 @@ public abstract class SnowballLogic {
 
             case GRASS:
             case DIRT:
-                return new RegenerationSnowballLogic(slice);
+                return new RegenerationSnowballLogic();
 
             case GHAST_TEAR:
                 return new SpawnSnowballLogic(EntityType.GHAST);
@@ -303,9 +303,17 @@ public abstract class SnowballLogic {
         }
     }
 
-    private static SnowballLogic createPotionLogic(InventorySlice slice) {
+    /**
+     * This method decodes the potion data for a potion, and creates a suitable
+     * snowball logic for the potion, which should be the first item in the
+     * slice given.
+     *
+     * @param itemStack The potion item stack that's triggering this snowball
+     * logic.
+     * @return The snowball logic to use, or null for none.
+     */
+    private static SnowballLogic createPotionLogic(ItemStack itemStack) {
         Potion potion;
-        ItemStack itemStack = slice.get(0);
 
         try {
             potion = Potion.fromItemStack(itemStack);
@@ -322,16 +330,17 @@ public abstract class SnowballLogic {
 
             switch (damage) {
                 case 8261:
-                    return createPotionLogic(PotionEffectType.HEAL, 0, 0, slice);
+                    return createPotionLogic(PotionEffectType.HEAL, 0, 0);
                 case 8268:
-                    return createPotionLogic(PotionEffectType.HARM, 0, 0, slice);
+                    return createPotionLogic(PotionEffectType.HARM, 0, 0);
                 default:
-                    System.out.println("Failed potion id: " + damage);
+                    Bukkit.getLogger().warning(String.format("Unable to interpret potion data for potion ID: ", damage));
                     return null;
             }
         }
 
         Collection<PotionEffect> effects = potion.getEffects();
+
         if (effects.isEmpty()) {
 
             int damage = itemStack.getDurability();
@@ -361,16 +370,24 @@ public abstract class SnowballLogic {
         return createPotionLogic(
                 effect.getType(),
                 effect.getAmplifier(),
-                effect.getDuration(),
-                slice);
+                effect.getDuration());
     }
 
-    private static SnowballLogic createPotionLogic(PotionEffectType effectType, int tier, int durationTicks, InventorySlice slice) {
+    /**
+     * This method creates the snowball logic for a potion describes by the
+     * parameters. The slice given is used
+     *
+     * @param effectType The potion type.
+     * @param tier 0 for Tier I, 1 for Tier II
+     * @param durationTicks Duration of effect, in 1200ths of a second.
+     * @return The snowball logic created, or null if none could be found.
+     */
+    private static SnowballLogic createPotionLogic(PotionEffectType effectType, int tier, int durationTicks) {
         final int ticksPerSec = 1200; // I don't know why, but it is
 
         if (effectType.equals(PotionEffectType.REGENERATION)) {
             //regen 0:45 requires ghast tear, rare
-            return new RegenerationSnowballLogic(slice);
+            return new RegenerationSnowballLogic();
         } else if (effectType.equals(PotionEffectType.SPEED)) {
             if (tier == 1) {
                 //swiftness II (sugar, glowstone) absurd speeds

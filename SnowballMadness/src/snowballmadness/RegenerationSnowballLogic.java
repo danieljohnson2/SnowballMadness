@@ -18,11 +18,6 @@ import org.bukkit.projectiles.ProjectileSource;
 public class RegenerationSnowballLogic extends SnowballLogic {
 
     private final static CooldownTimer<Long> cooldown = new CooldownTimer<Long>(1000);
-    private final InventorySlice inventory;
-
-    public RegenerationSnowballLogic(InventorySlice inventory) {
-        this.inventory = Preconditions.checkNotNull(inventory);
-    }
 
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
