@@ -117,7 +117,6 @@ public final class PotionInfo {
      * @return The snowball logic created, or null if none could be found.
      */
     public SnowballLogic createPotionLogic() {
-        System.out.print("Firing: " + this);
         return effect.createLogic(this);
     }
 
