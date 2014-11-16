@@ -40,7 +40,8 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                 baseTool = 1;
                 break;
             case WOOD_PICKAXE:
-            //nothing
+                baseTool = 1;
+                break;
         }
         final double totalEffectiveness = baseTool * info.power;
         final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
