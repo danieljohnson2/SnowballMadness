@@ -35,17 +35,17 @@ public class ItemDropSnowballLogic extends SnowballLogic {
                     itemDropped = null;
                     World world = snowball.getWorld();
                     Location location = snowball.getLocation();
-                    world.spawnEntity(location, EntityType.PIG_ZOMBIE);
+                    //world.spawnCreature(location, EntityType.PIG_ZOMBIE);
                 }
                 break;
             //existing case. Gold nuggets drop a porkchop.
             // double glowstone gets you zombie pigs
 
             case SADDLE:
-                   itemDropped = null;
-                    World world = snowball.getWorld();
-                    Location location = snowball.getLocation();
-                    world.spawnEntity(location, EntityType.HORSE);
+                itemDropped = Material.LEASH;
+                World world = snowball.getWorld();
+                Location location = snowball.getLocation();
+                //world.spawnCreature(location, EntityType.HORSE);
                 break;
             //saddle gets you horses
 
