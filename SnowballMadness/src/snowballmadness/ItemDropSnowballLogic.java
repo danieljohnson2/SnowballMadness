@@ -5,9 +5,6 @@ import java.util.Random;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.util.Vector;
-import static snowballmadness.SnowballLogic.performLaunch;
 
 /**
  * This logic drops an item at the point of impact.
@@ -35,23 +32,23 @@ public class ItemDropSnowballLogic extends SnowballLogic {
             case GOLD_NUGGET:
                 itemDropped = Material.PORK;
                 /*if (info.power > 63) {
-                    itemDropped = null;
-                    World world = snowball.getWorld();
-                    ProjectileSource shooter = snowball.getShooter();
-                    Location source = snowball.getLocation().clone();
-                    Vector bounce = snowball.getVelocity().clone();
-                    Snowball extra = world.spawn(source, Snowball.class);
-                    extra.setShooter(shooter);
-                    SpawnSnowballLogic (new SpawnSnowballLogic(EntityType.PIG_ZOMBIE));
-                    performLaunch(inventory, extra, info);
-                    //if this worked, we could repurpose gold blocks and do LOTS with this
-                    //it's an attempt to fire the mob spawner by making another snowball
-                } */
+                 itemDropped = null;
+                 World world = snowball.getWorld();
+                 ProjectileSource shooter = snowball.getShooter();
+                 Location source = snowball.getLocation().clone();
+                 Vector bounce = snowball.getVelocity().clone();
+                 Snowball extra = world.spawn(source, Snowball.class);
+                 extra.setShooter(shooter);
+                 SpawnSnowballLogic (new SpawnSnowballLogic(EntityType.PIG_ZOMBIE));
+                 performLaunch(inventory, extra, info);
+                 //if this worked, we could repurpose gold blocks and do LOTS with this
+                 //it's an attempt to fire the mob spawner by making another snowball
+                 } */
                 break;
             //existing case. Gold nuggets drop a porkchop.
 
             case LEATHER:
-                randomSelect = randomSelect % 11; //one more than total number of outputs
+                randomSelect = randomSelect % 12; //one more than total number of outputs
                 switch (randomSelect) {
                     case 0:
                         itemDropped = Material.BOOK;
@@ -69,7 +66,7 @@ public class ItemDropSnowballLogic extends SnowballLogic {
                         itemDropped = Material.LEATHER_BOOTS;
                         break;
                     case 5:
-                        itemDropped = Material.LEATHER_BOOTS;
+                        itemDropped = Material.STICK;
                         break;
                     case 6:
                         itemDropped = Material.WOOD_SWORD;
@@ -85,6 +82,9 @@ public class ItemDropSnowballLogic extends SnowballLogic {
                         break;
                     case 10:
                         itemDropped = Material.WOOD_HOE;
+                        break;
+                    case 11:
+                        itemDropped = Material.WORKBENCH;
                         break;
                 }
                 break;
@@ -134,10 +134,43 @@ public class ItemDropSnowballLogic extends SnowballLogic {
                 }
                 break;
             //if you have nine iron we can assume you'll get more, go ahead and iron up quick
-            //we are not going to do likewise for diamond, but we can try gold block
+
+            case GOLD_BLOCK:
+                randomSelect = randomSelect % 10; //one more than total number of outputs
+                switch (randomSelect) {
+                    case 1:
+                        itemDropped = Material.GOLD_HELMET;
+                        break;
+                    case 2:
+                        itemDropped = Material.GOLD_CHESTPLATE;
+                        break;
+                    case 3:
+                        itemDropped = Material.GOLD_LEGGINGS;
+                        break;
+                    case 4:
+                        itemDropped = Material.GOLD_BOOTS;
+                        break;
+                    case 5:
+                        itemDropped = Material.GOLD_SWORD;
+                        break;
+                    case 6:
+                        itemDropped = Material.GOLD_PICKAXE;
+                        break;
+                    case 7:
+                        itemDropped = Material.GOLD_AXE;
+                        break;
+                    case 8:
+                        itemDropped = Material.GOLD_SPADE;
+                        break;
+                    case 9:
+                        itemDropped = Material.GOLD_HOE;
+                        break;
+                }
+                break;
+            //we are not going to do likewise for diamond.
 
             case BEDROCK:
-                //end of the list
+            //end of the list
         }
         //end of item specialcases with their individual code
 

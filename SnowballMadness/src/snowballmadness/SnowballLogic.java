@@ -268,14 +268,12 @@ public abstract class SnowballLogic {
             case GOLD_NUGGET:
             case LEATHER:
             case IRON_INGOT:
+            case GOLD_BLOCK:
                 return new ItemDropSnowballLogic(hint.getType());
             //developing ItemDropSnowball to be a randomizer, it won't be
             //heavily used so it can be full of special cases
 
             case GOLD_INGOT:
-                return new SpawnSnowballLogic(EntityType.PIG);
-
-            case GOLD_BLOCK:
                 return new SpawnSnowballLogic(EntityType.PIG, EntityType.PIG_ZOMBIE, 8.0);
 
             case STRING:
