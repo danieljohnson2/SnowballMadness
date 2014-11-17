@@ -31,24 +31,26 @@ public class ItemDropSnowballLogic extends SnowballLogic {
         switch (itemUsed) {
             case GOLD_NUGGET:
                 itemDropped = Material.PORK;
-                /*if (info.power > 63) {
-                 itemDropped = null;
-                 World world = snowball.getWorld();
-                 ProjectileSource shooter = snowball.getShooter();
-                 Location source = snowball.getLocation().clone();
-                 Vector bounce = snowball.getVelocity().clone();
-                 Snowball extra = world.spawn(source, Snowball.class);
-                 extra.setShooter(shooter);
-                 SpawnSnowballLogic (new SpawnSnowballLogic(EntityType.PIG_ZOMBIE));
-                 performLaunch(inventory, extra, info);
-                 //if this worked, we could repurpose gold blocks and do LOTS with this
-                 //it's an attempt to fire the mob spawner by making another snowball
-                 } */
+                if (info.power > 8) {
+                    itemDropped = null;
+                    World world = snowball.getWorld();
+                    Location location = snowball.getLocation();
+                    world.spawnEntity(location, EntityType.PIG_ZOMBIE);
+                }
                 break;
             //existing case. Gold nuggets drop a porkchop.
+            // double glowstone gets you zombie pigs
+
+            case SADDLE:
+                   itemDropped = null;
+                    World world = snowball.getWorld();
+                    Location location = snowball.getLocation();
+                    world.spawnEntity(location, EntityType.HORSE);
+                break;
+            //saddle gets you horses
 
             case LEATHER:
-                randomSelect = randomSelect % 12; //one more than total number of outputs
+                randomSelect = randomSelect % 13; //one more than total number of outputs
                 switch (randomSelect) {
                     case 0:
                         itemDropped = Material.BOOK;
@@ -85,6 +87,9 @@ public class ItemDropSnowballLogic extends SnowballLogic {
                         break;
                     case 11:
                         itemDropped = Material.WORKBENCH;
+                        break;
+                    case 12:
+                        itemDropped = Material.SADDLE;
                         break;
                 }
                 break;
