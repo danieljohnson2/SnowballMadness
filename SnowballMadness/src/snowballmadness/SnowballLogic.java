@@ -264,6 +264,7 @@ public abstract class SnowballLogic {
 
             case ENCHANTMENT_TABLE:
                 return new SpawnSnowballLogic(EntityType.WITCH, EntityType.ENDER_CRYSTAL, 8.0);
+                //this is now the spawn-many-things instance
 
             case GOLD_NUGGET:
             case LEATHER:
@@ -282,11 +283,23 @@ public abstract class SnowballLogic {
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
 
+            case EGG:
             case DRAGON_EGG:
-                return new SpawnSnowballLogic(EntityType.CHICKEN, EntityType.ENDER_DRAGON, 8.0);
+                return new SpawnSnowballLogic(EntityType.CHICKEN);
+                //spawning dragons now requires placing the dragon egg, and then
+                //hitting a backwall just above it with an enchanting table snowball.
+                //This naturally destroys the dragon egg, but you'll get another by
+                //killing the spawned dragon.
 
             case MILK_BUCKET:
-                return new SpawnSnowballLogic(EntityType.COW, EntityType.MUSHROOM_COW, 8.0);
+                return new SpawnSnowballLogic(EntityType.COW);
+                //get cow if you have ever milked one
+                //path to leather -> book -> enchanting table
+
+            case MUSHROOM_SOUP:
+                return new SpawnSnowballLogic(EntityType.MUSHROOM_COW);
+                //get mooshroom if you can get both mushrooms and wood
+                //alternate path to leather -> book -> enchanting table!
 
             case JACK_O_LANTERN:
                 return new SpawnSnowballLogic(EntityType.SKELETON, EntityType.WITHER_SKULL, 8.0);

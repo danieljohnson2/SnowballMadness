@@ -43,6 +43,97 @@ public class SpawnSnowballLogic extends SnowballLogic {
     }
 
     /**
+     * This method actually creates the entity; subclasses can adjust the
+     * entity's properties.
+     *
+     * @param world The world to spawn in.
+     * @param location The place to spawn at.
+     * @param info The snowball info in effect, if you need it.
+     * @return The new entity created.
+     */
+    protected Entity createEntity(World world, Location location, SnowballInfo info) {
+        //We always return here to create an entity.
+        Location position = location.clone();
+        position.setY(position.getY() + 1.0);
+        //quickly check that above block is clear
+        if (position.getBlock().isEmpty() || position.getBlock().isLiquid()) {
+            //we're only here if the block is breathable space
+            //nerfing too-trivially-easy suffocation mob farms
+            if (this.entityType == EntityType.WITCH) {
+                //here's where we will do the special case for enchanting tables. The basic
+                //case is Witch, because that's what's sent by Enchanting Table. So if we
+                //fall through, we get Witch.
+                position.setY(position.getY() - 2.0);
+                Material target = position.getBlock().getType(); //block spawn stands on
+                Location inSky = location.clone();
+                switch (target) {
+                    case STATIONARY_LAVA:
+                    case LAVA:
+                    case FIRE:
+                        return world.spawnEntity(location, EntityType.BLAZE);
+                    //lava and fire produce blazes out of the lava/fire
+
+                    case NETHERRACK:
+                        return world.spawnEntity(location, EntityType.PIG_ZOMBIE);
+                    //netherrack gives you zombie pigmen
+
+                    case QUARTZ_ORE:
+                        inSky.setY(inSky.getY() + 16);
+                        return world.spawnEntity(inSky, EntityType.GHAST);
+                    //to be annoying with ghasts, mine nether quartz ore and place it
+                    //and fire enchantment table snowballs at it
+
+                    case DIAMOND_ORE:
+                        return world.spawnEntity(location, EntityType.WITHER);
+                    //if spawning on diamond ore, you get wither. This is a dangerous way
+                    //to get nether stars w/o wither skelly grinding.
+
+                    case ENDER_PORTAL:
+                    case ENDER_PORTAL_FRAME:
+                    //if we are actually spawning it off the portal it's sent to the End.
+                    //this will make the End more ridiculous, but odds of the dragon appearing there
+                    //and not portaling out are very slim. May be possible if you break the portal.
+                    //you'll get another (w. egg) from killing the dragon.
+                    case DRAGON_EGG:
+                        return world.spawnEntity(location, EntityType.ENDER_DRAGON);
+                    //you get a dragon right there in your face. As it appears,
+                    //it will very likely take out the egg it came from, so you fight them
+                    //more one at a time, starting right where the egg was.
+                    //For best spawning, you have to make a 3x2 wall behind the egg and hit just over it.
+
+                    case GRASS:
+                    case DIRT:
+                    case GRAVEL:
+                    case SAND:
+                        return world.spawnEntity(location, EntityType.PRIMED_TNT);
+                    //if we hit certain very ordinary blocks, simple boom. Best to be in a rocky cave.
+
+                    case RED_ROSE:
+                    case YELLOW_FLOWER:
+                        return world.spawnEntity(location, EntityType.HORSE);
+                    //horses are cool, spawn them off flowers with an enchanting table snowball
+
+                    case BEDROCK:
+                        inSky.setY(inSky.getY() + 2.0);
+                        if (inSky.getBlock().isEmpty()) {
+                            return world.spawnEntity(inSky, EntityType.ENDERMAN);
+                        }
+                    //down in those bedrock basements, you get endermen.
+                    //Three high space required to not suffocate them.
+                }
+            }
+            return world.spawnEntity(location, pickEntityType(info));
+            //entitytype was not WITCH. Therefore, the default spawn case
+        } else {
+            //we did not have an air block, so we will just return a big zap!
+            //we have to return something that's an entitytype.
+            //this is sound and fire but does not do the lightning display, which
+            //distinguishes it from real lightning: leave that way.
+            return world.spawnEntity(location, EntityType.LIGHTNING);
+        }
+    }
+
+    /**
      * This method returns the entity type to spawn; we pick the powered version
      * if the snowball is sufficiently powered.
      *
@@ -56,19 +147,6 @@ public class SpawnSnowballLogic extends SnowballLogic {
         } else {
             return entityType;
         }
-    }
-
-    /**
-     * This method actually creates the entity; subclasses can adjust the
-     * entity's properties.
-     *
-     * @param world The world to spawn in.
-     * @param location The place to spawn at.
-     * @param info The snowball info in effect, if you need it.
-     * @return The new entity created.
-     */
-    protected Entity createEntity(World world, Location location, SnowballInfo info) {
-        return world.spawnEntity(location, pickEntityType(info));
     }
 
     /**
@@ -141,7 +219,7 @@ public class SpawnSnowballLogic extends SnowballLogic {
 
     /**
      * This logic provides wither skeletons when not powered, but withers when
-     * powered a lot.
+     * powered a lot. You have to already have two wither stars.
      */
     private static class WitherSkeletonLogic extends SpawnSnowballLogic {
 
