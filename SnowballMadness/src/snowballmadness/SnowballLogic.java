@@ -201,7 +201,7 @@ public abstract class SnowballLogic {
                 return new TNTSnowballLogic(4);
 
             case SULPHUR:
-                return new TNTSnowballLogic(1);
+                return new TNTSnowballLogic(2);
 
             case FIREWORK:
                 return new JetpackSnowballLogic();
