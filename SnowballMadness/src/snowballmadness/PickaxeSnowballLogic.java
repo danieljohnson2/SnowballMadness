@@ -96,6 +96,8 @@ public class PickaxeSnowballLogic extends SnowballLogic {
 
         return target.getType() == Material.STONE //the simplest case: clear stone.
 
+                || (material == Material.NETHERRACK && (tool > 1))
+                || (material == Material.ENDER_STONE && (tool > 1))
                 || (material == Material.SAND && (tool > 1))
                 || (material == Material.DIRT && (tool > 1))
                 || (material == Material.SANDSTONE && (tool > 1))
