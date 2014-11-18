@@ -267,13 +267,70 @@ public abstract class SnowballLogic {
 
             case ENCHANTMENT_TABLE:
                 return new SpawnSnowballLogic(EntityType.WITCH, EntityType.ENDER_CRYSTAL, 8.0);
-            //this is now the spawn-many-things instance
 
             case GOLD_NUGGET:
-            case LEATHER:
+                return new ItemDropSnowballLogic(Material.PORK) {
+                    @Override
+                    protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
+                        if (info.power > 8) {
+                            return EntityType.PIG_ZOMBIE;
+                        } else {
+                            return null;
+                        }
+                    }
+                };
+
             case IRON_INGOT:
+                return new ItemDropSnowballLogic(1.0 / 1000.0, Material.IRON_BLOCK);
+
+            case LEATHER:
+                return new ItemDropSnowballLogic(
+                        Material.BOOK,
+                        Material.LEATHER_HELMET,
+                        Material.LEATHER_CHESTPLATE,
+                        Material.LEATHER_LEGGINGS,
+                        Material.LEATHER_BOOTS,
+                        Material.STICK,
+                        Material.WOOD_SWORD,
+                        Material.WOOD_PICKAXE,
+                        Material.WOOD_AXE,
+                        Material.WOOD_SPADE,
+                        Material.WOOD_HOE,
+                        Material.WORKBENCH,
+                        Material.SADDLE);
+
+            case IRON_BLOCK:
+                return new ItemDropSnowballLogic(
+                        Material.IRON_HELMET,
+                        Material.IRON_CHESTPLATE,
+                        Material.IRON_LEGGINGS,
+                        Material.IRON_BOOTS,
+                        Material.IRON_SWORD,
+                        Material.IRON_PICKAXE,
+                        Material.IRON_AXE,
+                        Material.IRON_SPADE,
+                        Material.IRON_HOE);
+
             case GOLD_BLOCK:
-                return new ItemDropSnowballLogic(hint.getType());
+                return new ItemDropSnowballLogic(
+                        Material.GOLD_HELMET,
+                        Material.GOLD_CHESTPLATE,
+                        Material.GOLD_LEGGINGS,
+                        Material.GOLD_BOOTS,
+                        Material.GOLD_SWORD,
+                        Material.GOLD_PICKAXE,
+                        Material.GOLD_AXE,
+                        Material.GOLD_SPADE,
+                        Material.GOLD_HOE);
+
+            case SADDLE:
+                return new ItemDropSnowballLogic(Material.LEASH) {
+                    @Override
+                    protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
+                        return EntityType.HORSE;
+                    }
+                };
+
             //developing ItemDropSnowball to be a randomizer, it won't be
             //heavily used so it can be full of special cases
 
