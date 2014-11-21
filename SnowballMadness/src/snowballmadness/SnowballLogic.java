@@ -155,6 +155,9 @@ public abstract class SnowballLogic {
             case GOLD_PICKAXE:
             case DIAMOND_PICKAXE:
                 return new PickaxeSnowballLogic(hint.getType());
+                
+            case SHEARS:
+                return new ShearsSnowballLogic();
 
             case STICK:
             case BONE:
