@@ -20,16 +20,16 @@ import org.bukkit.inventory.*;
 public class ItemDropSnowballLogic extends SnowballLogic {
 
     private static final Random itemPickRandom = new Random();
-    private final Material[] dropabbleItems;
+    private final Material[] droppableItems;
     private final double chanceToDrop;
 
-    public ItemDropSnowballLogic(Material... dropabbleItems) {
-        this(1.0, dropabbleItems);
+    public ItemDropSnowballLogic(Material... droppableItems) {
+        this(1.0, droppableItems);
     }
 
-    public ItemDropSnowballLogic(double chanceToDrop, Material... dropabbleItems) {
+    public ItemDropSnowballLogic(double chanceToDrop, Material... droppableItems) {
         this.chanceToDrop = chanceToDrop;
-        this.dropabbleItems = Preconditions.checkNotNull(dropabbleItems);
+        this.droppableItems = Preconditions.checkNotNull(droppableItems);
     }
 
     /**
@@ -50,15 +50,15 @@ public class ItemDropSnowballLogic extends SnowballLogic {
         super.hit(snowball, info);
 
         if (chanceToDrop < 1.0 && itemPickRandom.nextDouble() > chanceToDrop) {
-            // you failed your die role, you get nothing.
+            // you failed your die roll, you get nothing.
             return;
         }
 
         World world = snowball.getWorld();
         Location location = snowball.getLocation();
 
-        int randomIndex = itemPickRandom.nextInt(dropabbleItems.length);
-        Material itemDropped = dropabbleItems[randomIndex];
+        int randomIndex = itemPickRandom.nextInt(droppableItems.length);
+        Material itemDropped = droppableItems[randomIndex];
 
         if (itemDropped != null) {
             ItemStack stack = new ItemStack(itemDropped);
