@@ -89,9 +89,11 @@ public class ShearsSnowballLogic extends SnowballLogic {
                 || (material == Material.PUMPKIN && (extraPower > 8))
                 || (material == Material.PUMPKIN_STEM && (extraPower > 8)) //double glowstone and it attacks crops & wood
 
-                || (material == Material.DIRT && (extraPower > 15))
+                || (material == Material.DIRT && (extraPower > 11)) //one glowstone block and one nether star and
+                || (material == Material.SAND && (extraPower > 11))
+                //you can get the weird behavior where just the grass is left floating over space where dirt would be
+
                 || (material == Material.GRASS && (extraPower > 15))
-                || (material == Material.SAND && (extraPower > 15))
                 || (material == Material.GRAVEL && (extraPower > 15)); //double nether star and it wipes out non-rock!
     }
 }
