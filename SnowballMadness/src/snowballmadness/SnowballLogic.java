@@ -131,16 +131,22 @@ public abstract class SnowballLogic {
             case LAVA_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.LAVA);
 
+            case RED_ROSE:
+            case YELLOW_FLOWER:
+                return new FireworkSnowballLogic(hint);
+
             case QUARTZ:
             case COAL:
             case COAL_BLOCK:
-            case SAPLING:
             case REDSTONE_BLOCK:
             case NETHERRACK:
             case LADDER:
             case DIAMOND_ORE:
             case DIAMOND_BLOCK:
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
+                
+            case SAPLING:
+                return new ArboristSnowballLogic(hint);
 
             case WOOD_SWORD:
             case STONE_SWORD:
@@ -155,7 +161,7 @@ public abstract class SnowballLogic {
             case GOLD_PICKAXE:
             case DIAMOND_PICKAXE:
                 return new PickaxeSnowballLogic(hint.getType());
-                
+
             case SHEARS:
                 return new ShearsSnowballLogic();
 
