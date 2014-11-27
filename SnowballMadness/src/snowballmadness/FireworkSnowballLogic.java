@@ -13,7 +13,7 @@ import org.bukkit.inventory.meta.*;
  */
 public class FireworkSnowballLogic extends SnowballLogic {
 
-    private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(5);
+    private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(3);
     private final Material baseItem;
     private final int variation;
 
