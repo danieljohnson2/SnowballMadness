@@ -28,6 +28,15 @@ public abstract class ChainableSnowballLogic extends SnowballLogic {
     }
 
     @Override
+    public void tick(Snowball snowball, SnowballInfo info) {
+        super.tick(snowball, info);
+
+        if (nextLogic != null) {
+            nextLogic.tick(snowball, info);
+        }
+    }
+
+    @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
         proposedDamage = super.damage(snowball, info, target, proposedDamage); //To change body of generated methods, choose Tools | Templates.
 

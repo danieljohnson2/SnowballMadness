@@ -290,7 +290,7 @@ public abstract class SnowballLogic {
                 };
 
             case IRON_INGOT:
-                return new ItemDropSnowballLogic(1.0 / 1000.0, Material.IRON_BLOCK);
+                return new MagneticSnowballLogic();
 
             case LEATHER:
                 return new ItemDropSnowballLogic(
