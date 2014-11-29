@@ -19,6 +19,8 @@ import org.bukkit.util.*;
  */
 public class MagneticSnowballLogic extends SnowballLogic {
 
+    private Vector previousTarget;
+
     @Override
     public void tick(Snowball snowball, SnowballInfo info) {
         super.tick(snowball, info);
@@ -26,21 +28,50 @@ public class MagneticSnowballLogic extends SnowballLogic {
         World world = snowball.getWorld();
         Vector target = snowball.getLocation().toVector();
 
-        for (Entity e : world.getEntities()) {
-            if (canAttract(e, snowball, info)) {
-                Vector eLoc = e.getLocation().toVector();
-                double distSq = target.distanceSquared(eLoc);
-                double factor = (info.power * 5) / distSq;
+        // on the first tick, we approximate the previous locaiton by
+        // using the shooter's present location. Close enough!
+        if (previousTarget == null) {
+            Location shooterLoc = snowball.getShooter().getLocation();
 
-                if (factor > 0.001) {
-                    Vector d = target.clone().subtract(eLoc);
-                    d.normalize();
-                    d.multiply(factor);
-
-                    Vector vel = e.getVelocity().clone().add(d);
-                    e.setVelocity(vel);
-                }
+            if (shooterLoc.getWorld() == world) {
+                previousTarget = shooterLoc.toVector();
+            } else {
+                previousTarget = target;
             }
+        }
+
+        for (Entity victim : world.getEntities()) {
+            if (canAttract(victim, snowball, info)) {
+                accelerate(victim, target, info.power);
+                accelerate(victim, target.getMidpoint(previousTarget), info.power);
+                accelerate(victim, previousTarget, info.power);
+            }
+        }
+
+        previousTarget = target;
+    }
+
+    /**
+     * This method applies acceleration of a victim towards a target. We a
+     * vector for 'target' instead of a Location because the methods we need are
+     * found on it; semantically this is a location.
+     *
+     * @param victim The entity to accelerate.
+     * @param target The target to move the entity towards.
+     * @param power The snowball power; accelerate speed depends on this.
+     */
+    private void accelerate(Entity victim, Vector target, double power) {
+        Vector eLoc = victim.getLocation().toVector();
+        double distSq = target.distanceSquared(eLoc);
+        double factor = (power * 2) / distSq;
+        if (factor > 0.001) {
+            Vector d = target.clone();
+            d.subtract(eLoc);
+            d.normalize();
+            d.multiply(factor);
+
+            Vector vel = victim.getVelocity().clone().add(d);
+            victim.setVelocity(vel);
         }
     }
 
@@ -54,12 +85,12 @@ public class MagneticSnowballLogic extends SnowballLogic {
      * @return true to move accelerate entity towards the snowball, false to do
      * nothing to it.
      */
-    protected boolean canAttract(Entity entity, Snowball snowball, SnowballInfo info) {
-        if (entity == snowball.getShooter()) {
+    protected boolean canAttract(Entity victim, Snowball snowball, SnowballInfo info) {
+        if (victim == snowball.getShooter()) {
             return false;
         }
 
-        if (entity instanceof Snowball) {
+        if (victim instanceof Snowball) {
             return false;
         }
 
