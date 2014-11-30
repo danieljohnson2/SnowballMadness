@@ -7,6 +7,7 @@ import net.minecraft.util.com.google.common.io.FileWriteMode;
 import net.minecraft.util.com.google.common.io.Files;
 import net.minecraft.util.org.apache.commons.io.Charsets;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.entity.*;
@@ -25,17 +26,40 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class SnowballMadness extends JavaPlugin implements Listener {
 
     private BukkitRunnable ticker;
+    private boolean shouldLogSnowballs;
+
+    /**
+     * This returns true if we should be logging snowball activity.
+     *
+     * @return True to log snowball activity messages.
+     */
+    public boolean shouldLogSnowballs() {
+        return shouldLogSnowballs;
+    }
 
     @Override
     public void onLoad() {
         super.onLoad();
 
-        if (new File("NUKE_WORLDS").exists()) {
-            deleteRecursively(new File("world"));
-            deleteRecursively(new File("world_nether"));
-            deleteRecursively(new File("world_the_end"));
-            clearJsonFile(new File("banned-players.json"));
-            clearJsonFile(new File("banned-ips.json"));
+        FileConfiguration config = getConfig();
+        shouldLogSnowballs = config.getBoolean("logsnowballs", false);
+        List<String> toNuke = config.getStringList("nuke");
+
+        for (String victim : toNuke) {
+            File file = new File(victim);
+
+            if (file.exists()) {
+                if (file.isDirectory()) {
+                    getLogger().info(String.format("Deleting directory %s", victim));
+                    deleteRecursively(file);
+                } else if (Files.getFileExtension(victim).equalsIgnoreCase("json")) {
+                    getLogger().info(String.format("Clearing file %s", victim));
+                    clearJsonFile(file);
+                } else {
+                    getLogger().info(String.format("Deleting file %s", victim));
+                    file.delete();
+                }
+            }
         }
     }
 
@@ -76,6 +100,9 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         super.onEnable();
+
+        // This creates the config file if missing
+        saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(this, this);
 

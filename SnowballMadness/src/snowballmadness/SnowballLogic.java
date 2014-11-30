@@ -144,7 +144,7 @@ public abstract class SnowballLogic {
             case DIAMOND_ORE:
             case DIAMOND_BLOCK:
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
-                
+
             case SAPLING:
                 return new ArboristSnowballLogic(hint);
 
@@ -419,7 +419,9 @@ public abstract class SnowballLogic {
     public static void performLaunch(SnowballLogic logic, Snowball snowball, SnowballInfo info) {
         logic.start(snowball, info);
 
-        Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
+        if (info.shouldLogMessages) {
+            Bukkit.getLogger().info(String.format("Snowball launched: %s [%d]", logic, inFlight.size()));
+        }
 
         logic.launch(snowball, info);
     }
@@ -435,7 +437,10 @@ public abstract class SnowballLogic {
 
         if (data != null) {
             try {
-                Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", data.logic, inFlight.size()));
+                if (data.info.shouldLogMessages) {
+                    Bukkit.getLogger().info(String.format("Snowball hit: %s [%d]", data.logic, inFlight.size()));
+                }
+
                 data.logic.hit(snowball, data.info);
             } finally {
                 data.logic.end(snowball);
@@ -447,7 +452,10 @@ public abstract class SnowballLogic {
         SnowballLogicData data = getData(Preconditions.checkNotNull(snowball));
 
         if (data != null) {
-            Bukkit.getLogger().info(String.format("Snowball damage: %s [%d]", data.logic, inFlight.size()));
+            if (data.info.shouldLogMessages) {
+                Bukkit.getLogger().info(String.format("Snowball damage: %s [%d]", data.logic, inFlight.size()));
+            }
+
             return data.logic.damage(snowball, data.info, target, damage);
         }
 

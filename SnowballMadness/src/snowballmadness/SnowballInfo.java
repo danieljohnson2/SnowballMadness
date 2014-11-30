@@ -26,13 +26,21 @@ public final class SnowballInfo {
      * this differently.
      */
     public final double power;
+    /**
+     * This is set to true if this snowball should log activity messages.
+     */
+    public final boolean shouldLogMessages;
 
     public SnowballInfo(SnowballMadness plugin) {
-        this(plugin, 1.0, 1.0);
+        this.plugin = Preconditions.checkNotNull(plugin);
+        this.shouldLogMessages = plugin.shouldLogSnowballs();
+        this.speed = 1.0;
+        this.power = 1.0;
     }
 
-    public SnowballInfo(SnowballMadness plugin, double speed, double power) {
-        this.plugin = Preconditions.checkNotNull(plugin);
+    private SnowballInfo(double speed, double power, SnowballInfo original) {
+        this.plugin = original.plugin;
+        this.shouldLogMessages = original.shouldLogMessages;
         this.speed = speed;
         this.power = power;
     }
@@ -44,7 +52,7 @@ public final class SnowballInfo {
      * @return A new info object.
      */
     public SnowballInfo speeded(double factor) {
-        return new SnowballInfo(plugin, speed * factor, power);
+        return new SnowballInfo(speed * factor, power, this);
     }
 
     /**
@@ -54,6 +62,6 @@ public final class SnowballInfo {
      * @return A new info object.
      */
     public SnowballInfo powered(double factor) {
-        return new SnowballInfo(plugin, speed, power * factor);
+        return new SnowballInfo(speed, power * factor, this);
     }
 }
