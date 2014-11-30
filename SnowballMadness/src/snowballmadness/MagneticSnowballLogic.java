@@ -55,6 +55,9 @@ public class MagneticSnowballLogic extends SnowballLogic {
      * This method applies acceleration of a victim towards a target. We a
      * vector for 'target' instead of a Location because the methods we need are
      * found on it; semantically this is a location.
+     * 
+     * To get a funny 'hang in the air' effect, this method actually repells
+     * when the victim is within a block of the target.
      *
      * @param victim The entity to accelerate.
      * @param target The target to move the entity towards.
@@ -63,15 +66,19 @@ public class MagneticSnowballLogic extends SnowballLogic {
     private void accelerate(Entity victim, Vector target, double power) {
         Vector eLoc = victim.getLocation().toVector();
         double distSq = target.distanceSquared(eLoc);
-        double factor = (power * 2) / distSq;
-        if (factor > 0.001) {
-            Vector d = target.clone();
-            d.subtract(eLoc);
-            d.normalize();
-            d.multiply(factor);
+        distSq -= 1.0;
 
-            Vector vel = victim.getVelocity().clone().add(d);
-            victim.setVelocity(vel);
+        if (distSq != 0.0) {
+            double factor = (power * 2) / distSq;
+            if (factor > 0.001) {
+                Vector d = target.clone();
+                d.subtract(eLoc);
+                d.normalize();
+                d.multiply(factor);
+
+                Vector vel = victim.getVelocity().clone().add(d);
+                victim.setVelocity(vel);
+            }
         }
     }
 
