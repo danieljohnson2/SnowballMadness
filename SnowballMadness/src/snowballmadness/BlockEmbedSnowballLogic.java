@@ -4,7 +4,6 @@ import com.google.common.base.*;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
-import org.bukkit.material.MaterialData;
 
 /**
  * This logic takes in a material to place and possibly a second material (for
@@ -61,16 +60,34 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                 return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
 
             case LADDER:
-                return new BlockEmbedSnowballLogic(Material.LADDER, Material.AIR, 256) {
+                return new BlockEmbedSnowballLogic(material, material, 256) {
                     @Override
                     protected void placeShaftBlock(Block block) {
-                        super.placeShaftBlock(block);
+                       //place nothing. use other ways to dig holes
+                    }
+                    protected void placeCapBlock(Block block) {
 
+                        if (block.getRelative(BlockFace.SOUTH).getType().isSolid()) {
+                            super.placeShaftBlock(block);
+                            block.setData((byte) 2);
+                        }
+                        if (block.getRelative(BlockFace.NORTH).getType().isSolid()) {
+                            super.placeShaftBlock(block);
+                            block.setData((byte) 3);
+                        }
+                        if (block.getRelative(BlockFace.EAST).getType().isSolid()) {
+                            super.placeShaftBlock(block);
+                            block.setData((byte) 4);
+                        }
+                        if (block.getRelative(BlockFace.WEST).getType().isSolid()) {
+                            super.placeShaftBlock(block);
+                            block.setData((byte) 5);
+                        }
+                        //if none of the above, we haven't placed a block
+                        //worst case we repeatedly place it, which is probably fine
                         // ladders need a special case to place them on the side of
                         // the shaft! 2 = north, 3 = south, 4 = west, 5 = east.
                         // There has to be a better way than this!
-
-                        block.setData((byte) 4);
                     }
                 };
 
