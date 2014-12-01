@@ -12,9 +12,6 @@ import org.bukkit.util.*;
  * This logic attracts entities to the snowball; more power makes the
  * attractions stronger and longer ranged.
  *
- * This does not apply an attraction to the shooter; this creates an unpleasant
- * glitchy effect.
- *
  * @author DanJ
  */
 public class MagneticSnowballLogic extends SnowballLogic {
@@ -28,7 +25,7 @@ public class MagneticSnowballLogic extends SnowballLogic {
         World world = snowball.getWorld();
         Vector target = snowball.getLocation().toVector();
 
-        // on the first tick, we approximate the previous locaiton by
+        // on the first tick, we approximate the previous location by
         // using the shooter's present location. Close enough!
         if (previousTarget == null) {
             Location shooterLoc = snowball.getShooter().getLocation();
@@ -41,13 +38,14 @@ public class MagneticSnowballLogic extends SnowballLogic {
         }
 
         for (Entity victim : world.getEntities()) {
-            if (canAttract(victim, snowball, info)) {
+            if (!(victim instanceof Snowball)) {
                 accelerate(victim, target, info.power);
-                accelerate(victim, target.getMidpoint(previousTarget), info.power);
                 accelerate(victim, previousTarget, info.power);
+            } else {
+                accelerate(victim, target, (0.001*info.power));
+                //victim is another snowball, we make them slightly interactive
             }
         }
-
         previousTarget = target;
     }
 
@@ -55,9 +53,6 @@ public class MagneticSnowballLogic extends SnowballLogic {
      * This method applies acceleration of a victim towards a target. We a
      * vector for 'target' instead of a Location because the methods we need are
      * found on it; semantically this is a location.
-     * 
-     * To get a funny 'hang in the air' effect, this method actually repells
-     * when the victim is within a block of the target.
      *
      * @param victim The entity to accelerate.
      * @param target The target to move the entity towards.
@@ -65,42 +60,21 @@ public class MagneticSnowballLogic extends SnowballLogic {
      */
     private void accelerate(Entity victim, Vector target, double power) {
         Vector eLoc = victim.getLocation().toVector();
-        double distSq = target.distanceSquared(eLoc);
-        distSq -= 1.0;
+        double dist = target.distance(eLoc);
 
-        if (distSq != 0.0) {
-            double factor = (power * 2) / distSq;
-            if (factor > 0.001) {
+        if (dist != 0.0) {
+            double factor = power / dist;
+            if (factor > 0.0001) {
                 Vector d = target.clone();
                 d.subtract(eLoc);
                 d.normalize();
                 d.multiply(factor);
-
-                Vector vel = victim.getVelocity().clone().add(d);
+                Vector vel = victim.getVelocity().clone();
+                Double restraint = 1.0 / ((Math.pow(vel.length(), 3)) + 1.0);
+                d.multiply(restraint);
+                vel.add(d);
                 victim.setVelocity(vel);
             }
         }
-    }
-
-    /**
-     * This method decides whether to attract 'entity' to the snowball given. If
-     * this returns false, the entity is skipped.
-     *
-     * @param entity The entity that might be attracted.
-     * @param snowball The snowball to attract the entity to.
-     * @param info The info about the snowball.
-     * @return true to move accelerate entity towards the snowball, false to do
-     * nothing to it.
-     */
-    protected boolean canAttract(Entity victim, Snowball snowball, SnowballInfo info) {
-        if (victim == snowball.getShooter()) {
-            return false;
-        }
-
-        if (victim instanceof Snowball) {
-            return false;
-        }
-
-        return true;
     }
 }
