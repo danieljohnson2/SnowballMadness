@@ -42,7 +42,7 @@ public class MagneticSnowballLogic extends SnowballLogic {
                 accelerate(victim, target, info.power);
                 accelerate(victim, previousTarget, info.power);
             } else {
-                accelerate(victim, target, (0.001*info.power));
+                accelerate(victim, target, (0.001 * info.power));
                 //victim is another snowball, we make them slightly interactive
             }
         }
@@ -62,16 +62,17 @@ public class MagneticSnowballLogic extends SnowballLogic {
         Vector eLoc = victim.getLocation().toVector();
         double dist = target.distance(eLoc);
 
-        if (dist != 0.0) {
+        if (dist > 0.0 && dist < 32.0) {
             double factor = power / dist;
             if (factor > 0.0001) {
+                Vector vel = victim.getVelocity().clone();
+                double restraint = 1.0 / ((Math.pow(vel.length(), 3)) + 1.0);
+                factor *= restraint;
+
                 Vector d = target.clone();
                 d.subtract(eLoc);
                 d.normalize();
                 d.multiply(factor);
-                Vector vel = victim.getVelocity().clone();
-                Double restraint = 1.0 / ((Math.pow(vel.length(), 3)) + 1.0);
-                d.multiply(restraint);
                 vel.add(d);
                 victim.setVelocity(vel);
             }
