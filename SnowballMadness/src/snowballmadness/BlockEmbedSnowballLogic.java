@@ -46,16 +46,6 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
             case COAL_BLOCK:
                 return new BlockEmbedSnowballLogic(Material.COAL_ORE, Material.AIR, 256);
 
-            case SAPLING:
-                return new BlockEmbedSnowballLogic(Material.DIRT, Material.SAPLING, 1) {
-                    @Override
-                    protected void placeCapBlock(Block block) {
-                        //if we can read the sapling type we can generate whatever tree
-                        //we want: that would be ideal. Boosted creates giants, clearly!
-                        block.getWorld().generateTree(block.getLocation(), TreeType.TREE);
-                    }
-                };
-
             case REDSTONE_BLOCK:
                 return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.REDSTONE_BLOCK, 1) {
                     @Override
