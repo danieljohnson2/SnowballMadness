@@ -93,6 +93,12 @@ public abstract class SnowballLogic {
         switch (hint.getType()) {
             case ARROW:
                 return new ArrowSnowballLogic(hint);
+                
+            case FIREWORK_CHARGE:
+            case BLAZE_ROD:
+            case EGG:
+            case EXP_BOTTLE:
+                return new ProjectileSnowballLogic(hint.getType());
 
             case COBBLESTONE:
             case OBSIDIAN:
@@ -167,11 +173,9 @@ public abstract class SnowballLogic {
 
             case STICK:
             case BONE:
-            case BLAZE_ROD:
             case FENCE:
             case COBBLE_WALL:
             case NETHER_FENCE:
-            case FEATHER:
                 return KnockbackSnowballLogic.fromMaterial(hint.getType());
 
             case LEAVES:
@@ -352,8 +356,7 @@ public abstract class SnowballLogic {
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
 
-            case EGG:
-            case DRAGON_EGG:
+             case DRAGON_EGG:
                 return new SpawnSnowballLogic(EntityType.CHICKEN);
             //spawning dragons now requires placing the dragon egg, and then
             //hitting a backwall just above it with an enchanting table snowball.

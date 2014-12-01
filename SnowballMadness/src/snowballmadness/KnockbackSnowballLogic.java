@@ -30,8 +30,8 @@ public class KnockbackSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This creates a knockback snowball logic given the material; we somtimes
-     * use a subclass fro special effects.
+     * This creates a knockback snowball logic given the material; we sometimes
+     * use a subclass for special effects.
      *
      * @param weaponUsed The item being used with the snowball.
      * @return The new logic.
@@ -49,19 +49,6 @@ public class KnockbackSnowballLogic extends SnowballLogic {
 
             case NETHER_FENCE:
                 return new KnockbackSnowballLogic(24);
-
-            case BLAZE_ROD:
-                return new KnockbackSnowballLogic(12) {
-                    @Override
-                    public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
-                        target.setFireTicks(target.getFireTicks() + (int) (100 * info.power));
-                        return super.damage(snowball, info, target, proposedDamage);
-                    }
-                };
-
-            case FEATHER:
-                //you could have knocked me over with a feather!
-                return new KnockbackSnowballLogic(2, 32);
 
             default:
                 return new KnockbackSnowballLogic(4);
