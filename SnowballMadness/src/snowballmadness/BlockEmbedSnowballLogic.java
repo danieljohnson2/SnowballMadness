@@ -63,24 +63,42 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                 return new BlockEmbedSnowballLogic(material, material, 256) {
                     @Override
                     protected void placeShaftBlock(Block block) {
-                       //place nothing. use other ways to dig holes
+                        if (!(block.getType().isSolid()))  {
+                            if (block.getRelative(BlockFace.SOUTH).getType().isSolid()) {
+                                super.placeCapBlock(block);
+                                block.setData((byte) 2);
+                            }
+                            if (block.getRelative(BlockFace.NORTH).getType().isSolid()) {
+                                super.placeCapBlock(block);
+                                block.setData((byte) 3);
+                            }
+                            if (block.getRelative(BlockFace.EAST).getType().isSolid()) {
+                                super.placeCapBlock(block);
+                                block.setData((byte) 4);
+                            }
+                            if (block.getRelative(BlockFace.WEST).getType().isSolid()) {
+                                super.placeCapBlock(block);
+                                block.setData((byte) 5);
+                            }
+                        }
                     }
+
                     protected void placeCapBlock(Block block) {
 
                         if (block.getRelative(BlockFace.SOUTH).getType().isSolid()) {
-                            super.placeShaftBlock(block);
+                            super.placeCapBlock(block);
                             block.setData((byte) 2);
                         }
                         if (block.getRelative(BlockFace.NORTH).getType().isSolid()) {
-                            super.placeShaftBlock(block);
+                            super.placeCapBlock(block);
                             block.setData((byte) 3);
                         }
                         if (block.getRelative(BlockFace.EAST).getType().isSolid()) {
-                            super.placeShaftBlock(block);
+                            super.placeCapBlock(block);
                             block.setData((byte) 4);
                         }
                         if (block.getRelative(BlockFace.WEST).getType().isSolid()) {
-                            super.placeShaftBlock(block);
+                            super.placeCapBlock(block);
                             block.setData((byte) 5);
                         }
                         //if none of the above, we haven't placed a block
