@@ -38,12 +38,12 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
         }
 
         for (Entity victim : world.getEntities()) {
-            if (!(victim instanceof Snowball)) {
+            if ((victim instanceof Snowball) || (victim == snowball.getShooter())) {
+                accelerate(victim, target, (0.005 * info.power));
+                //victim is another snowball or the shooter, we make them slightly interactive
+            } else {
                 accelerate(victim, target, info.power);
                 accelerate(victim, previousTarget, info.power);
-            } else {
-                accelerate(victim, target, (0.005 * info.power));
-                //victim is another snowball, we make them slightly interactive
             }
         }
         previousTarget = target;
