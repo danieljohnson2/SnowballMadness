@@ -109,6 +109,14 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
+                
+            case LAPIS_BLOCK:
+            case EMERALD_BLOCK:
+            case LAPIS_ORE:
+            case EMERALD_ORE:
+            case EMERALD:
+            case INK_SACK:
+                return new FeeshVariationsSnowballLogic(hint);
 
             case ENDER_PEARL:
                 return new BlockPlacementSnowballLogic(Material.ENDER_CHEST);
