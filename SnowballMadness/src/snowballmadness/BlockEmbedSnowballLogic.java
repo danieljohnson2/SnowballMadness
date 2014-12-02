@@ -65,19 +65,19 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                     protected void placeShaftBlock(Block block) {
                         if (!(block.getType().isSolid())) {
                             if (block.getRelative(BlockFace.SOUTH).getType().isSolid()) {
-                                super.placeCapBlock(block);
+                                super.placeShaftBlock(block);
                                 block.setData((byte) 2);
                             }
                             if (block.getRelative(BlockFace.NORTH).getType().isSolid()) {
-                                super.placeCapBlock(block);
+                                super.placeShaftBlock(block);
                                 block.setData((byte) 3);
                             }
                             if (block.getRelative(BlockFace.EAST).getType().isSolid()) {
-                                super.placeCapBlock(block);
+                                super.placeShaftBlock(block);
                                 block.setData((byte) 4);
                             }
                             if (block.getRelative(BlockFace.WEST).getType().isSolid()) {
-                                super.placeCapBlock(block);
+                                super.placeShaftBlock(block);
                                 block.setData((byte) 5);
                             }
                         }
@@ -106,6 +106,61 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                         // ladders need a special case to place them on the side of
                         // the shaft! 2 = north, 3 = south, 4 = west, 5 = east.
                         // There has to be a better way than this!
+                    }
+                };
+
+
+            case VINE:
+                return new BlockEmbedSnowballLogic(material, material, 256) {
+                    @Override
+                    protected void placeShaftBlock(Block block) {
+                        if (!(block.getType().isSolid())) {
+                            byte vinemask = 0;
+                            if (block.getRelative(BlockFace.SOUTH).getType().isSolid()) {
+                                super.placeShaftBlock(block);
+                                vinemask = (byte) (vinemask + 1);
+                                block.setData(vinemask);
+                            }
+                            if (block.getRelative(BlockFace.NORTH).getType().isSolid()) {
+                                super.placeShaftBlock(block);
+                                vinemask = (byte) (vinemask + 4);
+                                block.setData(vinemask);
+                            }
+                            if (block.getRelative(BlockFace.EAST).getType().isSolid()) {
+                                super.placeShaftBlock(block);
+                                vinemask = (byte) (vinemask + 8);
+                                block.setData(vinemask);
+                            }
+                            if (block.getRelative(BlockFace.WEST).getType().isSolid()) {
+                                super.placeShaftBlock(block);
+                                vinemask = (byte) (vinemask + 2);
+                                block.setData(vinemask);
+                            }
+                        }
+                    }
+
+                    protected void placeCapBlock(Block block) {
+                        byte vinemask = 0;
+                        if (block.getRelative(BlockFace.SOUTH).getType().isSolid()) {
+                            super.placeCapBlock(block);
+                            vinemask = (byte) (vinemask + 1);
+                            block.setData(vinemask);
+                        }
+                        if (block.getRelative(BlockFace.NORTH).getType().isSolid()) {
+                            super.placeCapBlock(block);
+                            vinemask = (byte) (vinemask + 4);
+                            block.setData(vinemask);
+                        }
+                        if (block.getRelative(BlockFace.EAST).getType().isSolid()) {
+                            super.placeCapBlock(block);
+                            vinemask = (byte) (vinemask + 8);
+                            block.setData(vinemask);
+                        }
+                        if (block.getRelative(BlockFace.WEST).getType().isSolid()) {
+                            super.placeCapBlock(block);
+                            vinemask = (byte) (vinemask + 2);
+                            block.setData(vinemask);
+                        }
                     }
                 };
 

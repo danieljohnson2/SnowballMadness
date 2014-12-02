@@ -147,6 +147,7 @@ public abstract class SnowballLogic {
             case REDSTONE_BLOCK:
             case NETHERRACK:
             case LADDER:
+            case VINE:
             case DIAMOND_ORE:
             case DIAMOND_BLOCK:
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
