@@ -294,8 +294,8 @@ public abstract class SnowballLogic {
                     }
                 };
 
-            case IRON_INGOT:
-                return new MagneticSnowballLogic();
+            case DRAGON_EGG:
+                return new DeathVortexSnowballLogic();
 
             case LEATHER:
                 return new ItemDropSnowballLogic(
@@ -356,13 +356,6 @@ public abstract class SnowballLogic {
 
             case EYE_OF_ENDER:
                 return new SpawnSnowballLogic(EntityType.ENDERMAN);
-
-             case DRAGON_EGG:
-                return new SpawnSnowballLogic(EntityType.CHICKEN);
-            //spawning dragons now requires placing the dragon egg, and then
-            //hitting a backwall just above it with an enchanting table snowball.
-            //This naturally destroys the dragon egg, but you'll get another by
-            //killing the spawned dragon.
 
             case MILK_BUCKET:
                 return new SpawnSnowballLogic(EntityType.COW);

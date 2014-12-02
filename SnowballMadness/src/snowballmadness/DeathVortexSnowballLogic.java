@@ -14,7 +14,7 @@ import org.bukkit.util.*;
  *
  * @author DanJ
  */
-public class MagneticSnowballLogic extends SnowballLogic {
+public class DeathVortexSnowballLogic extends SnowballLogic {
 
     private Vector previousTarget;
 
@@ -42,7 +42,7 @@ public class MagneticSnowballLogic extends SnowballLogic {
                 accelerate(victim, target, info.power);
                 accelerate(victim, previousTarget, info.power);
             } else {
-                accelerate(victim, target, (0.01 * info.power));
+                accelerate(victim, target, (0.005 * info.power));
                 //victim is another snowball, we make them slightly interactive
             }
         }
@@ -66,7 +66,7 @@ public class MagneticSnowballLogic extends SnowballLogic {
             double factor = power / dist;
             if (factor > 0.0001) {
                 Vector vel = victim.getVelocity().clone();
-                double restraint = 1.0 / ((Math.pow(vel.length(), 4)) + 1.0);
+                double restraint = 1.0 / ((Math.pow(vel.length(), 3)) + 1.0);
                 factor *= restraint;
 
                 Vector d = target.clone();
