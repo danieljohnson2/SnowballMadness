@@ -304,6 +304,12 @@ public abstract class SnowballLogic {
 
             case DRAGON_EGG:
                 return new DeathVortexSnowballLogic();
+                
+            case IRON_INGOT:
+                return new MagneticSnowballLogic();
+                
+            case CARROT_STICK:
+                
 
             case LEATHER:
                 return new ItemDropSnowballLogic(
