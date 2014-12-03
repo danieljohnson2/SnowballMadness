@@ -7,6 +7,7 @@ package snowballmadness;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.util.*;
+import org.bukkit.Location;
 
 /**
  * This logic attracts entities to the snowball; more power makes the
@@ -24,11 +25,12 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
 
         World world = snowball.getWorld();
         Vector target = snowball.getLocation().toVector();
+        Vector momentum = snowball.getVelocity().normalize();
 
         // on the first tick, we approximate the previous location by
-        // using the shooter's present location. Close enough!
+        // using the snowball's present location. Close enough!
         if (previousTarget == null) {
-            Location shooterLoc = snowball.getShooter().getLocation();
+            Location shooterLoc = snowball.getLocation();
 
             if (shooterLoc.getWorld() == world) {
                 previousTarget = shooterLoc.toVector();
@@ -39,15 +41,24 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
 
         for (Entity victim : world.getEntities()) {
             if ((victim instanceof Snowball) || (victim == snowball.getShooter())) {
-                accelerate(victim, target, (0.025 * info.power));
-                //victim is another snowball or the shooter, we make them slightly interactive
+                accelerate(victim, target, (0.03 * info.power));
+                //victim is another snowball or the shooter, we make them less interactive
             } else {
                 accelerate(victim, target, info.power);
                 accelerate(victim, previousTarget, info.power);
-                if (victim instanceof ExperienceOrb) victim.remove();
+                if (victim instanceof ExperienceOrb) {
+                    victim.remove();
+                }
             }
         }
         previousTarget = target;
+    }
+
+    @Override
+    public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
+        target.teleport(target.getLocation().add(target.getVelocity()));
+        //if you hit things with the death vortex snowball, you knock 'em away from you
+        return 0;
     }
 
     /**
@@ -74,8 +85,13 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
                 d.subtract(eLoc);
                 d.normalize();
                 d.multiply(factor);
+
+                if (eLoc.getY() < (target.getY() + 4.0)) {
+                    d.setY(Math.abs(d.getY())); //vortex tends to make victims go up!
+                }
                 vel.add(d);
                 victim.setVelocity(vel);
+                victim.setFallDistance(0); //stop damage while going up
             }
         }
     }
