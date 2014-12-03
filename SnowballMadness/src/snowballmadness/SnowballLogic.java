@@ -101,7 +101,6 @@ public abstract class SnowballLogic {
                 return new ProjectileSnowballLogic(hint.getType());
 
             case COBBLESTONE:
-            case OBSIDIAN:
             case BOOKSHELF:
             case BRICK:
             case SAND:
@@ -309,7 +308,9 @@ public abstract class SnowballLogic {
                 return new MagneticSnowballLogic();
                 
             case CARROT_STICK:
-                
+            case FISHING_ROD:
+            case OBSIDIAN:
+                return new ComeAlongSnowballLogic(hint.getType());
 
             case LEATHER:
                 return new ItemDropSnowballLogic(
