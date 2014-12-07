@@ -389,6 +389,9 @@ public abstract class SnowballLogic {
                 SkullType skullType = SkullType.values()[hint.getDurability()];
                 return SpawnSnowballLogic.fromSkullType(skullType);
 
+            case FEATHER:
+                return new FeatherSnowballLogic();
+                
             default:
                 return null;
         }
