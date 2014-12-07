@@ -176,26 +176,8 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         Player player = e.getPlayer();
 
         bestowSnowball(player);
-
-        long now = System.currentTimeMillis();
-        Long lastRespawnTime = playerLastRespawnTimes.get(player);
-        playerLastRespawnTimes.put(player, now);
-
-        if (lastRespawnTime != null) {
-            long elapsed = now - lastRespawnTime;
-
-            if (elapsed < 10000) {
-                getLogger().info(String.format(
-                        "Player %s spawned %d seconds after last respawn, applying fling.",
-                        player.getName(),
-                        elapsed / 1000));
-
-                player.setVelocity(
-                        Vector.getRandom().multiply(5).setY(2));
-            }
-        }
+        RespawnInfo.checkRespawn(player);
     }
-    private final Map<Player, Long> playerLastRespawnTimes = new WeakHashMap<Player, Long>();
 
     /**
      * This method gives a player a snowball in a designated snowball slot,
