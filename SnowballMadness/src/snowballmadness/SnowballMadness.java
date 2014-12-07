@@ -1,13 +1,12 @@
 package snowballmadness;
 
-import java.io.File;
-import java.io.IOException;
+import com.google.common.base.Charsets;
+import com.google.common.collect.*;
+import com.google.common.io.Files;
+import java.io.*;
 import java.util.*;
-import net.minecraft.util.com.google.common.io.FileWriteMode;
-import net.minecraft.util.com.google.common.io.Files;
-import net.minecraft.util.org.apache.commons.io.Charsets;
 import org.bukkit.*;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.entity.*;
@@ -16,6 +15,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 /**
  * This is the plug-in class for this mod; it handles events and forwards them
@@ -52,7 +52,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 if (file.isDirectory()) {
                     getLogger().info(String.format("Deleting directory %s", victim));
                     deleteRecursively(file);
-                } else if (Files.getFileExtension(victim).equalsIgnoreCase("json")) {
+                } else if (getFileExtension(file).equalsIgnoreCase("json")) {
                     getLogger().info(String.format("Clearing file %s", victim));
                     clearJsonFile(file);
                 } else {
@@ -91,9 +91,28 @@ public class SnowballMadness extends JavaPlugin implements Listener {
      */
     private static void clearJsonFile(File file) {
         try {
-            Files.asCharSink(file, Charsets.US_ASCII).write("[]");
+            Files.write("[]", file, Charsets.US_ASCII);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * This extracts the file extension from the file given. The extension
+     * returned does not include the '.' preceeding it. If the file has no
+     * extension, this method returns "".
+     *
+     * @param file The file whose extension is wanted.
+     * @return The extension, without the '.'.
+     */
+    private static String getFileExtension(File file) {
+        String name = file.getName();
+        int pos = name.lastIndexOf(".");
+
+        if (pos < 0) {
+            return "";
+        } else {
+            return name.substring(pos + 1);
         }
     }
 
@@ -154,8 +173,29 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
-        bestowSnowball(e.getPlayer());
+        Player player = e.getPlayer();
+
+        bestowSnowball(player);
+
+        long now = System.currentTimeMillis();
+        Long lastRespawnTime = playerLastRespawnTimes.get(player);
+        playerLastRespawnTimes.put(player, now);
+
+        if (lastRespawnTime != null) {
+            long elapsed = now - lastRespawnTime;
+
+            if (elapsed < 10000) {
+                getLogger().info(String.format(
+                        "Player %s spawned %d seconds after last respawn, applying fling.",
+                        player.getName(),
+                        elapsed / 1000));
+
+                player.setVelocity(
+                        Vector.getRandom().multiply(5).setY(2));
+            }
+        }
     }
+    private final Map<Player, Long> playerLastRespawnTimes = new WeakHashMap<Player, Long>();
 
     /**
      * This method gives a player a snowball in a designated snowball slot,
