@@ -100,12 +100,6 @@ public class FeeshVariationsSnowballLogic extends SnowballLogic {
                     }
                 }
                 break;
-            case EMERALD:
-            case INK_SACK:
-                
-                Silverfish silverfish = snowballLoc.getWorld().spawn(snowballLoc, Silverfish.class);
-                silverfish.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
-                break;
         }
     }
 }

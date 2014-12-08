@@ -122,12 +122,11 @@ public abstract class SnowballLogic {
                 //fires poisoned feesh or various and sundry other things related to dyes
                 //and bone meal: many variations, some rarer than others or biome specific
                 //for now we can assume everything's lapis
-                return new SpawnSnowballLogic(EntityType.SILVERFISH) {
+                return new SpawnSnowballLogic2<Silverfish>(Silverfish.class) {
                     @Override
-                    protected Entity createEntity(World world, Location location, SnowballInfo info) {
-                        Silverfish entity = (Silverfish) super.createEntity(world, location, info);
-                        entity.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
-                        return entity;
+                    protected void initializeEntity(Silverfish spawned, SnowballInfo info) {
+                        super.initializeEntity(spawned, info);
+                        spawned.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
                     }
                 };
 
@@ -295,13 +294,13 @@ public abstract class SnowballLogic {
                 return new RegenerationSnowballLogic();
 
             case GHAST_TEAR:
-                return new SpawnSnowballLogic(EntityType.GHAST);
+                return SpawnSnowballLogic2.fromEntityClass(Ghast.class);
 
             case ROTTEN_FLESH:
-                return new SpawnSnowballLogic(EntityType.ZOMBIE);
+                return SpawnSnowballLogic2.fromEntityClass(Zombie.class);
 
             case ENCHANTMENT_TABLE:
-                return new SpawnSnowballLogic(EntityType.WITCH, EntityType.ENDER_CRYSTAL, 8.0);
+                return new EnchantingTableSnowballLogic();
 
             case GOLD_NUGGET:
                 return new ItemDropSnowballLogic(Material.PORK) {
@@ -378,30 +377,30 @@ public abstract class SnowballLogic {
             //heavily used so it can be full of special cases
 
             case GOLD_INGOT:
-                return new SpawnSnowballLogic(EntityType.PIG, EntityType.PIG_ZOMBIE, 8.0);
+                return SpawnSnowballLogic2.fromEntityClass(Pig.class, PigZombie.class, 8.0);
 
             case STRING:
-                return new SpawnSnowballLogic(EntityType.SPIDER, EntityType.CAVE_SPIDER, 8.0);
+                return SpawnSnowballLogic2.fromEntityClass(Spider.class, CaveSpider.class, 8.0);
 
             case EYE_OF_ENDER:
-                return new SpawnSnowballLogic(EntityType.ENDERMAN);
+                return SpawnSnowballLogic2.fromEntityClass(Enderman.class);
 
             case MILK_BUCKET:
-                return new SpawnSnowballLogic(EntityType.COW);
+                return SpawnSnowballLogic2.fromEntityClass(Cow.class);
             //get cow if you have ever milked one
             //path to leather -> book -> enchanting table
 
             case MUSHROOM_SOUP:
-                return new SpawnSnowballLogic(EntityType.MUSHROOM_COW);
+                return SpawnSnowballLogic2.fromEntityClass(MushroomCow.class);
             //get mooshroom if you can get both mushrooms and wood
             //alternate path to leather -> book -> enchanting table!
 
             case JACK_O_LANTERN:
-                return new SpawnSnowballLogic(EntityType.SKELETON, EntityType.WITHER_SKULL, 8.0);
+                return SpawnSnowballLogic2.fromEntityClass(Skeleton.class, WitherSkull.class, 8.0);
 
             case SKULL_ITEM:
                 SkullType skullType = SkullType.values()[hint.getDurability()];
-                return SpawnSnowballLogic.fromSkullType(skullType);
+                return SpawnSnowballLogic2.fromSkullType(skullType);
 
             case FEATHER:
                 return new FeatherSnowballLogic();
