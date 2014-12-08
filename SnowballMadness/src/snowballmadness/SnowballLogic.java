@@ -8,6 +8,8 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -93,7 +95,7 @@ public abstract class SnowballLogic {
         switch (hint.getType()) {
             case ARROW:
                 return new ArrowSnowballLogic(hint);
-                
+
             case FIREWORK_CHARGE:
             case BLAZE_ROD:
             case EGG:
@@ -108,14 +110,26 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
-                
+
             case LAPIS_BLOCK:
             case EMERALD_BLOCK:
             case LAPIS_ORE:
             case EMERALD_ORE:
+                return new FeeshVariationsSnowballLogic(hint);
+
             case EMERALD:
             case INK_SACK:
-                return new FeeshVariationsSnowballLogic(hint);
+                //fires poisoned feesh or various and sundry other things related to dyes
+                //and bone meal: many variations, some rarer than others or biome specific
+                //for now we can assume everything's lapis
+                return new SpawnSnowballLogic(EntityType.SILVERFISH) {
+                    @Override
+                    protected Entity createEntity(World world, Location location, SnowballInfo info) {
+                        Silverfish entity = (Silverfish) super.createEntity(world, location, info);
+                        entity.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
+                        return entity;
+                    }
+                };
 
             case ENDER_PEARL:
                 return new BlockPlacementSnowballLogic(Material.ENDER_CHEST);
@@ -303,10 +317,10 @@ public abstract class SnowballLogic {
 
             case DRAGON_EGG:
                 return new DeathVortexSnowballLogic();
-                
+
             case IRON_INGOT:
                 return new MagneticSnowballLogic();
-                
+
             case CARROT_STICK:
             case FISHING_ROD:
             case OBSIDIAN:
@@ -391,7 +405,7 @@ public abstract class SnowballLogic {
 
             case FEATHER:
                 return new FeatherSnowballLogic();
-                
+
             default:
                 return null;
         }

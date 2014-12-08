@@ -48,7 +48,6 @@ public class FeeshVariationsSnowballLogic extends SnowballLogic {
         final int endZ = beginZ + diameter;
         final Location locationBuffer = new Location(world, 0, 0, 0);
 
-
         switch (baseItem) {
             case EMERALD_ORE:
             case LAPIS_ORE:
@@ -103,9 +102,7 @@ public class FeeshVariationsSnowballLogic extends SnowballLogic {
                 break;
             case EMERALD:
             case INK_SACK:
-                //fires poisoned feesh or various and sundry other things related to dyes
-                //and bone meal: many variations, some rarer than others or biome specific
-                //for now we can assume everything's lapis
+                
                 Silverfish silverfish = snowballLoc.getWorld().spawn(snowballLoc, Silverfish.class);
                 silverfish.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
                 break;
