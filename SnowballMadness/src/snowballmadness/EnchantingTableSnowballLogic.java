@@ -5,14 +5,17 @@
 package snowballmadness;
 
 import org.bukkit.*;
-import org.bukkit.block.BlockFace;
+import org.bukkit.block.*;
 import org.bukkit.entity.*;
 
 /**
+ * This is the logic for the enchanting table snowball, which spawns things,
+ * when it hits blocks, but changes what it spawns depending on the type of
+ * block. Fancy!
  *
- * @author DanJ
+ * @author Chris Mostly Really
  */
-public class EnchantingTableSnowballLogic extends SpawnSnowballLogic2<Entity> {
+public class EnchantingTableSnowballLogic extends SpawnSnowballLogic<Entity> {
 
     public EnchantingTableSnowballLogic() {
         super(Witch.class, EnderCrystal.class, 8.0);
