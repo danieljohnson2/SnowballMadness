@@ -34,10 +34,6 @@ public class PoweredSnowballLogic extends ChainableSnowballLogic {
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
         double damage = super.damage(snowball, info, target, proposedDamage);
 
-        if (factor > 1.0 && damage == 0.0) {
-            damage = 1.0;
-        }
-
         return damage * factor;
     }
 

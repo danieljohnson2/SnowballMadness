@@ -3,7 +3,6 @@ package snowballmadness;
 import com.google.common.base.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 /**

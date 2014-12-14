@@ -27,8 +27,9 @@ public class FeatherSnowballLogic extends LingeringSnowballLogic<Entity> {
     protected boolean linger(SnowballInfo info, int counter, Entity victim) {
 
         Vector vel = victim.getVelocity().clone();
-        vel.add(new Vector(0, (.3 * info.power) / (counter + 1), 0));
+        vel.add(new Vector(0, (Math.sqrt(info.power)) / (Math.pow(counter,2)+1), 0));
         victim.setVelocity(vel);
+        victim.setFallDistance(0);
 
         return true;
     }
