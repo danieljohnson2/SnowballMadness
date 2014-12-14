@@ -11,9 +11,10 @@ import org.bukkit.util.Vector;
  *
  * @author christopherjohnson
  */
-public class ComeAlongSnowballLogic extends SnowballLogic {
+public class ComeAlongSnowballLogic extends LingeringSnowballLogic<Entity> {
 
     private final Material trigger;
+    private Vector bounce;
 
     public ComeAlongSnowballLogic(Material trigger) {
         this.trigger = Preconditions.checkNotNull(trigger);
@@ -21,9 +22,8 @@ public class ComeAlongSnowballLogic extends SnowballLogic {
 
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
-        Vector bounce = snowball.getVelocity().clone();
-        double force = Math.sqrt(4.0 + info.power + info.speed);
-        bounce.multiply(force);
+        bounce = snowball.getVelocity().clone();
+        bounce.multiply(Math.pow(info.power,2) / 6.0);
         switch (trigger) {
             case OBSIDIAN:
                 //everything bounces away
@@ -41,10 +41,18 @@ public class ComeAlongSnowballLogic extends SnowballLogic {
                 }
                 break;
         }
-        bounce.setY(0.999); //having a real problem getting anything to bounce UP much.
+        bounce.setY(Math.abs(bounce.getY())); //having a real problem getting anything to bounce UP much.
         //specifically, no matter how high I set this it ignores it.
-        target.setVelocity(bounce);
+        beginLinger(info, 2, 3, target);
+        return super.damage(snowball, info, target, proposedDamage);
+    }
+
+    @Override
+    protected boolean linger(SnowballInfo info, int counter, Entity target) {
+
+        target.setVelocity(bounce.clone().add(target.getVelocity()));
         target.setFallDistance(0);
-        return 0;
+        return true;
+
     }
 }
