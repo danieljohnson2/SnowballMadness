@@ -176,7 +176,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         Player player = e.getPlayer();
 
         bestowSnowball(player);
-        RespawnInfo.checkRespawn(player);
+        RespawnInfo.checkRespawn(player, this);
     }
 
     /**
