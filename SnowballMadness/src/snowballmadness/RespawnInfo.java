@@ -25,7 +25,7 @@ public final class RespawnInfo {
      * This is the maximum number of milliseconds between consecutive respawns;
      * if you respawn faster than this, we intervene by flinging you about.
      */
-    private static final long flingRespawnMillis = 120000;
+    private static final long flingRespawnMillis = 15000;
     /**
      * This holds onto a player info for every player who has respawned, but
      * might be respawning too fast.
@@ -69,7 +69,21 @@ public final class RespawnInfo {
         }
     }
 
-    private static void startFling(final Player player, final int respawnCount, Plugin plugin) {
+    /**
+     * This method begins the flinging process; it gives the player an initial
+     * velocity, and sets up a runnable to periodicity apply the velocity again.
+     * We reduce the Y velocity each time to avoid hoisting the player into the
+     * stratosphere.
+     *
+     * We stop this repated boosting process if the player dies, or lands on the
+     * ground.
+     *
+     * @param player THe player that is respawning.
+     * @param boostCount The number of times to boost the player after the
+     * initial spawn event.
+     * @param plugin The plugin; used to schedule boosts.
+     */
+    private static void startFling(final Player player, final int boostCount, Plugin plugin) {
         final Vector boost = Vector.getRandom().add(new Vector(-0.5, 0.0, -0.5)).
                 setY(0).
                 normalize().
@@ -79,16 +93,16 @@ public final class RespawnInfo {
         player.setVelocity(boost);
 
         new BukkitRunnable() {
-            private final int runLimit = respawnCount * 6;
             private int runCount = 0;
             private double deltaY = 1.0;
 
             @Override
             public void run() {
-                ++runCount;
-                if (runCount >= runLimit) {
+                if (runCount >= boostCount) {
                     cancel();
                 } else if (runCount > 4 && player.isOnGround()) {
+                    // we have to wait a bit after the initial spawn, since
+                    // the 'is on ground' flag is not immediately updated.
                     cancel();
                 } else if (player.isDead()) {
                     cancel();
@@ -97,6 +111,7 @@ public final class RespawnInfo {
                     player.setFireTicks(0);
                     player.setVelocity(boost.clone().setY(deltaY));
                     deltaY *= 0.75;
+                    ++runCount;
                 }
             }
         }.runTaskTimer(plugin, 10, 10);
