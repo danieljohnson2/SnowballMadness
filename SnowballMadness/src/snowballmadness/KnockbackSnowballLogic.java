@@ -16,10 +16,15 @@ import org.bukkit.util.Vector;
  *
  * @author christopherjohnson
  */
-public class KnockbackSnowballLogic extends SnowballLogic {
+public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
 
     private final double strength, poweredStrength;
+    private final Material trigger;
+    private Vector bounce;
 
+    public KnockbackSnowballLogic(Material trigger) {
+        this.trigger = Preconditions.checkNotNull(trigger);
+    }
     public KnockbackSnowballLogic(double strength) {
         this(strength, strength);
     }
@@ -71,7 +76,16 @@ public class KnockbackSnowballLogic extends SnowballLogic {
         double boost = Math.abs(velocity.getX()) + Math.abs(velocity.getZ());
         velocity.setY(boost * info.power);
 
+        beginLinger(info, 2, 3, target);
+        return super.damage(snowball, info, target, proposedDamage);
+    }
+    
+        @Override
+    protected boolean linger(SnowballInfo info, int counter, Entity target) {
+
         target.setVelocity(velocity);
-        return 0;
+        target.setFallDistance(0);
+        return true;
+
     }
 }
