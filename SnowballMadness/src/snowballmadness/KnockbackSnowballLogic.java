@@ -19,7 +19,7 @@ import org.bukkit.util.Vector;
 public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
 
     private final double strength, poweredStrength;
-    private Vector velocity;
+    private Vector bounce;
 
     public KnockbackSnowballLogic(double strength) {
         this(strength, strength);
@@ -62,18 +62,18 @@ public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
         effectiveStrength *= info.power;
 
         // setuip 'velocity' field at the top, so linger can use it.
-        velocity = target.getVelocity().clone();
-        velocity.add(target.getLocation().toVector());
-        velocity.subtract(snowball.getLocation().toVector());
-        velocity.normalize();
-        velocity.multiply(effectiveStrength);
+        bounce = target.getVelocity().clone();
+        bounce.add(target.getLocation().toVector());
+        bounce.subtract(snowball.getLocation().toVector());
+        bounce.normalize();
+        bounce.multiply(effectiveStrength);
 
         //power also determines how much air time you're getting. No power means little air time,
-        double boost = Math.abs(velocity.getX()) + Math.abs(velocity.getZ());
-        velocity.setY(boost * info.power);
+        double boost = Math.abs(bounce.getX()) + Math.abs(bounce.getZ());
+        bounce.setY(boost * info.power);
 
         // lets lower this so it doesn't send things into the stratosphere!
-        velocity.multiply(0.1);
+        bounce.multiply(0.1);
         
         beginLinger(info, 2, 3, target);
         return super.damage(snowball, info, target, proposedDamage);
@@ -82,7 +82,7 @@ public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
     @Override
     protected boolean linger(SnowballInfo info, int counter, Entity target) {
 
-        target.setVelocity(velocity);
+        target.setVelocity(bounce);
         target.setFallDistance(0); // <-- sacrilege!
         return true;
 
