@@ -19,12 +19,8 @@ import org.bukkit.util.Vector;
 public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
 
     private final double strength, poweredStrength;
-    private final Material trigger;
-    private Vector bounce;
+    private Vector velocity;
 
-    public KnockbackSnowballLogic(Material trigger) {
-        this.trigger = Preconditions.checkNotNull(trigger);
-    }
     public KnockbackSnowballLogic(double strength) {
         this(strength, strength);
     }
@@ -65,8 +61,8 @@ public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
         double effectiveStrength = info.power > 8 ? poweredStrength : strength;
         effectiveStrength *= info.power;
 
-        // hows this for de-obfuscated?
-        Vector velocity = target.getVelocity().clone();
+        // setuip 'velocity' field at the top, so linger can use it.
+        velocity = target.getVelocity().clone();
         velocity.add(target.getLocation().toVector());
         velocity.subtract(snowball.getLocation().toVector());
         velocity.normalize();
@@ -76,15 +72,18 @@ public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
         double boost = Math.abs(velocity.getX()) + Math.abs(velocity.getZ());
         velocity.setY(boost * info.power);
 
+        // lets lower this so it doesn't send things into the stratosphere!
+        velocity.multiply(0.1);
+        
         beginLinger(info, 2, 3, target);
         return super.damage(snowball, info, target, proposedDamage);
     }
-    
-        @Override
+
+    @Override
     protected boolean linger(SnowballInfo info, int counter, Entity target) {
 
         target.setVelocity(velocity);
-        target.setFallDistance(0);
+        target.setFallDistance(0); // <-- sacrilege!
         return true;
 
     }
