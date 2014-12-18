@@ -205,28 +205,19 @@ public final class PotionInfo {
         },
         POISON(4) {
             @Override
-            public SnowballLogic createLogic(PotionInfo info) {
-                // This would be a great place for a 'replace stone with monster egg' bomb.
-                // I'll see what I can do. Done properly, it will replace all 'simulatable' blocks
-                // with feesh, that being stone, smooth brick variants and I think cobblestone.
-                // Radius will expand with strength of potion, always sphere. High power equals
-                // VERY LARGE AREA turned entirely to feesh. Ideally we also spawn one and then hit
-                // the feesh in the area with poison effect, setting off the trap (for high levels)
-                // There is also an argument for leaving it untriggered. 
-                
+            public SnowballLogic createLogic(PotionInfo info) {  
+                ItemStack payload;
+                payload = new ItemStack(Material.EMERALD_ORE, 1);
                 switch (info.getAwesomeness()) {
                     case 0:
-                        //poison gives you feeeshapocalypse! Not a proper fishbowl though
-                        return new SphereSnowballLogic(Material.GLASS, Material.AIR,
-                                new ItemStack(Material.RAW_FISH, 1));
+                        //poison gives feesh sphere trap
+                        return new FeeshVariationsSnowballLogic(payload);
                     case 1:
-                        //poison 2:00 (+redstone) gives a proper feeeshbowl!
-                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER,
-                                new ItemStack(Material.RAW_FISH, 1));
+                        //poison 2:00 (+redstone) gives feesh sphere trap
+                        return new FeeshVariationsSnowballLogic(payload);
                     default:
-                        //poison II (+glowstone) gives you lunch. 
-                        return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA,
-                                new ItemStack(Material.COOKED_FISH, 1));
+                        //poison II (+glowstone) gives you feesh sphere trap
+                        return new FeeshVariationsSnowballLogic(payload);
                 }
             }
         },
@@ -291,7 +282,7 @@ public final class PotionInfo {
             public SnowballLogic createLogic(PotionInfo info) {
                 if (!info.hasExtendedDuration) {
                     //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web 3x3
-                    return new BoxSnowballLogic(Material.WEB, Material.WEB);
+                    return new BoxSnowballLogic(Material.WEB, Material.AIR);
                 } else {
                     //slowness 4:00 makes a web sphere, hollow (spam to encase)
                     return new SphereSnowballLogic(Material.WEB, Material.AIR);

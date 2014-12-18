@@ -106,17 +106,12 @@ public abstract class SnowballLogic {
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
 
-            case LAPIS_BLOCK:
             case EMERALD_BLOCK:
-            case LAPIS_ORE:
             case EMERALD_ORE:
                 return new FeeshVariationsSnowballLogic(hint);
 
             case EMERALD:
-            case INK_SACK:
-                //fires poisoned feesh or various and sundry other things related to dyes
-                //and bone meal: many variations, some rarer than others or biome specific
-                //for now we can assume everything's lapis
+                //fires poisoned feesh 
                 return new SpawnSnowballLogic<Silverfish>(Silverfish.class) {
                     @Override
                     protected void initializeEntity(Silverfish spawned, SnowballInfo info) {
@@ -192,7 +187,7 @@ public abstract class SnowballLogic {
             case FENCE:
             case COBBLE_WALL:
             case NETHER_FENCE:
-                 return new KnockbackSnowballLogic(hint.getType());
+                return new KnockbackSnowballLogic(hint.getType());
 
             case LEAVES:
             case STONE:
@@ -247,14 +242,23 @@ public abstract class SnowballLogic {
             case FERMENTED_SPIDER_EYE:
                 return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
 
+            case APPLE:
+                return new SpeededSnowballLogic(1.2, slice.skip(1));
+
+            case MELON:
+                return new SpeededSnowballLogic(1.4, slice.skip(1));
+
             case SUGAR:
                 return new SpeededSnowballLogic(1.6, slice.skip(1));
 
-            case BOW:
-                return new SpeededSnowballLogic(1.8, slice.skip(1));
-
             case COOKIE:
+                return new SpeededSnowballLogic(1.8, slice.skip(1));
+                
+            case BOW:
                 return new SpeededSnowballLogic(2, slice.skip(1));
+
+            case PUMPKIN_PIE:
+                return new SpeededSnowballLogic(2.5, slice.skip(1));
 
             case CAKE:
                 return new SpeededSnowballLogic(3, slice.skip(1));
@@ -265,7 +269,7 @@ public abstract class SnowballLogic {
             //the beacon is the REAL lazor.
 
             case GLOWSTONE_DUST:
-                return new PoweredSnowballLogic(1.5, slice.skip(1));
+                return new PoweredSnowballLogic(1.6, slice.skip(1));
 
             case GLOWSTONE:
                 return new PoweredSnowballLogic(3, slice.skip(1));

@@ -5,9 +5,8 @@ import org.bukkit.block.*;
 import org.bukkit.entity.*;
 
 /**
- * This logic makes a box out of the material you give it, varying the
- * construction method by type. You can specify the material for the walls and
- * the fill, but by default this class will only replace air and liquid blocks.
+ * This logic makes a box out of the material you give it, varying the construction method by type. You can specify the material
+ * for the walls and the fill, but by default this class will only replace air and liquid blocks.
  *
  * @author christopherjohnson
  */
@@ -21,8 +20,6 @@ public class BoxSnowballLogic extends SnowballLogic {
     }
 
     public BoxSnowballLogic(Material wallMaterial, Material fillMaterial) {
-        // we allow nulls here, with the meaning 'don't touch the blocks at
-        // all'.
         this.wallMaterial = wallMaterial;
         this.fillMaterial = fillMaterial;
     }
@@ -35,7 +32,6 @@ public class BoxSnowballLogic extends SnowballLogic {
         World world = snowball.getWorld();
         final int radius = (int) info.power;
         final int diameter = (int) (info.power * 2);
-
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
 
@@ -56,7 +52,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                 for (int y = beginY; y <= endY; ++y) {
                     Block target = world.getBlockAt(beginX, y, z);
                     if (canReplace(target)) {
-                        replaceBlock(target, wallMaterial);
+                        target.setType(wallMaterial);
                     }
                 }
             }
@@ -80,7 +76,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                     if (replacement != null) {
                         Block target = world.getBlockAt(x, y, z);
                         if (canReplace(target)) {
-                            replaceBlock(target, replacement);
+                            target.setType(replacement);
                         }
                     }
                 }
@@ -93,7 +89,7 @@ public class BoxSnowballLogic extends SnowballLogic {
                 for (int y = beginY; y <= endY; ++y) {
                     Block target = world.getBlockAt(endX, y, z);
                     if (canReplace(target)) {
-                        replaceBlock(target, wallMaterial);
+                        target.setType(wallMaterial);
                     }
                 }
             }
@@ -102,30 +98,10 @@ public class BoxSnowballLogic extends SnowballLogic {
         //as elegant and plain as possible, and Chris insisting on some videogamey
         //efficiency hacks. Off to devise an even crazier power-boost so as to
         //illustrate the need for execution efficiency :D
-
-
-
     }
 
     /**
-     * This method is called on each block that is to be updated, and by default
-     * simply calls setType() on it. You can override this to set metadata or
-     * make other changes.
-     *
-     * This method is not called if the material would be null because null was
-     * passed to the constructor. It is also not called if canReplace() returns
-     * false.
-     *
-     * @param target The block to update.
-     * @param material The new material it should have.
-     */
-    protected void replaceBlock(Block target, Material material) {
-        target.setType(material);
-    }
-
-    /**
-     * This method decides whether to replace a given block; by default it
-     * replaces air and liquid blocks only.
+     * This method decides whether to replace a given block; by default it replaces air and liquid blocks only.
      *
      * @param target The proposed block to update.
      * @return True to update the block; false to do nothing.
@@ -138,10 +114,15 @@ public class BoxSnowballLogic extends SnowballLogic {
                 || material == Material.STATIONARY_WATER
                 || material == Material.LAVA
                 || material == Material.STATIONARY_LAVA
+                || material == Material.WEB
+                || material == Material.TNT
+                || material == Material.MONSTER_EGGS
+                || material == Material.FIRE
                 || material == Material.LONG_GRASS
                 || material == Material.RED_ROSE
                 || material == Material.YELLOW_FLOWER;
         //including some of the ground cover blocks as they seem like
         //glitches when they block wall placement
+        //also, we replace webs and TNT where possible
     }
 }

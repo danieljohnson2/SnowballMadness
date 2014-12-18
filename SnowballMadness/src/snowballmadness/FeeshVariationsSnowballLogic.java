@@ -50,7 +50,6 @@ public class FeeshVariationsSnowballLogic extends SnowballLogic {
 
         switch (baseItem) {
             case EMERALD_ORE:
-            case LAPIS_ORE:
                 //the shell of feesh with untouched inside
                 for (int x = beginX; x <= endX; ++x) {
                     for (int z = beginZ; z <= endZ; ++z) {
@@ -70,7 +69,6 @@ public class FeeshVariationsSnowballLogic extends SnowballLogic {
                 }
                 break;
             case EMERALD_BLOCK:
-            case LAPIS_BLOCK:
                 //turning everything inside the sphere to stealth feesh for later unleashing
                 for (int x = beginX; x <= endX; ++x) {
                     for (int z = beginZ; z <= endZ; ++z) {
