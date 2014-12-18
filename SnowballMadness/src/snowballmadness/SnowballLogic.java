@@ -117,6 +117,7 @@ public abstract class SnowballLogic {
                     protected void initializeEntity(Silverfish spawned, SnowballInfo info) {
                         super.initializeEntity(spawned, info);
                         spawned.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
+                        spawned.setTarget(spawned); //seems to trigger only if feesh has a object of its ire.
                     }
                 };
 
