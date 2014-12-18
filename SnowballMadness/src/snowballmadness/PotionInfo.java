@@ -281,11 +281,11 @@ public final class PotionInfo {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
                 if (!info.hasExtendedDuration) {
-                    //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web 3x3
-                    return new BoxSnowballLogic(Material.WEB, Material.AIR);
+                    //slowness 1:30 (swiftness/fireresist+fermented spider eye) makes a web sphere, hollow
+                    return new RingSnowballLogic(Material.WEB, Material.AIR);
                 } else {
                     //slowness 4:00 makes a web sphere, hollow (spam to encase)
-                    return new SphereSnowballLogic(Material.WEB, Material.AIR);
+                    return new RingSnowballLogic(Material.WEB, Material.AIR);
                     //webs are good effects
                 }
             }
@@ -416,7 +416,7 @@ public final class PotionInfo {
             @Override
             public SnowballLogic createWaterBottleLogic() {
                 //awkward potion made with netherwart gives you TNT
-                return new SphereSnowballLogic(Material.TNT, Material.AIR);
+                return new RingSnowballLogic(Material.TNT, Material.AIR);
 
             }
         },

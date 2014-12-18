@@ -194,7 +194,6 @@ public abstract class SnowballLogic {
             case STONE:
             case SMOOTH_BRICK:
             case IRON_FENCE:
-            case WEB:
                 return new BoxSnowballLogic(hint.getType());
             //all structures that can be broken with any pick, but can be
             //large with use of glowstone. Provides a defensive game
@@ -212,6 +211,12 @@ public abstract class SnowballLogic {
 
             case BUCKET:
                 return new BoxSnowballLogic(Material.AIR);
+
+            case WEB:
+            case WOOD:
+            case LOG:
+            case MOSSY_COBBLESTONE:
+                return new RingSnowballLogic(hint.getType());
 
             case TORCH:
                 return new LinkedTrailSnowballLogic(Material.FIRE);
