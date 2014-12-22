@@ -397,7 +397,6 @@ public abstract class SnowballLogic {
             case GOLD_INGOT:
                 return SpawnSnowballLogic.fromEntityClass(PigZombie.class);
 
-
             case EYE_OF_ENDER:
                 return SpawnSnowballLogic.fromEntityClass(Enderman.class);
 
