@@ -105,6 +105,9 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
+                
+            case STRING:
+                return new BlockPlacementSnowballLogic(Material.WEB);
 
             case EMERALD_BLOCK:
             case EMERALD_ORE:
@@ -232,7 +235,7 @@ public abstract class SnowballLogic {
                 return new TNTSnowballLogic(4);
 
             case SULPHUR:
-                return new TNTSnowballLogic(2);
+                return new TNTSnowballLogic((float)1.4);
 
             case FIREWORK:
                 return new JetpackSnowballLogic();
@@ -247,21 +250,21 @@ public abstract class SnowballLogic {
                 return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
 
             case APPLE:
-                return new SpeededSnowballLogic(1.2, slice.skip(1));
+                return new SpeededSnowballLogic(1.3, slice.skip(1));
 
             case MELON:
                 return new SpeededSnowballLogic(1.4, slice.skip(1));
 
             case SUGAR:
-                return new SpeededSnowballLogic(1.6, slice.skip(1));
+                return new SpeededSnowballLogic(1.5, slice.skip(1));
 
-            case COOKIE:
-                return new SpeededSnowballLogic(1.8, slice.skip(1));
-                
             case BOW:
-                return new SpeededSnowballLogic(2, slice.skip(1));
+                return new SpeededSnowballLogic(1.8, slice.skip(1));
 
-            case PUMPKIN_PIE:
+             case COOKIE:
+                return new SpeededSnowballLogic(2, slice.skip(1));
+                
+           case PUMPKIN_PIE:
                 return new SpeededSnowballLogic(2.5, slice.skip(1));
 
             case CAKE:
@@ -306,7 +309,7 @@ public abstract class SnowballLogic {
                 return new EnchantingTableSnowballLogic();
 
             case GOLD_NUGGET:
-                return new ItemDropSnowballLogic(Material.PORK) {
+                return new ItemDropSnowballLogic(Material.ROTTEN_FLESH) {
                     @Override
                     protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
                         if (info.power > 8) {
@@ -392,10 +395,8 @@ public abstract class SnowballLogic {
             //heavily used so it can be full of special cases
 
             case GOLD_INGOT:
-                return SpawnSnowballLogic.fromEntityClass(Pig.class, PigZombie.class, 8.0);
+                return SpawnSnowballLogic.fromEntityClass(PigZombie.class);
 
-            case STRING:
-                return SpawnSnowballLogic.fromEntityClass(Spider.class, CaveSpider.class, 8.0);
 
             case EYE_OF_ENDER:
                 return SpawnSnowballLogic.fromEntityClass(Enderman.class);
