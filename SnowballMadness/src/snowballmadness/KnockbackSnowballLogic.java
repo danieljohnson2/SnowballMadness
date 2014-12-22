@@ -8,19 +8,18 @@ import org.bukkit.entity.*;
 import org.bukkit.util.Vector;
 
 /**
- * This creates a knockback snowball logic given the material; we sometimes use a subclass for special effects.
+ * This creates a knockback snowball logic given the material; we sometimes use
+ * a subclass for special effects.
  *
  * @param weaponUsed The item being used with the snowball.
  * @return The new logic.
  */
 public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
 
-    private final Material weaponUsed;
+    private final double weapon;
     private Vector bounce;
-    private double weapon;
 
     public KnockbackSnowballLogic(Material weaponUsed) {
-        this.weaponUsed = Preconditions.checkNotNull(weaponUsed);
         //we won't need a 'hit' method as we are overriding damage
         switch (weaponUsed) {
             case BONE:
@@ -43,12 +42,11 @@ public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
     @Override
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
 
-        weapon = weapon + ((Math.sqrt(Math.sqrt(info.power))-1)*0.23);
         //low power somewhat enhances stuff, mega power takes nether fence to silly levels
         bounce = target.getVelocity().clone();
         bounce.add(target.getLocation().toVector());
         bounce.subtract(snowball.getLocation().toVector());
-        bounce.setY(Math.abs(bounce.getY())*0.15);
+        bounce.setY(Math.abs(bounce.getY()) * 0.15);
         bounce.normalize();
 
         beginLinger(info, 1, 8, target);
@@ -57,10 +55,11 @@ public class KnockbackSnowballLogic extends LingeringSnowballLogic<Entity> {
 
     @Override
     protected boolean linger(SnowballInfo info, int counter, Entity target) {
-        bounce.multiply(weapon); //should be progressively diminishing this
+        final double weaponAsPowered = weapon + ((Math.sqrt(Math.sqrt(info.power)) - 1) * 0.23);
+
+        bounce.multiply(weaponAsPowered); //should be progressively diminishing this
         target.setVelocity(target.getVelocity().add(bounce));
         target.setFallDistance(0);
         return true;
-
     }
 }

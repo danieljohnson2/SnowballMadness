@@ -232,10 +232,10 @@ public abstract class SnowballLogic {
                 return new LinkedWaterTrailSnowballLogic(Material.WATER_LILY);
 
             case TNT:
-                return new TNTSnowballLogic(4);
+                return new TNTSnowballLogic(4.0f);
 
             case SULPHUR:
-                return new TNTSnowballLogic((float)1.4);
+                return new TNTSnowballLogic(1.4f);
 
             case FIREWORK:
                 return new JetpackSnowballLogic();
