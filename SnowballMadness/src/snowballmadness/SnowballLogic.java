@@ -160,7 +160,6 @@ public abstract class SnowballLogic {
             case LADDER:
             case VINE:
             case DIAMOND_ORE:
-            case DIAMOND_BLOCK:
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
             case SAPLING:
@@ -202,9 +201,7 @@ public abstract class SnowballLogic {
                 return new BoxSnowballLogic(Material.GLASS, Material.AIR);
 
             case GLASS_BOTTLE:
-                return new SphereSnowballLogic(Material.GLASS, Material.AIR);
-            //these two enable a sort of minigame: try not to get encased in glass
-            //against other players who are trying to encase you
+                return new RingSnowballLogic(Material.GLASS);
 
             case POTION:
                 return PotionInfo.fromItemStack(hint).createPotionLogic();
@@ -219,7 +216,8 @@ public abstract class SnowballLogic {
                 return new RingSnowballLogic(hint.getType());
 
             case TORCH:
-                return new LinkedTrailSnowballLogic(Material.FIRE);
+                return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA); //gives you a tiny lava box.
+                    //Will set delayed fires, glass doesn't replace leaves so they catch.
 
             case FENCE_GATE:
                 return new LinkedTrailSnowballLogic(Material.FENCE);
@@ -369,6 +367,18 @@ public abstract class SnowballLogic {
                         Material.GOLD_AXE,
                         Material.GOLD_SPADE,
                         Material.GOLD_HOE);
+
+            case DIAMOND_BLOCK:
+                return new ItemDropSnowballLogic(
+                        Material.DIAMOND_HELMET,
+                        Material.DIAMOND_CHESTPLATE,
+                        Material.DIAMOND_LEGGINGS,
+                        Material.DIAMOND_BOOTS,
+                        Material.DIAMOND_SWORD,
+                        Material.DIAMOND_PICKAXE,
+                        Material.DIAMOND_AXE,
+                        Material.DIAMOND_SPADE,
+                        Material.DIAMOND_HOE);
 
             case SADDLE:
                 return new ItemDropSnowballLogic(Material.LEASH) {

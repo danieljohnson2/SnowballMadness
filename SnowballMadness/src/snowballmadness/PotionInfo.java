@@ -191,10 +191,9 @@ public final class PotionInfo {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
                 if (!info.hasExtendedDuration) {
-                    //fire resist 3:00 (magma cream) gives you a tiny lava box.
-                    //Will set delayed fires, glass doesn't replace leaves so they catch.
+                    //fire resist 3:00 (magma cream) 
                     //WITCH FARMABLE. Spawn them in lava or over fire, they will drink these to survive.
-                    return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA);
+                    return new SphereSnowballLogic(Material.FIRE, Material.AIR);
                 } else {
                     //fire resist 8:00 (magma cream, redstone) gives you a massive fireball!
                     //We have to manage fire entities, I think, this is another server killer
@@ -241,7 +240,7 @@ public final class PotionInfo {
             public SnowballLogic createLogic(PotionInfo info) {
                 if (!info.hasExtendedDuration) {
                     //night vision 3:00 (golden carrot) gives you a obsidian cube
-                    return new BoxSnowballLogic(Material.OBSIDIAN, Material.OBSIDIAN);
+                    return new BoxSnowballLogic(Material.OBSIDIAN, Material.AIR);
                 } else {
                     //night vision 8:00 (golden carrot, redstone) gives you a obsidian sphere
                     return new SphereSnowballLogic(Material.OBSIDIAN, Material.AIR);
@@ -401,22 +400,23 @@ public final class PotionInfo {
         NONE(0x00) {
             @Override
             public SnowballLogic createWaterBottleLogic() {
-                //water bottle gives you water sphere.
-                return new SphereSnowballLogic(Material.GLASS, Material.STATIONARY_WATER);
+                //water bottle gives you the glass rings as it is so easy to get
+                //nonreal potions don't give you spheres or boxes
+                return new RingSnowballLogic(Material.GLASS);
             }
         },
         MUNDANE(0x00) {
             @Override
             public SnowballLogic createWaterBottleLogic() {
                 //mundane potion (extended) made with redstone gives you redstone (duration)
-                return new SphereSnowballLogic(Material.REDSTONE_BLOCK, Material.AIR);
+                return new RingSnowballLogic(Material.REDSTONE_BLOCK);
             }
         },
         AWKWARD(0x10) {
             @Override
             public SnowballLogic createWaterBottleLogic() {
-                //awkward potion made with netherwart gives you TNT
-                return new RingSnowballLogic(Material.TNT, Material.AIR);
+                //awkward potion made with netherwart gives you TNT rings
+                return new RingSnowballLogic(Material.TNT);
 
             }
         },
@@ -424,7 +424,7 @@ public final class PotionInfo {
             @Override
             public SnowballLogic createWaterBottleLogic() {
                 //thick potion made with glowstone dust gives you glowstone (potency)
-                return new SphereSnowballLogic(Material.GLOWSTONE, Material.AIR);
+                return new RingSnowballLogic(Material.GLOWSTONE);
             }
         },
         POTENT(0x30),
@@ -491,8 +491,7 @@ public final class PotionInfo {
             return null;
 
             //these are the only ways to get glowstone, redstone or TNT
-            //tnt is a gag. awk—warrrd! If you have the Nether you should be able
-            //to get that much gunpowder anyway. Hollow to minimize the amount.
+            //tnt is a gag. awk—warrrd!
         }
     }
 }

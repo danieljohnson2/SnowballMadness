@@ -9,9 +9,8 @@ import org.bukkit.block.*;
 import org.bukkit.entity.*;
 
 /**
- * This is the logic for the enchanting table snowball, which spawns things,
- * when it hits blocks, but changes what it spawns depending on the type of
- * block. Fancy!
+ * This is the logic for the enchanting table snowball, which spawns things, when it hits blocks, but changes what it spawns
+ * depending on the type of block. Fancy!
  *
  * @author Chris Mostly Really
  */
@@ -43,6 +42,10 @@ public class EnchantingTableSnowballLogic extends SpawnSnowballLogic<Entity> {
                 return PigZombie.class;
             //netherrack gives you zombie pigmen
 
+            case SOUL_SAND:
+                location.getBlock().setType(Material.NETHER_WARTS);
+                return null; //way to get netherwart for potions without fortress finding
+
             case QUARTZ_ORE:
                 location.add(0, 16, 0);
                 return Ghast.class;
@@ -67,12 +70,16 @@ public class EnchantingTableSnowballLogic extends SpawnSnowballLogic<Entity> {
             //more one at a time, starting right where the egg was.
             //For best spawning, you have to make a 3x2 wall behind the egg and hit just over it.
 
-            case GRASS:
             case DIRT:
             case GRAVEL:
             case SAND:
                 return TNTPrimed.class;
             //if we hit certain very ordinary blocks, simple boom. Best to be in a rocky cave.
+
+            case GRASS:
+            case STONE:
+                return EnderCrystal.class;
+            //making the table more dangerous and tricky to operate
 
             case RED_ROSE:
             case YELLOW_FLOWER:

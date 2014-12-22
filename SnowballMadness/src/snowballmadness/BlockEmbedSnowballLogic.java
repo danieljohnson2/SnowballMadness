@@ -165,20 +165,7 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                 };
 
             case DIAMOND_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 256) {
-                    @Override
-                    protected void placeShaftBlock(Block block) {
-                        if (block.getRelative(BlockFace.DOWN).getType() == Material.BEDROCK) {
-                            block.setType(Material.STATIONARY_WATER);
-                        } else {
-                            super.placeShaftBlock(block);
-                        }
-                    }
-                };
-
-
-            case DIAMOND_BLOCK:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
+                   return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
 
             default:
                 return new BlockEmbedSnowballLogic(material, material, 1);
