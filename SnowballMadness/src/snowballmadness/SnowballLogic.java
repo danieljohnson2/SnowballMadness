@@ -282,7 +282,7 @@ public abstract class SnowballLogic {
             //overkill but not that cost-effective, plus more unwieldy.
 
             case SNOW_BALL:
-                return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
+                return new MultiplierSnowballLogic(hint.getAmount(), hint.getItemMeta().getDisplayName(), slice.skip(1));
 
             case SLIME_BALL:
                 return new BouncySnowballLogic(hint.getAmount(), slice.skip(1));

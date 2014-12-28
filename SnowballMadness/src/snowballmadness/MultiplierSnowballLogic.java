@@ -7,9 +7,8 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.*;
 
 /**
- * This snowball logic spawns a cluster of additional snowballs at impact, and
- * these may have a second logic attached to them (and that can be a multiplier
- * too, for total chaos!)
+ * This snowball logic spawns a cluster of additional snowballs at impact, and these may have a second logic attached to them (and
+ * that can be a multiplier too, for total chaos!)
  *
  * @author DanJ
  */
@@ -18,10 +17,12 @@ public class MultiplierSnowballLogic extends SnowballLogic {
     private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(3);
     private final static int inFlightSnowballLimit = 256;
     private final int numberOfSnowballs;
+    private final String targetName;
     private final InventorySlice inventory;
 
-    public MultiplierSnowballLogic(int numberOfSnowballs, InventorySlice inventory) {
+    public MultiplierSnowballLogic(int numberOfSnowballs, String targetName, InventorySlice inventory) {
         this.numberOfSnowballs = numberOfSnowballs;
+        this.targetName = targetName;
         this.inventory = Preconditions.checkNotNull(inventory);
     }
 
@@ -39,6 +40,36 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             bounce.setY(-(bounce.getY()));
             //we are not going to amplify the bounce because the initial velocity should
             //be what's amplified. Thus we needn't amplify it again.
+
+            //here we can override if the snowball is named
+            if (targetName == null) {
+                //pass right by
+            } else {
+                //we have a word but is it a player name?
+                OfflinePlayer sleepingPlayer = snowball.getServer().getOfflinePlayer(targetName);
+                //this should return null if no such player exists, or return the OfflinePlayer if the named player exists
+                Player namedPlayer = snowball.getServer().getPlayer(targetName);
+                //this should return null if the player named is not online at the moment
+                Location targetLocation = snowball.getLocation().add(0, 1000, 0);
+                //default behavior is firing straight up if nothing is found
+
+                if (sleepingPlayer != null) {
+                    if (namedPlayer != null) {
+                        targetLocation = namedPlayer.getEyeLocation();
+                    } else {
+                        targetLocation = sleepingPlayer.getBedSpawnLocation();
+                    }
+                    //we've set targetLocation to something
+                }
+                //now we will replace bounce outright with a vector made of target location - snowball location
+                bounce = targetLocation.toVector().subtract(snowball.getLocation().toVector());
+                //thus giving us a new trajectory that aims at the target, either a player location
+                //or the location of the offline player's bedspawn, or straight up if there's no such player.
+                bounce.setY(bounce.getY()+1); //ballistic trajectory
+                double range = Math.sqrt(bounce.length())*0.2;
+                bounce.normalize().multiply(range); //it goes very fast, so we scale it
+                //end of the named snowball location override
+            }
 
             Snowball skipper = world.spawn(source, Snowball.class);
             skipper.setShooter(shooter);
