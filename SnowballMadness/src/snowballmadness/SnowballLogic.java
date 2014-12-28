@@ -105,9 +105,6 @@ public abstract class SnowballLogic {
                 return new BlockPlacementSnowballLogic(hint.getType());
             //considering adding data values to smooth brick so it randomizes
             //including mossy, cracked and even silverfish
-                
-            case STRING:
-                return new BlockPlacementSnowballLogic(Material.WEB);
 
             case EMERALD_BLOCK:
             case EMERALD_ORE:
@@ -142,9 +139,6 @@ public abstract class SnowballLogic {
             case CACTUS:
                 return new StopRainLogic();
 
-            case ENDER_STONE:
-                return new BlockPlacementSnowballLogic(Material.ENDER_PORTAL);
-
             case WATER_BUCKET:
                 return new BlockPlacementSnowballLogic(Material.WATER);
 
@@ -163,6 +157,7 @@ public abstract class SnowballLogic {
             case LADDER:
             case VINE:
             case DIAMOND_ORE:
+            case ENDER_STONE:
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
             case SAPLING:
@@ -220,7 +215,7 @@ public abstract class SnowballLogic {
 
             case TORCH:
                 return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA); //gives you a tiny lava box.
-                    //Will set delayed fires, glass doesn't replace leaves so they catch.
+            //Will set delayed fires, glass doesn't replace leaves so they catch.
 
             case FENCE_GATE:
                 return new LinkedTrailSnowballLogic(Material.FENCE);
@@ -261,10 +256,10 @@ public abstract class SnowballLogic {
             case BOW:
                 return new SpeededSnowballLogic(1.8, slice.skip(1));
 
-             case COOKIE:
+            case COOKIE:
                 return new SpeededSnowballLogic(2, slice.skip(1));
-                
-           case PUMPKIN_PIE:
+
+            case PUMPKIN_PIE:
                 return new SpeededSnowballLogic(2.5, slice.skip(1));
 
             case CAKE:
@@ -328,6 +323,7 @@ public abstract class SnowballLogic {
 
             case CARROT_STICK:
             case FISHING_ROD:
+            case STRING:
             case OBSIDIAN:
                 return new ComeAlongSnowballLogic(hint.getType());
 

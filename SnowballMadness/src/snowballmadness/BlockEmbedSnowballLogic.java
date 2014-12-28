@@ -167,6 +167,9 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
             case DIAMOND_ORE:
                    return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
 
+            case ENDER_STONE:
+                   return new BlockEmbedSnowballLogic(Material.ENDER_STONE, Material.ENDER_PORTAL, 1);
+
             default:
                 return new BlockEmbedSnowballLogic(material, material, 1);
         }
