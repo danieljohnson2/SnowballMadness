@@ -555,7 +555,9 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method calls tick() on each snowball that has any logic.
+     * This method calls tick() on each snowball that has any logic. This also
+     * checks shouldContinue() on each snowball and removes snowball that
+     * shouldn't continue.
      */
     public static void onTick() {
         ArrayList<Map.Entry<Snowball, SnowballLogicData>> toRemove = null;
@@ -565,7 +567,7 @@ public abstract class SnowballLogic {
             SnowballLogic logic = e.getValue().logic;
             SnowballInfo info = e.getValue().info;
 
-            if (!logic.shouldContinue(snowball, info)) {
+            if (logic.shouldContinue(snowball, info)) {
                 logic.tick(snowball, info);
             } else {
                 if (toRemove == null) {
