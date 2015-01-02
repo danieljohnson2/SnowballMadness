@@ -2,6 +2,7 @@ package snowballmadness;
 
 import java.util.*;
 import com.google.common.base.*;
+import com.google.common.collect.Lists;
 
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -13,10 +14,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * This class is the base class that hosts the logic that triggers when a snowball hits a target.
+ * This class is the base class that hosts the logic that triggers when a
+ * snowball hits a target.
  *
- * We keep these in a weak hash map, so it is important that this object (and all subclasses) not hold onto a reference to a
- * Snowball, or that snowball may never be collected.
+ * We keep these in a weak hash map, so it is important that this object (and
+ * all subclasses) not hold onto a reference to a Snowball, or that snowball may
+ * never be collected.
  *
  * @author DanJ
  */
@@ -35,6 +38,24 @@ public abstract class SnowballLogic {
     }
 
     /**
+     * This method decides whether the snowball should continue to operate; for
+     * performance reasons we destroy snowball that have gone too high.
+     *
+     * This is called before tick() is, and if this returns false then tick() is
+     * not called.
+     *
+     * @param snowball The snowball that we may destroy.
+     * @param info The info about he snowball.
+     * @return True to continue with this snowball; false to silently terminate
+     * it.
+     */
+    public boolean shouldContinue(Snowball snowball, SnowballInfo info) {
+        double y = snowball.getLocation().getY();
+
+        return y > 0 && y <= snowball.getWorld().getMaxHeight();
+    }
+
+    /**
      * this is called every many times every second.
      *
      * @param snowball A snowball that gets a chance to do something.
@@ -44,7 +65,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This is called when the snowball hits something and returns teh damange to be done (which can be 0).
+     * This is called when the snowball hits something and returns teh damange
+     * to be done (which can be 0).
      *
      * @param snowball The snowball hitting something.
      * @param info Other information about the snowball.
@@ -74,11 +96,13 @@ public abstract class SnowballLogic {
     //
 
     /**
-     * This method creates a new logic, but does not start it. It chooses the logic based on 'hint', which is the stack
-     * immediately above the snowball being thrown.
+     * This method creates a new logic, but does not start it. It chooses the
+     * logic based on 'hint', which is the stack immediately above the snowball
+     * being thrown.
      *
      * @param slice The inventory slice above the snowball in the inventory.
-     * @return The new logic, not yet started or attached to a snowball, or null if the snowball will be illogical.
+     * @return The new logic, not yet started or attached to a snowball, or null
+     * if the snowball will be illogical.
      */
     public static SnowballLogic createLogic(InventorySlice slice) {
         ItemStack hint = slice.getBottomItem();
@@ -425,11 +449,12 @@ public abstract class SnowballLogic {
     // Event Handling
     //
     /**
-     * This method processes a new snowball, executing its launch() method and also recording it so the hit() method can be called
-     * later.
+     * This method processes a new snowball, executing its launch() method and
+     * also recording it so the hit() method can be called later.
      *
-     * The shooter may be provided as well; this allows us to launch snowballs from places that are not a player, but associated
-     * it with a player anyway.
+     * The shooter may be provided as well; this allows us to launch snowballs
+     * from places that are not a player, but associated it with a player
+     * anyway.
      *
      * @param inventory The inventory slice that determines the logic type.
      * @param snowball The snowball to be launched.
@@ -447,7 +472,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This overload of performLaunch takes the logic to associate with the snowball instead of an inventory.
+     * This overload of performLaunch takes the logic to associate with the
+     * snowball instead of an inventory.
      *
      * @param logic The logic to apply to the snowball; can't be null.
      * @param snowball The snowball to be launched.
@@ -464,7 +490,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method processes the impact of a snowball, and invokes the hit() method on its logic object, if it has one.
+     * This method processes the impact of a snowball, and invokes the hit()
+     * method on its logic object, if it has one.
      *
      * @param snowball The impacting snowball.
      */
@@ -499,7 +526,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method handles a projectile launch; it selects a logic and runs its launch method.
+     * This method handles a projectile launch; it selects a logic and runs its
+     * launch method.
      *
      * @param e The event data.
      */
@@ -530,17 +558,45 @@ public abstract class SnowballLogic {
      * This method calls tick() on each snowball that has any logic.
      */
     public static void onTick() {
+        ArrayList<Map.Entry<Snowball, SnowballLogicData>> toRemove = null;
+
         for (Map.Entry<Snowball, SnowballLogicData> e : inFlight.entrySet()) {
             Snowball snowball = e.getKey();
             SnowballLogic logic = e.getValue().logic;
             SnowballInfo info = e.getValue().info;
 
-            logic.tick(snowball, info);
+            if (!logic.shouldContinue(snowball, info)) {
+                logic.tick(snowball, info);
+            } else {
+                if (toRemove == null) {
+                    toRemove = Lists.newArrayList();
+                }
+
+                toRemove.add(e);
+            }
+        }
+
+        if (toRemove != null) {
+            for (Map.Entry<Snowball, SnowballLogicData> e : toRemove) {
+                Snowball snowball = e.getKey();
+                SnowballLogic logic = e.getValue().logic;
+                SnowballInfo info = e.getValue().info;
+
+                try {
+                    if (info.shouldLogMessages) {
+                        Bukkit.getLogger().info(String.format("Snowball exceeded maximum height: %s [%d]", logic, inFlight.size()));
+                    }
+                } finally {
+                    logic.end(snowball);
+                    snowball.remove();
+                }
+            }
         }
     }
 
     /**
-     * This method handles the damage a snowball does on impact, and can adjust that damage.
+     * This method handles the damage a snowball does on impact, and can adjust
+     * that damage.
      *
      * @param e The damage event.
      */
@@ -559,9 +615,10 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method increments the number of snowballs in the slot indicated; but it does this after a brief delay since changes
-     * made during the launch are ignored. If the indicated slot contains something that is not a snowball, we don't update it. If
-     * it is empty, we put one snowball in there.
+     * This method increments the number of snowballs in the slot indicated; but
+     * it does this after a brief delay since changes made during the launch are
+     * ignored. If the indicated slot contains something that is not a snowball,
+     * we don't update it. If it is empty, we put one snowball in there.
      *
      * @param plugin The plugin, used to schedule the update.
      * @param inventory The inventory to update.
@@ -609,8 +666,9 @@ public abstract class SnowballLogic {
     private static long inFlightSyncDeadline = 0;
 
     /**
-     * this class just holds the snowball logic and info for a snowball; the snowball itself must not be kept here, as this is the
-     * value of a weak-hash-map keyed on the snowballs. We don't want to keep them alive.
+     * this class just holds the snowball logic and info for a snowball; the
+     * snowball itself must not be kept here, as this is the value of a
+     * weak-hash-map keyed on the snowballs. We don't want to keep them alive.
      */
     private final static class SnowballLogicData {
 
@@ -624,8 +682,9 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This returns the number of snowballs (that have attached logic) that are currently in flight. This may count snowballs that
-     * have been unloaded or otherwise destroyed for a time; it is not exact.
+     * This returns the number of snowballs (that have attached logic) that are
+     * currently in flight. This may count snowballs that have been unloaded or
+     * otherwise destroyed for a time; it is not exact.
      *
      * @return The number of in-flight snowballs.
      */
@@ -643,7 +702,8 @@ public abstract class SnowballLogic {
      * This returns the logic and shooter for a snowball that has one.
      *
      * @param snowball The snowball of interest; can be null.
-     * @return The logic and info of the snowball, or null if it is an illogical snowball or it was null.
+     * @return The logic and info of the snowball, or null if it is an illogical
+     * snowball or it was null.
      */
     private static SnowballLogicData getData(Snowball snowball) {
         if (snowball != null) {
@@ -654,7 +714,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method registers the logic so getLogic() can find it. Logics only work once started.
+     * This method registers the logic so getLogic() can find it. Logics only
+     * work once started.
      *
      * @param snowball The snowball being launched.
      * @param info Other information about the snowball.
@@ -666,7 +727,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method unregisters this logic so it is no longer invoked; this is done when snowball hits something.
+     * This method unregisters this logic so it is no longer invoked; this is
+     * done when snowball hits something.
      *
      * @param snowball The snowball to deregister.
      */
@@ -679,8 +741,9 @@ public abstract class SnowballLogic {
     //
 
     /**
-     * This returns the of the nearest non-air block underneath 'location' that is directly over the ground. If 'locaiton' is
-     * inside the ground, we'll return a new copy of the same location.
+     * This returns the of the nearest non-air block underneath 'location' that
+     * is directly over the ground. If 'locaiton' is inside the ground, we'll
+     * return a new copy of the same location.
      *
      * @param location The starting location; this is not modified.
      * @return A new location describing the place found.
