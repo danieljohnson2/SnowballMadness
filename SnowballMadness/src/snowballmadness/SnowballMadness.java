@@ -130,9 +130,11 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         }
 
         ticker = new BukkitRunnable() {
+            private long tickCount = 0;
+            
             @Override
             public void run() {
-                SnowballLogic.onTick();
+                SnowballLogic.onTick(tickCount++);
             }
         };
 

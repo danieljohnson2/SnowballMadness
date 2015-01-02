@@ -41,8 +41,9 @@ public abstract class SnowballLogic {
      * This method decides whether the snowball should continue to operate; for
      * performance reasons we destroy snowball that have gone too high.
      *
-     * This is called before tick() is, and if this returns false then tick() is
-     * not called.
+     * This is called before tick() is, but only about 1/16th as often as
+     * tick(); snowballs can therefore exist 'outside the reservation' for a
+     * short time.
      *
      * @param snowball The snowball that we may destroy.
      * @param info The info about he snowball.
@@ -50,9 +51,23 @@ public abstract class SnowballLogic {
      * it.
      */
     public boolean shouldContinue(Snowball snowball, SnowballInfo info) {
-        double y = snowball.getLocation().getY();
+        Location here = snowball.getLocation();
+        double y = here.getY();
 
-        return y > 0 && y <= snowball.getWorld().getMaxHeight();
+        if (y < 0 || y > snowball.getWorld().getMaxHeight()) {
+            return false;
+        }
+
+        final double maxDistance = 128.0;
+        final double maxDistanceSq = maxDistance * maxDistance;
+
+        double distanceSq = info.launchLocation.distanceSquared(here);
+
+        if (distanceSq > maxDistanceSq) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -545,7 +560,8 @@ public abstract class SnowballLogic {
 
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
                 InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball, new SnowballInfo(plugin));
+                SnowballLogic logic = performLaunch(slice, snowball,
+                        new SnowballInfo(plugin, snowball.getLocation()));
 
                 if (logic != null && player.getGameMode() != GameMode.CREATIVE) {
                     replenishSnowball(plugin, inv, heldSlot);
@@ -559,15 +575,27 @@ public abstract class SnowballLogic {
      * checks shouldContinue() on each snowball and removes snowball that
      * shouldn't continue.
      */
-    public static void onTick() {
+    public static void onTick(long tickCount) {
         ArrayList<Map.Entry<Snowball, SnowballLogicData>> toRemove = null;
+
+        // we use the tick count to decide which snowballs to
+        // check shouldContinue() on; we increment this so
+        // on each tick we can check 1/16th of the snowballs.
+
+        long continuationThrottle = tickCount;
 
         for (Map.Entry<Snowball, SnowballLogicData> e : inFlight.entrySet()) {
             Snowball snowball = e.getKey();
             SnowballLogic logic = e.getValue().logic;
             SnowballInfo info = e.getValue().info;
 
-            if (logic.shouldContinue(snowball, info)) {
+            boolean shouldContinue = true;
+
+            if ((continuationThrottle & 0xF) == 0) {
+                shouldContinue = logic.shouldContinue(snowball, info);
+            }
+
+            if (shouldContinue) {
                 logic.tick(snowball, info);
             } else {
                 if (toRemove == null) {
@@ -576,6 +604,8 @@ public abstract class SnowballLogic {
 
                 toRemove.add(e);
             }
+
+            ++continuationThrottle;
         }
 
         if (toRemove != null) {
@@ -586,7 +616,7 @@ public abstract class SnowballLogic {
 
                 try {
                     if (info.shouldLogMessages) {
-                        Bukkit.getLogger().info(String.format("Snowball exceeded maximum height: %s [%d]", logic, inFlight.size()));
+                        Bukkit.getLogger().info(String.format("Snowball has left the reservation: %s [%d]", logic, inFlight.size()));
                     }
                 } finally {
                     logic.end(snowball);

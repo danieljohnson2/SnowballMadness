@@ -1,7 +1,8 @@
 package snowballmadness;
 
 import com.google.common.base.*;
-import org.bukkit.entity.*;
+import org.bukkit.*;
+import org.bukkit.entity.Snowball;
 
 /**
  * This class holds onto auxiliary information about a snowball; we pass this to
@@ -17,6 +18,10 @@ public final class SnowballInfo {
      */
     public final SnowballMadness plugin;
     /**
+     * This is the place where the snowball was launched from.
+     */
+    public final Location launchLocation;
+    /**
      * This is a modifier on the speed of a snowball; it makes snowballs fly
      * faster.
      */
@@ -31,18 +36,24 @@ public final class SnowballInfo {
      */
     public final boolean shouldLogMessages;
 
-    public SnowballInfo(SnowballMadness plugin) {
+    public SnowballInfo(SnowballMadness plugin, Location launchLocation) {
         this.plugin = Preconditions.checkNotNull(plugin);
         this.shouldLogMessages = plugin.shouldLogSnowballs();
         this.speed = 1.0;
         this.power = 1.0;
+        this.launchLocation = launchLocation.clone();
     }
 
     private SnowballInfo(double speed, double power, SnowballInfo original) {
+        this(speed, power, original.launchLocation, original);
+    }
+
+    private SnowballInfo(double speed, double power, Location launchLocation, SnowballInfo original) {
         this.plugin = original.plugin;
         this.shouldLogMessages = original.shouldLogMessages;
         this.speed = speed;
         this.power = power;
+        this.launchLocation = launchLocation.clone();
     }
 
     /**
