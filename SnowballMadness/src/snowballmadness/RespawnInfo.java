@@ -25,7 +25,7 @@ public final class RespawnInfo {
      * This is the maximum number of milliseconds between consecutive respawns;
      * if you respawn faster than this, we intervene by flinging you about.
      */
-    private static final long flingRespawnMillis = 15000;
+    private static final long flingRespawnMillis = 30000;
     /**
      * This holds onto a player info for every player who has respawned, but
      * might be respawning too fast.

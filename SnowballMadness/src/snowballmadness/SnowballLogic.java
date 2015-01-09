@@ -446,7 +446,7 @@ public abstract class SnowballLogic {
                     protected void initializeEntity(Skeleton spawned, SnowballInfo info) {
                         //my skellington army of undead minions!
                         if (info.power > 1) {
-                            //you have to use at least some glowstone to get it to work, but then
+                            //you have to use at least some glowstone to get the special stuff to work, but then
                             //the real gains are in speed
                             super.initializeEntity(spawned, info);
                             spawned.setMaxHealth(spawned.getMaxHealth() * info.power);

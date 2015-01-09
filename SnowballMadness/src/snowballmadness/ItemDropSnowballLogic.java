@@ -69,7 +69,7 @@ public class ItemDropSnowballLogic extends SnowballLogic {
         EntityType entityDropped = getEntityToSpawn(snowball, info);
 
         if (entityDropped != null) {
-            if (world.getLivingEntities().size() < 9000) {
+            if (world.getLivingEntities().size() < 900) {
                 if (entityDropped == EntityType.PIG_ZOMBIE) {
                     //make pig zombies angry by default
                     PigZombie piggy = (PigZombie) world.spawnEntity(location, entityDropped);
