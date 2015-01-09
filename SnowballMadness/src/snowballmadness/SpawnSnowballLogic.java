@@ -75,8 +75,10 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
         Class<? extends TEntity> spawnClass = pickSpawnClass(adjusted, info);
 
         if (spawnClass != null && canSpawnAt(adjusted, info)) {
+            if (world.getLivingEntities().size() < 9000) {
             TEntity spawned = world.spawn(adjusted, spawnClass);
             initializeEntity(spawned, info);
+            }
         }
     }
 

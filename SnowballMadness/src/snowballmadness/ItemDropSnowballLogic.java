@@ -7,13 +7,10 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
 
 /**
- * This logic drops an item at the point of impact; you can provide several
- * materials, and it chooses randomly between them. You can also provide a
- * chance to spawn, a number for 0 to 1.0; this is the chance that you get
- * anything, where 1.0 is 100%.
+ * This logic drops an item at the point of impact; you can provide several materials, and it chooses randomly between them. You
+ * can also provide a chance to spawn, a number for 0 to 1.0; this is the chance that you get anything, where 1.0 is 100%.
  *
- * You can further subclass this to provide an entity spawn as well, which is
- * awkward in itself but keeps the constructors clean.
+ * You can further subclass this to provide an entity spawn as well, which is awkward in itself but keeps the constructors clean.
  *
  * @author DanJ
  */
@@ -33,9 +30,8 @@ public class ItemDropSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This method decides what entity to spawn; by default it returns null and
-     * we spawn none. however, this lets you tack on an entity with your item
-     * when desired.
+     * This method decides what entity to spawn; by default it returns null and we spawn none. however, this lets you tack on an
+     * entity with your item when desired.
      *
      * @param snowball The snowball whose impact spawns things.
      * @param info Info about the snowball.
@@ -73,7 +69,16 @@ public class ItemDropSnowballLogic extends SnowballLogic {
         EntityType entityDropped = getEntityToSpawn(snowball, info);
 
         if (entityDropped != null) {
-            world.spawnEntity(location, entityDropped);
+            if (world.getLivingEntities().size() < 9000) {
+                if (entityDropped == EntityType.PIG_ZOMBIE) {
+                    //make pig zombies angry by default
+                    PigZombie piggy = (PigZombie) world.spawnEntity(location, entityDropped);
+                    piggy.setAnger(32767);
+                    //not working unless they're hit by a snowball which is normal
+                } else {
+                    world.spawnEntity(location, entityDropped);
+                }
+            }
         }
     }
 }

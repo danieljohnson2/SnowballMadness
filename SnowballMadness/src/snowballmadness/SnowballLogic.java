@@ -8,18 +8,17 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * This class is the base class that hosts the logic that triggers when a
- * snowball hits a target.
+ * This class is the base class that hosts the logic that triggers when a snowball hits a target.
  *
- * We keep these in a weak hash map, so it is important that this object (and
- * all subclasses) not hold onto a reference to a Snowball, or that snowball may
- * never be collected.
+ * We keep these in a weak hash map, so it is important that this object (and all subclasses) not hold onto a reference to a
+ * Snowball, or that snowball may never be collected.
  *
  * @author DanJ
  */
@@ -38,17 +37,15 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method decides whether the snowball should continue to operate; for
-     * performance reasons we destroy snowball that have gone too high.
+     * This method decides whether the snowball should continue to operate; for performance reasons we destroy snowball that have
+     * gone too high.
      *
-     * This is called before tick() is, but only about 1/16th as often as
-     * tick(); snowballs can therefore exist 'outside the reservation' for a
-     * short time.
+     * This is called before tick() is, but only about 1/16th as often as tick(); snowballs can therefore exist 'outside the
+     * reservation' for a short time.
      *
      * @param snowball The snowball that we may destroy.
      * @param info The info about he snowball.
-     * @return True to continue with this snowball; false to silently terminate
-     * it.
+     * @return True to continue with this snowball; false to silently terminate it.
      */
     public boolean shouldContinue(Snowball snowball, SnowballInfo info) {
         Location here = snowball.getLocation();
@@ -80,8 +77,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This is called when the snowball hits something and returns teh damange
-     * to be done (which can be 0).
+     * This is called when the snowball hits something and returns teh damange to be done (which can be 0).
      *
      * @param snowball The snowball hitting something.
      * @param info Other information about the snowball.
@@ -111,13 +107,11 @@ public abstract class SnowballLogic {
     //
 
     /**
-     * This method creates a new logic, but does not start it. It chooses the
-     * logic based on 'hint', which is the stack immediately above the snowball
-     * being thrown.
+     * This method creates a new logic, but does not start it. It chooses the logic based on 'hint', which is the stack
+     * immediately above the snowball being thrown.
      *
      * @param slice The inventory slice above the snowball in the inventory.
-     * @return The new logic, not yet started or attached to a snowball, or null
-     * if the snowball will be illogical.
+     * @return The new logic, not yet started or attached to a snowball, or null if the snowball will be illogical.
      */
     public static SnowballLogic createLogic(InventorySlice slice) {
         ItemStack hint = slice.getBottomItem();
@@ -336,9 +330,6 @@ public abstract class SnowballLogic {
             case GHAST_TEAR:
                 return SpawnSnowballLogic.fromEntityClass(Ghast.class);
 
-            case ROTTEN_FLESH:
-                return SpawnSnowballLogic.fromEntityClass(Zombie.class);
-
             case ENCHANTMENT_TABLE:
                 return new EnchantingTableSnowballLogic();
 
@@ -346,7 +337,7 @@ public abstract class SnowballLogic {
                 return new ItemDropSnowballLogic(Material.ROTTEN_FLESH) {
                     @Override
                     protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
-                        if (info.power > 8) {
+                        if (info.power > 2) {
                             return EntityType.PIG_ZOMBIE;
                         } else {
                             return null;
@@ -422,7 +413,11 @@ public abstract class SnowballLogic {
                 return new ItemDropSnowballLogic(Material.LEASH) {
                     @Override
                     protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
-                        return EntityType.HORSE;
+                        if (info.power > 2) {
+                            return EntityType.HORSE;
+                        } else {
+                            return null;
+                        }
                     }
                 };
 
@@ -446,14 +441,81 @@ public abstract class SnowballLogic {
             //alternate path to leather -> book -> enchanting table!
 
             case JACK_O_LANTERN:
-                return SpawnSnowballLogic.fromEntityClass(Skeleton.class, WitherSkull.class, 8.0);
+                return new SpawnSnowballLogic<Skeleton>(Skeleton.class) {
+                    @Override
+                    protected void initializeEntity(Skeleton spawned, SnowballInfo info) {
+                        //my skellington army of undead minions!
+                        if (info.power > 1) {
+                            //you have to use at least some glowstone to get it to work, but then
+                            //the real gains are in speed
+                            super.initializeEntity(spawned, info);
+                            spawned.setMaxHealth(spawned.getMaxHealth() * info.power);
+                            spawned.setHealth(spawned.getMaxHealth());
+                            if (info.speed > 1) {
+                                //if you speed the snowballs, you get speedyjumpyskeles
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, (int) info.speed));
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) Math.pow(info.speed, 2)));
+                            }
+
+                            /*
+                             Skeleton skeleton = spawned;
+                             ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                             SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                             meta.setOwner(info.shooter.getName());
+                             skull.setItemMeta(meta);
+                             skeleton.getEquipment().setHelmet(skull);
+                             // this part will only work right if you delay it by one tick
+                             // can't add armor either, for that reason. IF the one tick BukkitRunnable
+                             // scheduled task is added, we can make an army of minions all with our face and whatever
+                             // armor we are wearing, just like us. THIS IS AWESOME Y/Y though they fight us too
+                             */
+
+                        }
+                    }
+                };
+
+            case ROTTEN_FLESH:
+                return new SpawnSnowballLogic<Zombie>(Zombie.class) {
+                    @Override
+                    protected void initializeEntity(Zombie spawned, SnowballInfo info) {
+                        //my zombie army of yucky minions!
+                        if (info.power > 1) {
+                            //you have to use at least some glowstone to get it to work, but then
+                            //the real gains are in speed
+                            super.initializeEntity(spawned, info);
+                            spawned.setMaxHealth(spawned.getMaxHealth() * info.power);
+                            spawned.setHealth(spawned.getMaxHealth());
+                            if (info.speed > 1) {
+                                //if you speed the snowballs, you get speedyjumpyskeles
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, (int) info.speed));
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) Math.pow(info.speed, 2)));
+                            }
+
+                            /*
+                             Zombie Zombie = spawned;
+                             ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                             SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                             meta.setOwner(info.shooter.getName());
+                             skull.setItemMeta(meta);
+                             skeleton.getEquipment().setHelmet(skull);
+                             // this part will only work right if you delay it by one tick
+                             // can't add armor either, for that reason. IF the one tick BukkitRunnable
+                             // scheduled task is added, we can make an army of minions all with our face and whatever
+                             // armor we are wearing, just like us. THIS IS AWESOME Y/Y though they fight us too
+                             */
+
+                        }
+                    }
+                };
+
 
             case SKULL_ITEM:
                 SkullType skullType = SkullType.values()[hint.getDurability()];
-                return SpawnSnowballLogic.fromSkullType(skullType);
 
+                return SpawnSnowballLogic.fromSkullType(skullType);
             case FEATHER:
                 return new FeatherSnowballLogic();
+
 
             default:
                 return null;
@@ -464,12 +526,11 @@ public abstract class SnowballLogic {
     // Event Handling
     //
     /**
-     * This method processes a new snowball, executing its launch() method and
-     * also recording it so the hit() method can be called later.
+     * This method processes a new snowball, executing its launch() method and also recording it so the hit() method can be called
+     * later.
      *
-     * The shooter may be provided as well; this allows us to launch snowballs
-     * from places that are not a player, but associated it with a player
-     * anyway.
+     * The shooter may be provided as well; this allows us to launch snowballs from places that are not a player, but associated
+     * it with a player anyway.
      *
      * @param inventory The inventory slice that determines the logic type.
      * @param snowball The snowball to be launched.
@@ -487,8 +548,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This overload of performLaunch takes the logic to associate with the
-     * snowball instead of an inventory.
+     * This overload of performLaunch takes the logic to associate with the snowball instead of an inventory.
      *
      * @param logic The logic to apply to the snowball; can't be null.
      * @param snowball The snowball to be launched.
@@ -505,8 +565,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method processes the impact of a snowball, and invokes the hit()
-     * method on its logic object, if it has one.
+     * This method processes the impact of a snowball, and invokes the hit() method on its logic object, if it has one.
      *
      * @param snowball The impacting snowball.
      */
@@ -541,8 +600,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method handles a projectile launch; it selects a logic and runs its
-     * launch method.
+     * This method handles a projectile launch; it selects a logic and runs its launch method.
      *
      * @param e The event data.
      */
@@ -561,7 +619,7 @@ public abstract class SnowballLogic {
             if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
                 InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
                 SnowballLogic logic = performLaunch(slice, snowball,
-                        new SnowballInfo(plugin, snowball.getLocation()));
+                        new SnowballInfo(plugin, snowball.getLocation(), player));
 
                 if (logic != null && player.getGameMode() != GameMode.CREATIVE) {
                     replenishSnowball(plugin, inv, heldSlot);
@@ -571,9 +629,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method calls tick() on each snowball that has any logic. This also
-     * checks shouldContinue() on each snowball and removes snowball that
-     * shouldn't continue.
+     * This method calls tick() on each snowball that has any logic. This also checks shouldContinue() on each snowball and
+     * removes snowball that shouldn't continue.
      */
     public static void onTick(long tickCount) {
         ArrayList<Map.Entry<Snowball, SnowballLogicData>> toRemove = null;
@@ -627,8 +684,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method handles the damage a snowball does on impact, and can adjust
-     * that damage.
+     * This method handles the damage a snowball does on impact, and can adjust that damage.
      *
      * @param e The damage event.
      */
@@ -647,10 +703,9 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method increments the number of snowballs in the slot indicated; but
-     * it does this after a brief delay since changes made during the launch are
-     * ignored. If the indicated slot contains something that is not a snowball,
-     * we don't update it. If it is empty, we put one snowball in there.
+     * This method increments the number of snowballs in the slot indicated; but it does this after a brief delay since changes
+     * made during the launch are ignored. If the indicated slot contains something that is not a snowball, we don't update it. If
+     * it is empty, we put one snowball in there.
      *
      * @param plugin The plugin, used to schedule the update.
      * @param inventory The inventory to update.
@@ -698,9 +753,8 @@ public abstract class SnowballLogic {
     private static long inFlightSyncDeadline = 0;
 
     /**
-     * this class just holds the snowball logic and info for a snowball; the
-     * snowball itself must not be kept here, as this is the value of a
-     * weak-hash-map keyed on the snowballs. We don't want to keep them alive.
+     * this class just holds the snowball logic and info for a snowball; the snowball itself must not be kept here, as this is the
+     * value of a weak-hash-map keyed on the snowballs. We don't want to keep them alive.
      */
     private final static class SnowballLogicData {
 
@@ -714,9 +768,8 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This returns the number of snowballs (that have attached logic) that are
-     * currently in flight. This may count snowballs that have been unloaded or
-     * otherwise destroyed for a time; it is not exact.
+     * This returns the number of snowballs (that have attached logic) that are currently in flight. This may count snowballs that
+     * have been unloaded or otherwise destroyed for a time; it is not exact.
      *
      * @return The number of in-flight snowballs.
      */
@@ -734,8 +787,7 @@ public abstract class SnowballLogic {
      * This returns the logic and shooter for a snowball that has one.
      *
      * @param snowball The snowball of interest; can be null.
-     * @return The logic and info of the snowball, or null if it is an illogical
-     * snowball or it was null.
+     * @return The logic and info of the snowball, or null if it is an illogical snowball or it was null.
      */
     private static SnowballLogicData getData(Snowball snowball) {
         if (snowball != null) {
@@ -746,8 +798,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method registers the logic so getLogic() can find it. Logics only
-     * work once started.
+     * This method registers the logic so getLogic() can find it. Logics only work once started.
      *
      * @param snowball The snowball being launched.
      * @param info Other information about the snowball.
@@ -759,8 +810,7 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method unregisters this logic so it is no longer invoked; this is
-     * done when snowball hits something.
+     * This method unregisters this logic so it is no longer invoked; this is done when snowball hits something.
      *
      * @param snowball The snowball to deregister.
      */
@@ -773,9 +823,8 @@ public abstract class SnowballLogic {
     //
 
     /**
-     * This returns the of the nearest non-air block underneath 'location' that
-     * is directly over the ground. If 'locaiton' is inside the ground, we'll
-     * return a new copy of the same location.
+     * This returns the of the nearest non-air block underneath 'location' that is directly over the ground. If 'locaiton' is
+     * inside the ground, we'll return a new copy of the same location.
      *
      * @param location The starting location; this is not modified.
      * @return A new location describing the place found.
