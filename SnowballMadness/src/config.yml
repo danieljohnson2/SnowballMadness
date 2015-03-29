@@ -1,2 +1,12 @@
+# nuke may be given an array of world-directories or files to reset on server
+# startup; these files are found in the root minecraft directory.
+# Ex:
+# nuke: [world, world_nether, world_the_end]
+#
+# Directories and most files are deleted, but .json files are set to be empty
+# as Minecraft won't tolerate having them deleted while it is running.
 nuke:
+# logsnowballs may be set to true to generae a lot of logging information to
+# the console when snowballs are used. This hurts performance, but it is useful
+# for debugging.
 logsnowballs: false
