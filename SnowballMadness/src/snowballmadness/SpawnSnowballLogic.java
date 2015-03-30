@@ -5,6 +5,9 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * This logic creates an entity at the point of impact. We can create a
@@ -69,15 +72,22 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * @param location The place to spawn at.
      * @param info The snowball info in effect, if you need it.
      */
-    private final void spawnEntity(Location location, SnowballInfo info) {
+    private final void spawnEntity(Location location, final SnowballInfo info) {
         World world = location.getWorld();
         Location adjusted = location.clone();
         Class<? extends TEntity> spawnClass = pickSpawnClass(adjusted, info);
 
         if (spawnClass != null && canSpawnAt(adjusted, info)) {
             if (world.getLivingEntities().size() < 900) {
-            TEntity spawned = world.spawn(adjusted, spawnClass);
-            initializeEntity(spawned, info);
+                final TEntity spawned = world.spawn(adjusted, spawnClass);
+                initializeEntity(spawned, info);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        equipEntity(spawned, info);
+                    }
+                }.runTaskLater(info.plugin, 1);
             }
         }
     }
@@ -88,7 +98,7 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      *
      * @param location The location we proposed to spawn at.
      * @param info The snowball info of the snowball.
-     * @return True toa ll the spawn; false to spawn nothing.
+     * @return True to allow the spawn; false to spawn nothing.
      */
     protected boolean canSpawnAt(Location location, SnowballInfo info) {
         //we're only going to spawn an entity if the block is breathable space
@@ -104,7 +114,7 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * This method is also allowed to alter the location (it's a copy); this
      * will change where the entity spawns.
      *
-     * this method cna return null to not spawn anything.
+     * This method can return null to not spawn anything.
      *
      * @param location The place the snowball hit. This method may modify the
      * location.
@@ -121,13 +131,26 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
     }
 
     /**
-     * This method is called on the spawned entity can can initialize it; if we
+     * This method is called on the spawned entity to initialize it; if we
      * decide not to spawn the entity, this method is never called.
      *
      * @param spawned The newly spawned thing.
-     * @param info The info of the snowball the spawned it.
+     * @param info The info of the snowball that spawned it.
      */
     protected void initializeEntity(TEntity spawned, SnowballInfo info) {
+    }
+
+    /**
+     * This method is called on the spawned entity to populate it with
+     * equipment, if appropriate. If decide not to spawn the entity, this method
+     * is never called. Unlike initializeEntity(), this method is called only
+     * after the entity has entered the world (it is delayed by one tick)- we
+     * can't get equipment to 'stick' without this delay.
+     *
+     * @param spawned The newly spawned thing.
+     * @param info The info of the snowball that spawned it.
+     */
+    protected void equipEntity(TEntity spawned, SnowballInfo info) {
     }
 
     /**
