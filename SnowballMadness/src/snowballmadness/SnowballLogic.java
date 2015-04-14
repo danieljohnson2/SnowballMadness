@@ -764,9 +764,12 @@ public abstract class SnowballLogic {
                         spawned.getEquipment().setItemInHand(gear);
                         spawned.getEquipment().setItemInHandDropChance(1.0f);
                     }
-                    spawned.setCustomName(info.shooter.getInventory().getItem(27).getItemMeta().getDisplayName());
-                    if (spawned.getCustomName() == null) {
+
+                    String mobName = info.shooter.getInventory().getItem(27).getItemMeta().getDisplayName();
+                    if (mobName == null) {
                         spawned.setCustomName(info.shooter.getName() + "'s Minion");
+                    } else {
+                        spawned.setCustomName(mobName);
                     }
                     spawned.setCustomNameVisible(true);
                 }
@@ -819,9 +822,11 @@ public abstract class SnowballLogic {
                         spawned.getEquipment().setItemInHand(gear);
                         spawned.getEquipment().setItemInHandDropChance(1.0f);
                     }
-                    spawned.setCustomName(info.shooter.getInventory().getItem(27).getItemMeta().getDisplayName());
-                    if (spawned.getCustomName() == null) {
+                    String mobName = info.shooter.getInventory().getItem(27).getItemMeta().getDisplayName();
+                    if (mobName == null) {
                         spawned.setCustomName(info.shooter.getName() + "'s Minion");
+                    } else {
+                        spawned.setCustomName(mobName);
                     }
                     spawned.setCustomNameVisible(true);
                 }
