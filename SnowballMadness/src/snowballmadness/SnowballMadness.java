@@ -18,8 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 /**
- * This is the plug-in class for this mod; it handles events and forwards them
- * to logic objects.
+ * This is the plug-in class for this mod; it handles events and forwards them to logic objects.
  *
  * @author DanJ
  */
@@ -64,8 +63,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     /**
-     * This deletes a directory and all its contents, because Java does not
-     * provide that. Stupid Java!
+     * This deletes a directory and all its contents, because Java does not provide that. Stupid Java!
      *
      * @param directory The directory (or file) to delete.
      */
@@ -83,9 +81,8 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     /**
-     * This method removes the content of a JSON file, which we need to do
-     * because when we are loading, it's too late for Minecraft to recreate such
-     * a file. So we just empty it before it is read.
+     * This method removes the content of a JSON file, which we need to do because when we are loading, it's too late for
+     * Minecraft to recreate such a file. So we just empty it before it is read.
      *
      * @param file The JSON file to overwrite with empty content.
      */
@@ -98,9 +95,8 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     /**
-     * This extracts the file extension from the file given. The extension
-     * returned does not include the '.' preceeding it. If the file has no
-     * extension, this method returns "".
+     * This extracts the file extension from the file given. The extension returned does not include the '.' preceeding it. If the
+     * file has no extension, this method returns "".
      *
      * @param file The file whose extension is wanted.
      * @return The extension, without the '.'.
@@ -131,7 +127,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
         ticker = new BukkitRunnable() {
             private long tickCount = 0;
-            
+
             @Override
             public void run() {
                 SnowballLogic.onTick(tickCount++);
@@ -182,21 +178,26 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     /**
-     * This method gives a player a snowball in a designated snowball slot,
-     * provided this slot is empty.
+     * This method gives a player a snowball in a designated snowball slot, provided this slot is empty.
      *
      * @param player The player to be gifted with snow!
      */
     @SuppressWarnings("deprecation")
     private void bestowSnowball(Player player) {
         PlayerInventory inventory = player.getInventory();
-        final int slotNumber = 8;
-
-        ItemStack oldStack = inventory.getItem(slotNumber);
-
+        ItemStack oldStack = inventory.getItem(8);
         if (oldStack == null || oldStack.getType() == Material.SNOW_BALL) {
-            inventory.setItem(slotNumber, new ItemStack(Material.SNOW_BALL, 16));
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 16));
             player.updateInventory();
         }
+        oldStack = inventory.getItem(35);
+        if (oldStack == null || oldStack.getType() == Material.SULPHUR ) {
+            inventory.setItem(35, new ItemStack(Material.SULPHUR, 5));
+            player.updateInventory();
+        }
+        //turns Snowball Madness into a casual 'drop by and blow up spawn' recreation, and fresh respawns
+        //immediately have a rather weak but noisy weapon to use on whatever they want. TNT can be crafted rapidly,
+        //and the game concept can be grasped by looking at how inventory is set up on spawn.
+
     }
 }
