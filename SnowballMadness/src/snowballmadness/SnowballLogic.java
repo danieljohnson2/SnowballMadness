@@ -324,6 +324,8 @@ public abstract class SnowballLogic {
                 return new KapwingSnowballLogic(hint.getAmount(), slice.skip(1));
 
             case GRASS:
+                return new RegenChunkOnlySnowballLogic();
+                
             case DIRT:
                 return new RegenerationSnowballLogic();
 

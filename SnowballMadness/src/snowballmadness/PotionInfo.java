@@ -165,7 +165,7 @@ public final class PotionInfo {
             @Override
             public SnowballLogic createLogic(PotionInfo info) {
                 //regen 0:45 requires ghast tear, rare
-                return new RegenerationSnowballLogic();
+                return new RegenChunkOnlySnowballLogic();
             }
         },
         SWIFTNESS(2) {
