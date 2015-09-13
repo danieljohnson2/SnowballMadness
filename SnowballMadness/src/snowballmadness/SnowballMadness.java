@@ -191,13 +191,14 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             player.updateInventory();
         }
         oldStack = inventory.getItem(35);
-        if (oldStack == null || oldStack.getType() == Material.SULPHUR ) {
-            inventory.setItem(35, new ItemStack(Material.SULPHUR, 5));
+        if (oldStack == null || oldStack.getType() == Material.ENDER_PEARL ) {
+            inventory.setItem(7, new ItemStack(Material.ENDER_PEARL, 16));
             player.updateInventory();
         }
-        //turns Snowball Madness into a casual 'drop by and blow up spawn' recreation, and fresh respawns
-        //immediately have a rather weak but noisy weapon to use on whatever they want. TNT can be crafted rapidly,
-        //and the game concept can be grasped by looking at how inventory is set up on spawn.
+        //new approach: we give players ender chests right away, and do not delete playerdata in reset.
+        //That way, you can gradually accumulate stuff but there's always a new random world, and
+        //everything you want to keep permanently must remain within one ender chest.
+        //Also, you can ender pearl out of trouble with 16 ender pearls on the hotbar.
 
     }
 }
