@@ -166,13 +166,14 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-        bestowSnowball(e.getPlayer());
+        Player player = e.getPlayer();
+        bestowSnowball(player);
+        RespawnInfo.checkRespawn(player, this);
     }
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
         Player player = e.getPlayer();
-
         bestowSnowball(player);
         RespawnInfo.checkRespawn(player, this);
     }
@@ -190,8 +191,8 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 16));
             player.updateInventory();
         }
-        oldStack = inventory.getItem(35);
-        if (oldStack == null || oldStack.getType() == Material.ENDER_PEARL ) {
+        oldStack = inventory.getItem(7);
+        if (oldStack == null || oldStack.getType() == Material.ENDER_PEARL) {
             inventory.setItem(7, new ItemStack(Material.ENDER_PEARL, 16));
             player.updateInventory();
         }
