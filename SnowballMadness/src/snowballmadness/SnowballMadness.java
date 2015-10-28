@@ -1,21 +1,19 @@
 package snowballmadness;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.*;
 import com.google.common.io.Files;
 import java.io.*;
 import java.util.*;
 import org.bukkit.*;
+import org.bukkit.BanList.Type;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 /**
  * This is the plug-in class for this mod; it handles events and forwards them to logic objects.
@@ -26,6 +24,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
     private BukkitRunnable ticker;
     private boolean shouldLogSnowballs;
+    private boolean unbanPlayers;
 
     /**
      * This returns true if we should be logging snowball activity.
@@ -36,12 +35,23 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         return shouldLogSnowballs;
     }
 
+    /**
+     * This returns true if we should unban all players on startup.
+     *
+     * @return True to unban all playerss.
+     */
+    public boolean unbanPlayers() {
+        return unbanPlayers;
+    }
+
     @Override
     public void onLoad() {
         super.onLoad();
 
         FileConfiguration config = getConfig();
         shouldLogSnowballs = config.getBoolean("logsnowballs", false);
+        unbanPlayers = config.getBoolean("unbanPlayers", false);
+
         List<String> toNuke = config.getStringList("nuke");
 
         for (String victim : toNuke) {
@@ -60,6 +70,19 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 }
             }
         }
+
+
+        /*
+
+        if (unbanPlayers == true) {
+            BanList banList = this.getServer().getBanList(BanList.Type.NAME);
+            for (BanEntry entry : banList.getBanEntries()) {
+                String name = entry.getTarget();
+                banList.pardon(name);
+            }
+        }
+        */
+
     }
 
     /**
