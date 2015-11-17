@@ -62,8 +62,8 @@ public final class RespawnInfo {
         }
         
         while (foundSpawn == false) {
-            randX = -1000 + Math.random() * 2001;
-            randZ = -1000 + Math.random() * 2001;
+            randX = -2000 + Math.random() * 4001;
+            randZ = -2000 + Math.random() * 4001;
             World world = player.getWorld();
             Location loc = new Location(player.getWorld(), randX, 127, randZ);
             world.getChunkAt(loc).load();
