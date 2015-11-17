@@ -55,6 +55,12 @@ public final class RespawnInfo {
          * immediate vicinity of the spawn location for solid ground that doesn't include any bad blocks.
          */
         foundSpawn = false;
+        
+        if (player.hasPlayedBefore()) {
+            foundSpawn = true;
+            //crazy random only on first logon ever
+        }
+        
         while (foundSpawn == false) {
             randX = -1000 + Math.random() * 2001;
             randZ = -1000 + Math.random() * 2001;
