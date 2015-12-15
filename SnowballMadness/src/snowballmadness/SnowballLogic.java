@@ -221,18 +221,19 @@ public abstract class SnowballLogic {
                 return new KnockbackSnowballLogic(hint.getType());
 
             case LEAVES:
-            case STONE:
-            case SMOOTH_BRICK:
             case IRON_FENCE:
                 return new BoxSnowballLogic(hint.getType());
             //all structures that can be broken with any pick, but can be
             //large with use of glowstone. Provides a defensive game
 
             case GLASS:
-                return new BoxSnowballLogic(Material.GLASS, Material.AIR);
+            case STONE:
+            case SMOOTH_BRICK:
+            case MOSSY_COBBLESTONE:
+                return new SkeletonBoxSnowballLogic(hint.getType());
 
             case GLASS_BOTTLE:
-                return new RingSnowballLogic(Material.GLASS);
+                return new BoxSnowballLogic(Material.GLASS, Material.AIR);
 
             case POTION:
                 return PotionInfo.fromItemStack(hint).createPotionLogic();
@@ -243,12 +244,16 @@ public abstract class SnowballLogic {
             case WEB:
             case WOOD:
             case LOG:
-            case MOSSY_COBBLESTONE:
                 return new RingSnowballLogic(hint.getType());
 
+            case STEP:
+                return new WalkwaySnowballLogic(hint);
+
             case TORCH:
-                return new BoxSnowballLogic(Material.GLASS, Material.STATIONARY_LAVA); //gives you a tiny lava box.
-            //Will set delayed fires, glass doesn't replace leaves so they catch.
+            case REDSTONE_TORCH_ON:
+            case REDSTONE_TORCH_OFF:
+                return new TorchPlaceSnowballLogic(hint.getType());
+            //let's just allow people to light stuff, what the heck. So convenient.
 
             case FENCE_GATE:
                 return new LinkedTrailSnowballLogic(Material.FENCE);
@@ -325,7 +330,7 @@ public abstract class SnowballLogic {
 
             case GRASS:
                 return new RegenChunkOnlySnowballLogic();
-                
+
             case DIRT:
                 return new RegenerationSnowballLogic();
 
