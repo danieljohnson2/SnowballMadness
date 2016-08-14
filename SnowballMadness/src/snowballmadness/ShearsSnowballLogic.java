@@ -8,8 +8,8 @@ import org.bukkit.entity.*;
 import org.bukkit.util.Vector;
 
 /**
- * This logic replaces leaves or grass or flower blocks with air. It basically
- * shaves everything, with the shears. No special purpose beyond mowing lawns.
+ * This logic replaces leaves or grass or flower blocks with air. It basically shaves everything, with the shears. No special
+ * purpose beyond mowing lawns.
  *
  * @author chrisjohnson
  */
@@ -22,7 +22,7 @@ public class ShearsSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        final int radius = (int) Math.sqrt(64 * info.power);
+        final int radius = (int) Math.sqrt(32 * info.power);
         final double distanceSquaredLimit = (radius * (double) radius);
 
         //size is heavily dependent on tool type, power expands so aggressively with
@@ -72,28 +72,13 @@ public class ShearsSnowballLogic extends SnowballLogic {
                 || (material == Material.DEAD_BUSH)
                 || (material == Material.DEAD_BUSH)
                 || (material == Material.DEAD_BUSH)
-                || (material == Material.SNOW && (extraPower > 1)) //power it and you can shovel snow
-
-                || (material == Material.WATER_LILY && (extraPower > 8))
-                || (material == Material.LOG && (extraPower > 8))
-                || (material == Material.LOG_2 && (extraPower > 8))
-                || (material == Material.WOOD && (extraPower > 8))
-                || (material == Material.CACTUS && (extraPower > 8))
-                || (material == Material.CROPS && (extraPower > 8))
-                || (material == Material.HAY_BLOCK && (extraPower > 8))
-                || (material == Material.HUGE_MUSHROOM_1 && (extraPower > 8))
-                || (material == Material.HUGE_MUSHROOM_2 && (extraPower > 8))
-                || (material == Material.MELON && (extraPower > 8))
-                || (material == Material.MELON_STEM && (extraPower > 8))
-                || (material == Material.POTATO && (extraPower > 8))
-                || (material == Material.PUMPKIN && (extraPower > 8))
-                || (material == Material.PUMPKIN_STEM && (extraPower > 8)) //double glowstone and it attacks crops & wood
-
-                || (material == Material.DIRT && (extraPower > 11)) //one glowstone block and one nether star and
-                || (material == Material.SAND && (extraPower > 11))
-                //you can get the weird behavior where just the grass is left floating over space where dirt would be
-
-                || (material == Material.GRASS && (extraPower > 15))
-                || (material == Material.GRAVEL && (extraPower > 15)); //double nether star and it wipes out non-rock!
+                || (material == Material.SNOW && (extraPower > 3.0)) //level 10 and you can shovel snow
+                || (material == Material.CACTUS && (extraPower > 3.0)) //and clear cacti
+                || (material == Material.CROPS && (extraPower < 5.5))
+                || (material == Material.MELON && (extraPower < 5.5))
+                || (material == Material.MELON_STEM && (extraPower < 5.5))
+                || (material == Material.POTATO && (extraPower < 5.5)) //under level 31 you wipe crops too
+                || (material == Material.PUMPKIN && (extraPower < 5.5)) //over level 30 you have the control not to
+                || (material == Material.PUMPKIN_STEM && (extraPower < 5.5));
     }
 }

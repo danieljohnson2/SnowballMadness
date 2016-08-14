@@ -30,7 +30,8 @@ public final class SnowballInfo {
      */
     public final double speed;
     /**
-     * This is a modifier on the power of a snowball; different snowballs treat this differently.
+     * This gives the logic your EXP: 4.5 and up means level 21, 5.5 and up means level 31.
+     * Used to scale many magic effects
      */
     public final double power;
     /**
@@ -42,9 +43,9 @@ public final class SnowballInfo {
         this.plugin = Preconditions.checkNotNull(plugin);
         this.shouldLogMessages = plugin.shouldLogSnowballs();
         this.speed = 1.0;
-        this.power = 1.0;
         this.launchLocation = launchLocation.clone();
         this.shooter = shooter.getPlayer();
+        this.power = Math.max(1.0, Math.sqrt(shooter.getLevel()));
     }
 
     private SnowballInfo(double speed, double power, SnowballInfo original) {
@@ -55,9 +56,9 @@ public final class SnowballInfo {
         this.plugin = original.plugin;
         this.shouldLogMessages = original.shouldLogMessages;
         this.speed = speed;
-        this.power = power;
         this.launchLocation = launchLocation.clone();
         this.shooter = shooter.getPlayer();
+        this.power = Math.max(1.0, Math.sqrt(shooter.getLevel()));
 
 
     }
@@ -70,15 +71,5 @@ public final class SnowballInfo {
      */
     public SnowballInfo speeded(double factor) {
         return new SnowballInfo(speed * factor, power, this);
-    }
-
-    /**
-     * This returns a new info whose power has been scaled by the factor given.
-     *
-     * @param factor The factor by which we adjust the power.
-     * @return A new info object.
-     */
-    public SnowballInfo powered(double factor) {
-        return new SnowballInfo(speed, power * factor, this);
     }
 }

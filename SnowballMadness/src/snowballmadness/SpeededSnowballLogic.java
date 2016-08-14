@@ -4,8 +4,7 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.util.Vector;
 
 /**
- * This is a snowball that flies faster than normal, and can apply a second
- * logic that will be given the increased speed.
+ * This is a snowball that flies faster than normal, and can apply a second logic that will be given the increased speed.
  *
  * @author DanJ
  */
@@ -23,7 +22,6 @@ public class SpeededSnowballLogic extends ChainableSnowballLogic {
         Vector v = snowball.getVelocity().clone();
         v.multiply(factor * info.speed);
         snowball.setVelocity(v);
-
         super.launch(snowball, info);
     }
 

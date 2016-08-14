@@ -36,12 +36,6 @@ public class PickaxeSnowballLogic extends SnowballLogic {
             case IRON_PICKAXE:
                 baseTool = 2;
                 break;
-            case STONE_PICKAXE:
-                baseTool = 1;
-                break;
-            case WOOD_PICKAXE:
-                baseTool = 1;
-                break;
         }
         final double totalEffectiveness = baseTool * info.power;
         final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
@@ -90,9 +84,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
         Material material = target.getType();
         //base tools:
         //0 = wood, 1 = stone, 2 = iron, 3 = gold, 4 = diamond
-        //multiplied by: 1 for no power boosts at all
-        //multiplied by: 9 for double glowstone
-        //multiplied by: 16 for double nether star
+        //multiplied by power level
 
         return target.getType() == Material.STONE //the simplest case: clear stone.
 
@@ -114,9 +106,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                 || (material == Material.IRON_ORE && (tool > 4)) //and you are not looking for mere iron or coal, pfaugh!
 
                 || (material == Material.OBSIDIAN && (tool > 11)) //glowstone block diamond means you can clear obsidian
-                || (material == Material.BEDROCK && (tool > 15) && (target.getY() > 0)) //more means a bedrock flat floor
-                || (material == Material.BEDROCK && (tool > 63)) //double nether star diamond removes ALL!
-                //this leaves a void floor beneath. OP tools are dangerous! you best be standing on some kind of ore!
+                || (material == Material.BEDROCK && (tool > 30) && (target.getY() > 0)) //more means a bedrock flat floor
 
                 || (material == Material.DIAMOND_ORE && (tool > 15))
                 || (material == Material.LAPIS_ORE && (tool > 15))

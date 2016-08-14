@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author DanJ
  */
-public final class CooldownTimer<TKey> {
+/* public final class CooldownTimer<TKey> {
 
     private final HashMap<TKey, Long> expirations = new HashMap<TKey, Long>();
     private final long timeoutMillis;
@@ -20,7 +20,7 @@ public final class CooldownTimer<TKey> {
     public CooldownTimer(long timeoutMillis) {
         this.timeoutMillis = timeoutMillis;
     }
-
+*/
     /**
      * This method checks to see if the cooldown has expired. This returns true
      * if it has, or if no cooldown is in effect at all- you can then do
@@ -33,7 +33,7 @@ public final class CooldownTimer<TKey> {
      * @param key The key identifies which cooldown you want to check.
      * @return True if the cooldown has expired (or there was no cooldown).
      */
-    public boolean check(TKey key) {
+   /* public boolean check(TKey key) {
         synchronized (expirations) {
             long now = System.currentTimeMillis();
 
@@ -53,12 +53,12 @@ public final class CooldownTimer<TKey> {
             return false;
         }
     }
-
+*/
     /**
      * This method removes any cooldowns that have expired, reclaiming memory.
      * We do this whenever we set up a new cooldown automatically.
      */
-    public void cleanup() {
+/*    public void cleanup() {
         long now = System.currentTimeMillis();
 
         synchronized (expirations) {
@@ -73,3 +73,4 @@ public final class CooldownTimer<TKey> {
         }
     }
 }
+*/

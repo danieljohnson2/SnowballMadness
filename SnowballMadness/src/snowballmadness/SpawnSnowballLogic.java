@@ -23,7 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
 
-    private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(100);
+    //private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(100);
     private final Class<? extends TEntity> entityClass;
     private final Class<? extends TEntity> poweredEntityClass;
     private final double upgradePower;
@@ -60,9 +60,9 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        if (cooldown.check("")) {
+        //if (cooldown.check("")) {
             spawnEntity(snowball.getLocation(), info);
-        }
+        //}
     }
 
     /**
@@ -77,8 +77,8 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
         Location adjusted = location.clone();
         Class<? extends TEntity> spawnClass = pickSpawnClass(adjusted, info);
 
-        if (spawnClass != null && canSpawnAt(adjusted, info)) {
-            if (world.getLivingEntities().size() < 900) {
+        if (spawnClass != null) {
+            if (world.getLivingEntities().size() < 3000) {
                 final TEntity spawned = world.spawn(adjusted, spawnClass);
                 initializeEntity(spawned, info);
 
@@ -100,13 +100,13 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * @param info The snowball info of the snowball.
      * @return True to allow the spawn; false to spawn nothing.
      */
-    protected boolean canSpawnAt(Location location, SnowballInfo info) {
+ /*   protected boolean canSpawnAt(Location location, SnowballInfo info) {
         //we're only going to spawn an entity if the block is breathable space
         //nerfing too-trivially-easy suffocation mob farms
         Block above = location.getBlock().getRelative(BlockFace.UP);
         return above.isEmpty() || above.isLiquid();
-    }
-
+    } //since minions are now tame and can be freely killed there's no reason to have this
+*/
     /**
      * This method returns the entity type to spawn; we pick the powered version
      * if the snowball is sufficiently powered.
@@ -212,7 +212,7 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
             super.initializeEntity(zombie, info);
 
             if (info.power > 8) {
-                zombie.setVillager(true);
+                zombie.setVillagerProfession(Villager.Profession.NORMAL);
             }
         }
     }

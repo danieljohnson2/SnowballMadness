@@ -28,24 +28,19 @@ public class TorchPlaceSnowballLogic extends SnowballLogic {
         if (target.getRelative(BlockFace.DOWN).getType().isSolid()) {
             if (target.getType() == Material.AIR) {
                 target.setType(toPlace);
+                if (target.getRelative(BlockFace.SOUTH).getType().isSolid()) {
+                    target.setData((byte) 4);
+                }
+                if (target.getRelative(BlockFace.NORTH).getType().isSolid()) {
+                    target.setData((byte) 3);
+                }
+                if (target.getRelative(BlockFace.EAST).getType().isSolid()) {
+                    target.setData((byte) 2);
+                }
+                if (target.getRelative(BlockFace.WEST).getType().isSolid()) {
+                    target.setData((byte) 1);
+                }
             }
-            if (target.getRelative(BlockFace.SOUTH).getType().isSolid()) {
-                target.setType(toPlace);
-                target.setData((byte) 4);
-            }
-            if (target.getRelative(BlockFace.NORTH).getType().isSolid()) {
-                target.setType(toPlace);
-                target.setData((byte) 3);
-            }
-            if (target.getRelative(BlockFace.EAST).getType().isSolid()) {
-                target.setType(toPlace);
-                target.setData((byte) 2);
-            }
-            if (target.getRelative(BlockFace.WEST).getType().isSolid()) {
-                target.setType(toPlace);
-                target.setData((byte) 1);
-            }
-
         }
     }
 }

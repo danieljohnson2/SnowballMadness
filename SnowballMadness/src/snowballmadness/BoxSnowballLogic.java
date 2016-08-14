@@ -3,6 +3,7 @@ package snowballmadness;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
+import org.bukkit.projectiles.*;
 
 /**
  * This logic makes a box out of the material you give it, varying the construction method by type. You can specify the material
@@ -13,25 +14,32 @@ import org.bukkit.entity.*;
 public class BoxSnowballLogic extends SnowballLogic {
 
     private final Material wallMaterial;
-    private final Material fillMaterial;
+    private int boxSize;
+    private final short durability;
 
-    public BoxSnowballLogic(Material wallMaterial) {
-        this(wallMaterial, Material.AIR);
-    }
-
-    public BoxSnowballLogic(Material wallMaterial, Material fillMaterial) {
+    public BoxSnowballLogic(Material wallMaterial, int boxSize, short durability) {
         this.wallMaterial = wallMaterial;
-        this.fillMaterial = fillMaterial;
+        this.boxSize = boxSize;
+        this.durability = durability;
     }
 
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
+        ProjectileSource shooter = snowball.getShooter();
+        int expLevel = 1;
+        if (shooter instanceof Player) {
+            Player player = (Player) shooter;
+            expLevel = player.getLevel();
+        }
+        if (boxSize > expLevel) {
+            boxSize = expLevel;
+        } //as you get better at magic (level up) your max creation size ramps up too
 
         Location snowballLoc = snowball.getLocation();
         World world = snowball.getWorld();
-        final int radius = (int) info.power;
-        final int diameter = (int) (info.power * 2);
+        final int radius = boxSize;
+        final int diameter = boxSize * 2;
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
 
@@ -53,52 +61,73 @@ public class BoxSnowballLogic extends SnowballLogic {
                     Block target = world.getBlockAt(beginX, y, z);
                     if (canReplace(target)) {
                         target.setType(wallMaterial);
+                        target.setData((byte) durability);
                     }
-                }
-            }
-        }
-
-        //least efficient method used for hollow section. If we did not need to
-        //hollow this out, we could just do each wall directly, but we're filling
-        //with air. For a truly huge box, it'd be preferable to do the walls and
-        //then fill the center: for 3x3x3 or 5x5x5 it's pointless. Our largest box
-        //begins to flirt with this issue.
-        for (int x = beginX + 1; x < endX; ++x) {
-            for (int z = beginZ; z <= endZ; ++z) {
-                for (int y = beginY; y <= endY; ++y) {
-                    final boolean isWallBlock =
-                            x == beginX || x == endX
-                            || z == beginZ || z == endZ
-                            || y == beginY || y == endY;
-
-                    final Material replacement = isWallBlock ? wallMaterial : fillMaterial;
-
-                    if (replacement != null) {
-                        Block target = world.getBlockAt(x, y, z);
-                        if (canReplace(target)) {
-                            target.setType(replacement);
-                        }
-                    }
-                }
-            }
-        }
-
-        //endX is our final wall
-        if (wallMaterial != null) {
-            for (int z = beginZ; z <= endZ; ++z) {
-                for (int y = beginY; y <= endY; ++y) {
-                    Block target = world.getBlockAt(endX, y, z);
+                    target = world.getBlockAt(endX, y, z);
                     if (canReplace(target)) {
                         target.setType(wallMaterial);
+                        target.setData((byte) durability);
+                    }
+
+                }
+            }
+        }
+
+        //beginY
+        if (wallMaterial != null) {
+            for (int z = beginZ; z <= endZ; ++z) {
+                for (int x = beginX; x <= endX; ++x) {
+                    Block target = world.getBlockAt(x, beginY, z);
+                    if (canReplace(target)) {
+                        target.setType(wallMaterial);
+                        target.setData((byte) durability);
+                    }
+                    target = world.getBlockAt(x, endY, z);
+                    if (canReplace(target)) {
+                        target.setType(wallMaterial);
+                        target.setData((byte) durability);
+                    }
+
+                }
+            }
+        }
+
+        //beginZ
+        if (wallMaterial != null) {
+            for (int x = beginX; x <= endX; ++x) {
+                for (int y = beginY; y <= endY; ++y) {
+                    Block target = world.getBlockAt(x, y, beginZ);
+                    if (canReplace(target)) {
+                        target.setType(wallMaterial);
+                        target.setData((byte) durability);
+                    }
+                    target = world.getBlockAt(x, y, endZ);
+                    if (canReplace(target)) {
+                        target.setType(wallMaterial);
+                        target.setData((byte) durability);
+                    }
+
+                }
+            }
+        }
+
+
+        //hollow center.
+        for (int x = beginX + 1; x < endX - 1; ++x) {
+            for (int z = beginZ + 1; z <= endZ - 1; ++z) {
+                for (int y = beginY + 1; y <= endY - 1; ++y) {
+                    Block target = world.getBlockAt(x, y, z);
+                    if (canReplace(target)) {
+                        target.setType(Material.AIR);
                     }
                 }
             }
         }
-        //this implementation is sort of a compromise between Dan making the code
-        //as elegant and plain as possible, and Chris insisting on some videogamey
-        //efficiency hacks. Off to devise an even crazier power-boost so as to
-        //illustrate the need for execution efficiency :D
     }
+    //this implementation is sort of a compromise between Dan making the code
+    //as elegant and plain as possible, and Chris insisting on some videogamey
+    //efficiency hacks. Off to devise an even crazier power-boost so as to
+    //illustrate the need for execution efficiency :D
 
     /**
      * This method decides whether to replace a given block; by default it replaces air and liquid blocks only.

@@ -6,11 +6,9 @@ import org.bukkit.block.*;
 import org.bukkit.entity.*;
 
 /**
- * This logic takes in a material to place and possibly a second material (for
- * placing in the air block just above the material) and a number specifying how
- * many blocks down the embedding is to go. If nothing is specified, we assume 1
- * block. Higher numbers attempt to place that many blocks under the point of
- * impact. -1 means we go down to void.
+ * This logic takes in a material to place and possibly a second material (for placing in the air block just above the material)
+ * and a number specifying how many blocks down the embedding is to go. If nothing is specified, we assume 1 block. Higher numbers
+ * attempt to place that many blocks under the point of impact. -1 means we go down to void.
  *
  *
  * @author christopherjohnson, somewhat
@@ -28,36 +26,15 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This method creates a logic for a material that you supply; we have many
-     * special cases here!
+     * This method creates a logic for a material that you supply; we have many special cases here!
      *
      * @param material The material being used with the snowball.
      * @return The new logic.
      */
     public static BlockEmbedSnowballLogic fromMaterial(Material material) {
         switch (material) {
-            case QUARTZ:
-                return new BlockEmbedSnowballLogic(Material.OBSIDIAN, Material.PORTAL, 1);
-
-            case COAL:
-                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.FIRE, 1);
-
-            case COAL_BLOCK:
-                return new BlockEmbedSnowballLogic(Material.COAL_ORE, Material.AIR, 256);
-
-            case REDSTONE_BLOCK:
-                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.REDSTONE_BLOCK, 1) {
-                    @Override
-                    protected void placeCapBlock(Block block) {
-                        //if boosted, in this case we want to spawn a creeper
-                        //or perhaps just spawn the creeper and then hit him with the lightning
-
-                        block.getWorld().strikeLightning(block.getLocation());
-                    }
-                };
-
-            case NETHERRACK:
-                return new BlockEmbedSnowballLogic(Material.NETHERRACK, Material.FIRE, 1);
+            case WOOD_SPADE:
+                return new BlockEmbedSnowballLogic(Material.GRASS_PATH, Material.AIR, 1);
 
             case LADDER:
                 return new BlockEmbedSnowballLogic(material, material, 256) {
@@ -164,11 +141,27 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                     }
                 };
 
+            case COAL_ORE:
+            case IRON_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 1);
+            case REDSTONE_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 2);
+            case LAPIS_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 3);
+            case EMERALD_ORE:
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 4);
             case DIAMOND_ORE:
-                   return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, -1);
+                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 8);
+            //new version is just a trap rather than an OP deathtrap
 
-            case ENDER_STONE:
-                   return new BlockEmbedSnowballLogic(Material.ENDER_STONE, Material.ENDER_PORTAL, 1);
+            case REDSTONE_TORCH_ON:
+            case REDSTONE_TORCH_OFF:
+                return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.AIR, 1) {
+                    @Override
+                    protected void placeCapBlock(Block block) {
+                        block.getWorld().strikeLightning(block.getLocation());
+                    }
+                };
 
             default:
                 return new BlockEmbedSnowballLogic(material, material, 1);
@@ -182,42 +175,42 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
         Location loc = snowball.getLocation().clone();
         Block block = loc.getBlock();
 
-        if (block.getType() == Material.AIR && block.getY() > 1) {
-            loc.setY(loc.getY() - 1);
-            block = loc.getBlock();
-        }
+        if (block.getType() == Material.LONG_GRASS) {
+            block.setType(Material.AIR);
+        } else {
+            if (block.getType() == Material.AIR && block.getY() > 1) {
+                loc.setY(loc.getY() - 1);
+                block = loc.getBlock();
+            }
 
-        if (block.getType() != Material.AIR) {
-            loc.setY(loc.getY() + 1);
-            block = loc.getBlock();
-        }
+            if (block.getType() != Material.AIR) {
+                loc.setY(loc.getY() + 1);
+                block = loc.getBlock();
+            }
 
-        if (block.getType() == Material.AIR) {
-            placeCapBlock(block);//we set the cap and prepare to step downward
-            loc.setY(loc.getY() - 1);
-            block = loc.getBlock();
-        }
+            if (block.getType() == Material.AIR) {
+                placeCapBlock(block);//we set the cap and prepare to step downward
+                loc.setY(loc.getY() - 1);
+                block = loc.getBlock();
+            }
 
-        float decrement = embedDepth;
+            float decrement = embedDepth;
 
-        while (!((loc.getY() < 0) || (decrement == 0) || (decrement > 0 && block.getType() == Material.BEDROCK))) {
-            //bail if: loc.Y is less than zero OR embedDepth is exactly zero 
-            //  OR  (embedDepth > 0 and the block type is bedrock)
-
-            placeShaftBlock(block);
-
-            //just stepped down, it's above zero and either a replaceable block
-            //or bedrock with embedDepth negative. place that sucker!            
-            decrement = decrement - 1;
-            loc.setY(loc.getY() - 1);
-            block = loc.getBlock();
-            //step down and go back to re-check the while
+            while (!((loc.getY() < 0) || (decrement == 0) || (decrement > 0 && block.getType() == Material.BEDROCK))) {
+                placeShaftBlock(block);
+                //just stepped down, it's above zero and a replaceable block
+                //or bedrock with embedDepth negative. place that sucker!            
+                decrement = decrement - 1;
+                loc.setY(loc.getY() - 1);
+                block = loc.getBlock();
+                //step down and go back to re-check the while
+            }
         }
     }
 
+    /* //this is the invocation for lightning strike */
     /**
-     * This method applies the cap block; you can override it do something
-     * different though, like strike with lightning.
+     * This method applies the cap block; you can override it do something different though, like strike with lightning.
      *
      * @param block The block to be updated.
      */
@@ -226,8 +219,7 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This method applies the shaft block; you can override it to do something
-     * fancier.
+     * This method applies the shaft block; you can override it to do something fancier.
      *
      * @param block The block to be updated.
      */

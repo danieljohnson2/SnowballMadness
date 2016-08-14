@@ -27,7 +27,7 @@ public class SphereSnowballLogic extends SnowballLogic {
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        int baseTool = 3;
+        int baseTool = 8;
         final double totalEffectiveness = baseTool * info.power;
         final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;

@@ -6,17 +6,18 @@ import org.bukkit.block.*;
 import org.bukkit.entity.*;
 
 /**
- * This logic places on top of the one you hit with the snowball, replacing only
- * air with it.
+ * This logic places on top of the one you hit with the snowball, replacing only air with it.
  *
  * @author DanJ
  */
 public class BlockPlacementSnowballLogic extends SnowballLogic {
 
     private final Material toPlace;
+    private final short durability;
 
-    public BlockPlacementSnowballLogic(Material toPlace) {
+    public BlockPlacementSnowballLogic(Material toPlace, short durability) {
         this.toPlace = Preconditions.checkNotNull(toPlace);
+        this.durability = Preconditions.checkNotNull(durability);
     }
 
     @Override
@@ -36,6 +37,7 @@ public class BlockPlacementSnowballLogic extends SnowballLogic {
         Block target = loc.getBlock();
         if (target.getType() == Material.AIR) {
             target.setType(toPlace);
+            target.setData((byte)durability);
         }
     }
 }

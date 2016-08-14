@@ -43,28 +43,28 @@ public class ArboristSnowballLogic extends SnowballLogic {
 
                 switch (variation) {
                     case 0:
-                        if (info.power > 2) {
+                        if (info.power > 5.5) {
                             block.getWorld().generateTree(block.getLocation(), TreeType.BIG_TREE);
                         } else {
                             block.getWorld().generateTree(block.getLocation(), TreeType.TREE);
                         }
                         break;
                     case 1:
-                        if (info.power > 2) {
+                        if (info.power > 5.5) {
                             block.getWorld().generateTree(block.getLocation(), TreeType.MEGA_REDWOOD);
                         } else {
                             block.getWorld().generateTree(block.getLocation(), TreeType.REDWOOD);
                         }
                         break;
                     case 2:
-                        if (info.power > 2) {
+                        if (info.power > 5.5) {
                             block.getWorld().generateTree(block.getLocation(), TreeType.TALL_BIRCH);
                         } else {
                             block.getWorld().generateTree(block.getLocation(), TreeType.BIRCH);
                         }
                         break;
                     case 3:
-                        if (info.power > 2) {
+                        if (info.power > 5.5) {
                             block.getWorld().generateTree(block.getLocation(), TreeType.JUNGLE);
                         } else {
                             block.getWorld().generateTree(block.getLocation(), TreeType.SMALL_JUNGLE);
@@ -76,7 +76,8 @@ public class ArboristSnowballLogic extends SnowballLogic {
                     case 5:
                         block.getWorld().generateTree(block.getLocation(), TreeType.DARK_OAK);
                         break;
-
+                        //note: power over 4.5 means level 21 and up
+                        //power over 5.5 means level 31 and up
                 }
                 loc.setY(loc.getY() - 1);
                 if (block.getY() > 1) {

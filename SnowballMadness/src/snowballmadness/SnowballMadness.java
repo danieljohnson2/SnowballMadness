@@ -53,6 +53,9 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         unbanPlayers = config.getBoolean("unbanPlayers", false);
 
         List<String> toNuke = config.getStringList("nuke");
+        //This mechanic permits a list of region files to be deleted upon startup. It's for
+        //use with servers that restart periodically and want to have regenerating terrain,
+        //but leave some more distant areas persistent. The idea is for it to be low maintenance.
 
         for (String victim : toNuke) {
             File file = new File(victim);
@@ -74,14 +77,14 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
         /*
 
-        if (unbanPlayers == true) {
-            BanList banList = this.getServer().getBanList(BanList.Type.NAME);
-            for (BanEntry entry : banList.getBanEntries()) {
-                String name = entry.getTarget();
-                banList.pardon(name);
-            }
-        }
-        */
+         if (unbanPlayers == true) {
+         BanList banList = this.getServer().getBanList(BanList.Type.NAME);
+         for (BanEntry entry : banList.getBanEntries()) {
+         String name = entry.getTarget();
+         banList.pardon(name);
+         }
+         }
+         */
 
     }
 
@@ -183,6 +186,11 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onEntityTargetPlayer(EntityTargetLivingEntityEvent e) {
+        SnowballLogic.onEntityTargetPlayer(e);
+    }
+
+    @EventHandler
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
         SnowballLogic.onEntityDamageByEntityEvent(e);
     }
@@ -208,21 +216,13 @@ public class SnowballMadness extends JavaPlugin implements Listener {
      */
     @SuppressWarnings("deprecation")
     private void bestowSnowball(Player player) {
+
         PlayerInventory inventory = player.getInventory();
         ItemStack oldStack = inventory.getItem(8);
         if (oldStack == null || oldStack.getType() == Material.SNOW_BALL) {
-            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 16));
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 1));
             player.updateInventory();
         }
-        oldStack = inventory.getItem(7);
-        if (oldStack == null || oldStack.getType() == Material.ENDER_PEARL) {
-            inventory.setItem(7, new ItemStack(Material.ENDER_PEARL, 16));
-            player.updateInventory();
-        }
-        //new approach: we give players ender chests right away, and do not delete playerdata in reset.
-        //That way, you can gradually accumulate stuff but there's always a new random world, and
-        //everything you want to keep permanently must remain within one ender chest.
-        //Also, you can ender pearl out of trouble with 16 ender pearls on the hotbar.
-
+        
     }
 }

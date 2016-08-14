@@ -13,6 +13,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.projectiles.*;
 
 /**
  * This class is the base class that hosts the logic that triggers when a snowball hits a target.
@@ -34,37 +35,6 @@ public abstract class SnowballLogic {
      * @param info Other information about the snowball.
      */
     public void launch(Snowball snowball, SnowballInfo info) {
-    }
-
-    /**
-     * This method decides whether the snowball should continue to operate; for performance reasons we destroy snowball that have
-     * gone too high.
-     *
-     * This is called before tick() is, but only about 1/16th as often as tick(); snowballs can therefore exist 'outside the
-     * reservation' for a short time.
-     *
-     * @param snowball The snowball that we may destroy.
-     * @param info The info about he snowball.
-     * @return True to continue with this snowball; false to silently terminate it.
-     */
-    public boolean shouldContinue(Snowball snowball, SnowballInfo info) {
-        Location here = snowball.getLocation();
-        double y = here.getY();
-
-        if (y < 0 || y > snowball.getWorld().getMaxHeight()) {
-            return false;
-        }
-
-        final double maxDistance = 128.0;
-        final double maxDistanceSq = maxDistance * maxDistance;
-
-        double distanceSq = info.launchLocation.distanceSquared(here);
-
-        if (distanceSq > maxDistanceSq) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -121,90 +91,21 @@ public abstract class SnowballLogic {
         }
 
         switch (hint.getType()) {
+
+            case TORCH:
+                return new TorchPlaceSnowballLogic(hint.getType());
+            //let's just allow people to light stuff, what the heck. So convenient.
+
             case ARROW:
-                return new ArrowSnowballLogic(hint);
-
-            case FIREWORK_CHARGE:
-            case BLAZE_ROD:
-            case EGG:
-            case EXP_BOTTLE:
-                return new ProjectileSnowballLogic(hint.getType());
-
-            case COBBLESTONE:
-            case BOOKSHELF:
-            case BRICK:
-            case SAND:
-            case GRAVEL:
-                return new BlockPlacementSnowballLogic(hint.getType());
-            //considering adding data values to smooth brick so it randomizes
-            //including mossy, cracked and even silverfish
-
-            case EMERALD_BLOCK:
-            case EMERALD_ORE:
-                return new FeeshVariationsSnowballLogic(hint);
-
-            case EMERALD:
-                //fires poisoned feesh
-                return new SpawnSnowballLogic<Silverfish>(Silverfish.class) {
-                    @Override
-                    protected void initializeEntity(Silverfish spawned, SnowballInfo info) {
-                        super.initializeEntity(spawned, info);
-                        spawned.addPotionEffect(new PotionEffect(PotionEffectType.POISON, Integer.MAX_VALUE, 250));
-                        spawned.setTarget(spawned); //seems to trigger only if feesh has a object of its ire.
-                    }
-                };
-
-            case ENDER_PEARL:
-                return new BlockPlacementSnowballLogic(Material.ENDER_CHEST);
-
-            case ANVIL:
-                return new AnvilSnowballLogic();
-
-            case DAYLIGHT_DETECTOR:
-                return new DaylightFinderSnowballLogic();
-
-            case WATCH:
-                return new WatchSnowballLogic();
-
-            case REDSTONE:
-                return new StartRainLogic();
-
-            case CACTUS:
-                return new StopRainLogic();
-
-            case WATER_BUCKET:
-                return new BlockPlacementSnowballLogic(Material.WATER);
-
-            case LAVA_BUCKET:
-                return new BlockPlacementSnowballLogic(Material.LAVA);
+                return new ArrowSnowballLogic();
 
             case RED_ROSE:
             case YELLOW_FLOWER:
                 return new FireworkSnowballLogic(hint);
 
-            case QUARTZ:
-            case COAL:
-            case COAL_BLOCK:
-            case REDSTONE_BLOCK:
-            case NETHERRACK:
-            case LADDER:
-            case VINE:
-            case DIAMOND_ORE:
-            case ENDER_STONE:
-                return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
-
             case SAPLING:
                 return new ArboristSnowballLogic(hint);
 
-            case WOOD_SWORD:
-            case STONE_SWORD:
-            case IRON_SWORD:
-            case GOLD_SWORD:
-            case DIAMOND_SWORD:
-                return new SwordSnowballLogic(slice);
-
-            case WOOD_PICKAXE:
-            case STONE_PICKAXE:
             case IRON_PICKAXE:
             case GOLD_PICKAXE:
             case DIAMOND_PICKAXE:
@@ -213,144 +114,76 @@ public abstract class SnowballLogic {
             case SHEARS:
                 return new ShearsSnowballLogic();
 
-            case STICK:
-            case BONE:
-            case FENCE:
-            case COBBLE_WALL:
-            case NETHER_FENCE:
-                return new KnockbackSnowballLogic(hint.getType());
+            case BOOKSHELF:
+            case ENDER_CHEST:
+            case DIAMOND_BLOCK:
+            case IRON_BLOCK:
+            case EMERALD_BLOCK:
+            case REDSTONE_BLOCK:
+            case LAPIS_BLOCK:
+            case SLIME_BLOCK:
+            case QUARTZ_BLOCK:
+            case COAL_BLOCK:
+            case GOLD_BLOCK:
+            case SNOW_BLOCK:
+            case BRICK:
+            case NETHER_BRICK:
+            case RED_NETHER_BRICK:
+            case SMOOTH_BRICK:
+            case GLASS:
+            case STAINED_GLASS:
+            case CLAY:
+            case STAINED_CLAY:
+            case GLOWSTONE:
+            case PURPUR_BLOCK:
+            case PRISMARINE:
+            case NETHER_WART_BLOCK:
+                return new BlockPlacementSnowballLogic(hint.getType(), hint.getDurability());
+            //generate stuff in quantity from any block of the consolidated stuff, including books and bricks
+            //Any block made by players out of sub-components. Glass is made out of sand. All generate single block at a time.
 
+            case DIRT:
             case LEAVES:
             case IRON_FENCE:
-                return new BoxSnowballLogic(hint.getType());
-            //all structures that can be broken with any pick, but can be
-            //large with use of glowstone. Provides a defensive game
-
-            case GLASS:
             case STONE:
-            case SMOOTH_BRICK:
-            case MOSSY_COBBLESTONE:
-                return new SkeletonBoxSnowballLogic(hint.getType());
-
-            case GLASS_BOTTLE:
-                return new BoxSnowballLogic(Material.GLASS, Material.AIR);
-
-            case POTION:
-                return PotionInfo.fromItemStack(hint).createPotionLogic();
-
-            case BUCKET:
-                return new BoxSnowballLogic(Material.AIR);
-
-            case WEB:
+            case ENDER_STONE:
             case WOOD:
             case LOG:
-                return new RingSnowballLogic(hint.getType());
+            case MOSSY_COBBLESTONE:
+            case COBBLESTONE:
+                return new BoxSnowballLogic(hint.getType(), hint.getAmount(), hint.getDurability());
 
-            case STEP:
-                return new WalkwaySnowballLogic(hint);
+            case GLASS_BOTTLE:
+            case POTION:
+                return new BoxSnowballLogic(Material.GLASS, hint.getAmount(), hint.getDurability());
 
-            case TORCH:
+            case WOOD_SPADE:
+            case LADDER:
+            case VINE:
+            case COAL_ORE:
+            case IRON_ORE:
+            case REDSTONE_ORE:
+            case LAPIS_ORE:
+            case EMERALD_ORE:
+            case DIAMOND_ORE:
             case REDSTONE_TORCH_ON:
             case REDSTONE_TORCH_OFF:
-                return new TorchPlaceSnowballLogic(hint.getType());
-            //let's just allow people to light stuff, what the heck. So convenient.
+                return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
-            case FENCE_GATE:
-                return new LinkedTrailSnowballLogic(Material.FENCE);
+            case BUCKET:
+                return new SphereSnowballLogic(Material.AIR, Material.AIR);
 
-            case CAULDRON_ITEM:
-                return new LinkedTrailSnowballLogic(Material.STATIONARY_WATER);
-
-            case WATER_LILY:
-                return new LinkedWaterTrailSnowballLogic(Material.WATER_LILY);
-
-            case TNT:
-                return new TNTSnowballLogic(4.0f);
+            case MAGMA:
+                return new SphereSnowballLogic(Material.FIRE, Material.FIRE);
 
             case SULPHUR:
-                return new TNTSnowballLogic(1.4f);
+                return new TNTSnowballLogic(0.25f);
+
+            case TNT:
+                return new TNTSnowballLogic(1.0f);
 
             case FIREWORK:
                 return new JetpackSnowballLogic();
-
-            case FLINT_AND_STEEL:
-                return new FlintAndSteelSnowballLogic(Material.FIRE);
-
-            case SPIDER_EYE:
-                return new ReversedSnowballLogic(1);
-
-            case FERMENTED_SPIDER_EYE:
-                return new EchoSnowballLogic(hint.getAmount(), slice.skip(1));
-
-            case APPLE:
-                return new SpeededSnowballLogic(1.3, slice.skip(1));
-
-            case MELON:
-                return new SpeededSnowballLogic(1.4, slice.skip(1));
-
-            case SUGAR:
-                return new SpeededSnowballLogic(1.5, slice.skip(1));
-
-            case BOW:
-                return new SpeededSnowballLogic(1.8, slice.skip(1));
-
-            case COOKIE:
-                return new SpeededSnowballLogic(2, slice.skip(1));
-
-            case PUMPKIN_PIE:
-                return new SpeededSnowballLogic(2.5, slice.skip(1));
-
-            case CAKE:
-                return new SpeededSnowballLogic(3, slice.skip(1));
-            //the cake is a... lazor!
-
-            case BEACON:
-                return new SpeededSnowballLogic(4, slice.skip(1));
-            //the beacon is the REAL lazor.
-
-            case GLOWSTONE_DUST:
-                return new PoweredSnowballLogic(1.6, slice.skip(1));
-
-            case GLOWSTONE:
-                return new PoweredSnowballLogic(3, slice.skip(1));
-
-            case NETHER_STAR:
-                return new PoweredSnowballLogic(4, slice.skip(1));
-            //nuclear option. Beacon/netherstar designed to be insane
-            //overkill but not that cost-effective, plus more unwieldy.
-
-            case SNOW_BALL:
-                return new MultiplierSnowballLogic(hint.getAmount(), hint.getItemMeta().getDisplayName(), slice.skip(1));
-
-            case SLIME_BALL:
-                return new BouncySnowballLogic(hint.getAmount(), slice.skip(1));
-
-            case QUARTZ_BLOCK:
-                return new KapwingSnowballLogic(hint.getAmount(), slice.skip(1));
-
-            case GRASS:
-                return new RegenChunkOnlySnowballLogic();
-
-            case DIRT:
-                return new RegenerationSnowballLogic();
-
-            case GHAST_TEAR:
-                return SpawnSnowballLogic.fromEntityClass(Ghast.class);
-
-            case ENCHANTMENT_TABLE:
-                return new EnchantingTableSnowballLogic();
-
-            case GOLD_NUGGET:
-                return new ItemDropSnowballLogic(Material.ROTTEN_FLESH) {
-                    @Override
-                    protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
-                        if (info.power > 2) {
-                            return EntityType.PIG_ZOMBIE;
-                        } else {
-                            return null;
-                        }
-                    }
-                };
 
             case DRAGON_EGG:
                 return new DeathVortexSnowballLogic();
@@ -358,94 +191,23 @@ public abstract class SnowballLogic {
             case IRON_INGOT:
                 return new MagneticSnowballLogic();
 
-            case CARROT_STICK:
-            case FISHING_ROD:
-            case STRING:
-            case OBSIDIAN:
-                return new ComeAlongSnowballLogic(hint.getType());
+            case APPLE:
+                return new SpeededSnowballLogic(1.5, slice.skip(1));
 
-            case LEATHER:
-                return new ItemDropSnowballLogic(
-                        Material.BOOK,
-                        Material.LEATHER_HELMET,
-                        Material.LEATHER_CHESTPLATE,
-                        Material.LEATHER_LEGGINGS,
-                        Material.LEATHER_BOOTS,
-                        Material.STICK,
-                        Material.WOOD_SWORD,
-                        Material.WOOD_PICKAXE,
-                        Material.WOOD_AXE,
-                        Material.WOOD_SPADE,
-                        Material.WOOD_HOE,
-                        Material.WORKBENCH,
-                        Material.SADDLE);
+            case MELON:
+                return new SpeededSnowballLogic(1.5, slice.skip(1));
 
-            case IRON_BLOCK:
-                return new ItemDropSnowballLogic(
-                        Material.IRON_HELMET,
-                        Material.IRON_CHESTPLATE,
-                        Material.IRON_LEGGINGS,
-                        Material.IRON_BOOTS,
-                        Material.IRON_SWORD,
-                        Material.IRON_PICKAXE,
-                        Material.IRON_AXE,
-                        Material.IRON_SPADE,
-                        Material.IRON_HOE);
+            case SUGAR:
+                return new SpeededSnowballLogic(2, slice.skip(1));
 
-            case GOLD_BLOCK:
-                return new ItemDropSnowballLogic(
-                        Material.GOLD_HELMET,
-                        Material.GOLD_CHESTPLATE,
-                        Material.GOLD_LEGGINGS,
-                        Material.GOLD_BOOTS,
-                        Material.GOLD_SWORD,
-                        Material.GOLD_PICKAXE,
-                        Material.GOLD_AXE,
-                        Material.GOLD_SPADE,
-                        Material.GOLD_HOE);
+            case COOKIE:
+                return new SpeededSnowballLogic(2.4, slice.skip(1));
 
-            case DIAMOND_BLOCK:
-                return new ItemDropSnowballLogic(
-                        Material.DIAMOND_HELMET,
-                        Material.DIAMOND_CHESTPLATE,
-                        Material.DIAMOND_LEGGINGS,
-                        Material.DIAMOND_BOOTS,
-                        Material.DIAMOND_SWORD,
-                        Material.DIAMOND_PICKAXE,
-                        Material.DIAMOND_AXE,
-                        Material.DIAMOND_SPADE,
-                        Material.DIAMOND_HOE);
+            case PUMPKIN_PIE:
+                return new SpeededSnowballLogic(2.6, slice.skip(1));
 
-            case SADDLE:
-                return new ItemDropSnowballLogic(Material.LEASH) {
-                    @Override
-                    protected EntityType getEntityToSpawn(Snowball snowball, SnowballInfo info) {
-                        if (info.power > 2) {
-                            return EntityType.HORSE;
-                        } else {
-                            return null;
-                        }
-                    }
-                };
-
-            //developing ItemDropSnowball to be a randomizer, it won't be
-            //heavily used so it can be full of special cases
-
-            case GOLD_INGOT:
-                return SpawnSnowballLogic.fromEntityClass(PigZombie.class);
-
-            case EYE_OF_ENDER:
-                return SpawnSnowballLogic.fromEntityClass(Enderman.class);
-
-            case MILK_BUCKET:
-                return SpawnSnowballLogic.fromEntityClass(Cow.class);
-            //get cow if you have ever milked one
-            //path to leather -> book -> enchanting table
-
-            case MUSHROOM_SOUP:
-                return SpawnSnowballLogic.fromEntityClass(MushroomCow.class);
-            //get mooshroom if you can get both mushrooms and wood
-            //alternate path to leather -> book -> enchanting table!
+            case CAKE:
+                return new SpeededSnowballLogic(3, slice.skip(1));
 
             case JACK_O_LANTERN:
                 return new SpawnSnowballLogic<Skeleton>(Skeleton.class) {
@@ -454,17 +216,8 @@ public abstract class SnowballLogic {
                         super.initializeEntity(spawned, info);
 
                         //my skellington army of undead minions!
-                        if (info.power > 1) {
-                            //you have to use at least some glowstone to get the special stuff to work, but then
-                            //the real gains are in speed
-                            spawned.setMaxHealth(spawned.getMaxHealth() * info.power);
-                            spawned.setHealth(spawned.getMaxHealth());
-
-                            if (info.speed > 1) {
-                                //if you speed the snowballs, you get speedyjumpyskeles
-                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, (int) info.speed));
-                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) Math.pow(info.speed, 2)));
-                            }
+                        if (info.speed > 1) {
+                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.speed));
                         }
                     }
 
@@ -480,18 +233,9 @@ public abstract class SnowballLogic {
                     @Override
                     protected void initializeEntity(Zombie spawned, SnowballInfo info) {
                         super.initializeEntity(spawned, info);
-
                         //my zombie army of yucky minions!
-                        if (info.power > 1) {
-                            //you have to use at least some glowstone to get it to work, but then
-                            //the real gains are in speed
-                            spawned.setMaxHealth(spawned.getMaxHealth() * info.power);
-                            spawned.setHealth(spawned.getMaxHealth());
-                            if (info.speed > 1) {
-                                //if you speed the snowballs, you get speedyjumpyzombies
-                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, (int) info.speed));
-                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) Math.pow(info.speed, 2)));
-                            }
+                        if (info.speed > 1) {
+                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.power));
                         }
                     }
 
@@ -501,15 +245,6 @@ public abstract class SnowballLogic {
                         equipZombie(info.plugin, spawned, info);
                     }
                 };
-
-
-            case SKULL_ITEM:
-                SkullType skullType = SkullType.values()[hint.getDurability()];
-
-                return SpawnSnowballLogic.fromSkullType(skullType);
-            case FEATHER:
-                return new FeatherSnowballLogic();
-
 
             default:
                 return null;
@@ -586,7 +321,6 @@ public abstract class SnowballLogic {
             if (data.info.shouldLogMessages) {
                 Bukkit.getLogger().info(String.format("Snowball damage: %s [%d]", data.logic, inFlight.size()));
             }
-
             return data.logic.damage(snowball, data.info, target, damage);
         }
 
@@ -600,24 +334,28 @@ public abstract class SnowballLogic {
      */
     public static void onProjectileLaunch(SnowballMadness plugin, ProjectileLaunchEvent e) {
         Projectile proj = e.getEntity();
-        LivingEntity shooter = proj.getShooter();
+        ProjectileSource psource = proj.getShooter();
+        if (psource instanceof LivingEntity) {
+            LivingEntity shooter = (LivingEntity) psource;
 
-        if (proj instanceof Snowball && shooter instanceof Player) {
-            Snowball snowball = (Snowball) proj;
-            Player player = (Player) shooter;
+            if (proj instanceof Snowball && shooter instanceof Player) {
 
-            PlayerInventory inv = player.getInventory();
-            int heldSlot = inv.getHeldItemSlot();
-            ItemStack sourceStack = inv.getItem(heldSlot);
-
-            if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
-                InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
-                SnowballLogic logic = performLaunch(slice, snowball,
-                        new SnowballInfo(plugin, snowball.getLocation(), player));
-
-                if (logic != null && player.getGameMode() != GameMode.CREATIVE) {
-                    replenishSnowball(plugin, inv, heldSlot);
+                Snowball snowball = (Snowball) proj;
+                Player player = (Player) shooter;
+                //if ((player.getLocation().toVector().getX() < 0.0) || (player.getLocation().toVector().getZ() < 0.0)) {
+                //either of the vectors is negative: we're not in the Versus Set Area
+                PlayerInventory inv = player.getInventory();
+                int heldSlot = inv.getHeldItemSlot();
+                ItemStack sourceStack = inv.getItem(heldSlot);
+                if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
+                    InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
+                    SnowballLogic logic = performLaunch(slice, snowball,
+                            new SnowballInfo(plugin, snowball.getLocation(), player));
+                    if (logic != null) {
+                        replenishSnowball(plugin, inv, heldSlot);
+                    }
                 }
+                //} //this goes with the Versus special case: defines an area where Snowball doesn't function
             }
         }
     }
@@ -627,52 +365,22 @@ public abstract class SnowballLogic {
      * removes snowball that shouldn't continue.
      */
     public static void onTick(long tickCount) {
-        ArrayList<Map.Entry<Snowball, SnowballLogicData>> toRemove = null;
-
-        // we use the tick count to decide which snowballs to
-        // check shouldContinue() on; we increment this so
-        // on each tick we can check 1/16th of the snowballs.
-
-        long continuationThrottle = tickCount;
-
         for (Map.Entry<Snowball, SnowballLogicData> e : inFlight.entrySet()) {
+
             Snowball snowball = e.getKey();
             SnowballLogic logic = e.getValue().logic;
             SnowballInfo info = e.getValue().info;
 
-            boolean shouldContinue = true;
+            Location here = snowball.getLocation();
+            double y = here.getY();
 
-            if ((continuationThrottle & 0xF) == 0) {
-                shouldContinue = logic.shouldContinue(snowball, info);
-            }
-
-            if (shouldContinue) {
+            if (y > 0 && y < 1024 && info.launchLocation.distanceSquared(here) < 1048576) {  //square the desired distance for this number: is 1024
                 logic.tick(snowball, info);
             } else {
-                if (toRemove == null) {
-                    toRemove = Lists.newArrayList();
-                }
-
-                toRemove.add(e);
-            }
-
-            ++continuationThrottle;
-        }
-
-        if (toRemove != null) {
-            for (Map.Entry<Snowball, SnowballLogicData> e : toRemove) {
-                Snowball snowball = e.getKey();
-                SnowballLogic logic = e.getValue().logic;
-                SnowballInfo info = e.getValue().info;
-
-                try {
-                    if (info.shouldLogMessages) {
-                        Bukkit.getLogger().info(String.format("Snowball has left the reservation: %s [%d]", logic, inFlight.size()));
-                    }
-                } finally {
-                    logic.end(snowball);
-                    snowball.remove();
-                }
+                logic.end(snowball);
+                snowball.remove();
+                break;
+                //we never need to delete all snowballs at once: each tick we can get one
             }
         }
     }
@@ -731,56 +439,44 @@ public abstract class SnowballLogic {
         new BukkitRunnable() {
             @Override
             public void run() {
+                if (info.power > 3.3 && info.shooter != null) {
+                    //you have to be over level 10 to make them your minions
+                    ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                    meta.setOwner(info.shooter.getName());
+                    skull.setItemMeta(meta);
+                    // OH GOD IT HAS MY FAAAAAAACE!
+                    spawned.getEquipment().setHelmet(skull);
+                    spawned.getEquipment().setHelmetDropChance(0.0f);
 
-                if (info.power > 1 && info.shooter != null) {
-                    //you have to use at least some glowstone to get the special stuff to work.
-                    ItemStack gear = info.shooter.getInventory().getHelmet();
-                    if (gear == null) {
-                        gear = info.shooter.getInventory().getItem(27);
+                    if (info.power > 4.5) {
+                        //you have to be over level 20 to armor them and have them holding your weapon
+                        ItemStack gear = info.shooter.getInventory().getChestplate();
+                        if (gear != null) {
+                            spawned.getEquipment().setChestplate(gear);
+                            spawned.getEquipment().setChestplateDropChance(0.0f);
+                        }
+                        gear = info.shooter.getInventory().getLeggings();
+                        if (gear != null) {
+                            spawned.getEquipment().setLeggings(gear);
+                            spawned.getEquipment().setLeggingsDropChance(0.0f);
+                        }
+                        gear = info.shooter.getInventory().getBoots();
+                        if (gear != null) {
+                            spawned.getEquipment().setBoots(gear);
+                            spawned.getEquipment().setBootsDropChance(0.0f);
+                        }
+                        if (info.power > 5.5) {
+                            gear = info.shooter.getInventory().getItem(0);
+                            if (gear != null) {
+                                spawned.getEquipment().setItemInMainHand(gear);
+                                spawned.getEquipment().setItemInMainHandDropChance(1.0f);
+                            }
+                        }
                     }
-                    if (gear != null) {
-                        spawned.getEquipment().setHelmet(gear);
-                        spawned.getEquipment().setHelmetDropChance(1.0f);
-                    } else {
-                        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-                        SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                        meta.setOwner(info.shooter.getName());
-                        skull.setItemMeta(meta);
-                        // OH GOD IT HAS MY FAAAAAAACE!
-                        spawned.getEquipment().setHelmet(skull);
-                        spawned.getEquipment().setHelmetDropChance(1.0f);
-                    }
-
-                    gear = info.shooter.getInventory().getChestplate();
-                    if (gear != null) {
-                        spawned.getEquipment().setChestplate(gear);
-                        spawned.getEquipment().setChestplateDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getLeggings();
-                    if (gear != null) {
-                        spawned.getEquipment().setLeggings(gear);
-                        spawned.getEquipment().setLeggingsDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getBoots();
-                    if (gear != null) {
-                        spawned.getEquipment().setBoots(gear);
-                        spawned.getEquipment().setBootsDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getItem(0);
-                    if (gear != null) {
-                        spawned.getEquipment().setItemInHand(gear);
-                        spawned.getEquipment().setItemInHandDropChance(1.0f);
-                    }
-
-                    String mobName = info.shooter.getInventory().getItem(27).getItemMeta().getDisplayName();
-                    if (mobName == null) {
-                        spawned.setCustomName(info.shooter.getName() + "'s Minion");
-                    } else {
-                        spawned.setCustomName(mobName);
-                    }
+                    spawned.setCustomName(info.shooter.getName() + "'s Minion");
                     spawned.setCustomNameVisible(true);
                 }
-
             }
         }.runTaskLater(plugin, 1L);
     }
@@ -789,57 +485,57 @@ public abstract class SnowballLogic {
         new BukkitRunnable() {
             @Override
             public void run() {
+                if (info.power > 3.3 && info.shooter != null) {
+                    //you have to be over level 10 to make them your minions
+                    ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                    meta.setOwner(info.shooter.getName());
+                    skull.setItemMeta(meta);
+                    // OH GOD IT HAS MY FAAAAAAACE!
+                    spawned.getEquipment().setHelmet(skull);
+                    spawned.getEquipment().setHelmetDropChance(0.0f);
 
-                if (info.power > 1 && info.shooter != null) {
-                    //you have to use at least some glowstone to get the special stuff to work.
-                    ItemStack gear = info.shooter.getInventory().getHelmet();
-                    if (gear == null) {
-                        gear = info.shooter.getInventory().getItem(27);
+                    if (info.power > 4.5) {
+                        //you have to be over level 20 to armor them
+                        ItemStack gear = info.shooter.getInventory().getChestplate();
+                        if (gear != null) {
+                            spawned.getEquipment().setChestplate(gear);
+                            spawned.getEquipment().setChestplateDropChance(0.0f);
+                        }
+                        gear = info.shooter.getInventory().getLeggings();
+                        if (gear != null) {
+                            spawned.getEquipment().setLeggings(gear);
+                            spawned.getEquipment().setLeggingsDropChance(0.0f);
+                        }
+                        gear = info.shooter.getInventory().getBoots();
+                        if (gear != null) {
+                            spawned.getEquipment().setBoots(gear);
+                            spawned.getEquipment().setBootsDropChance(0.0f);
+                        }
+                        if (info.power > 5.5) {
+                            gear = info.shooter.getInventory().getItem(0);
+                            if (gear != null) {
+                                spawned.getEquipment().setItemInMainHand(gear);
+                                spawned.getEquipment().setItemInMainHandDropChance(1.0f);
+                            }
+                        }
                     }
-                    if (gear != null) {
-                        spawned.getEquipment().setHelmet(gear);
-                        spawned.getEquipment().setHelmetDropChance(1.0f);
-                    } else {
-                        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-                        SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                        meta.setOwner(info.shooter.getName());
-                        skull.setItemMeta(meta);
-
-                        // OH GOD IT HAS MY FAAAAAAACE!
-                        spawned.getEquipment().setHelmet(skull);
-                        spawned.getEquipment().setHelmetDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getChestplate();
-                    if (gear != null) {
-                        spawned.getEquipment().setChestplate(gear);
-                        spawned.getEquipment().setChestplateDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getLeggings();
-                    if (gear != null) {
-                        spawned.getEquipment().setLeggings(gear);
-                        spawned.getEquipment().setLeggingsDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getBoots();
-                    if (gear != null) {
-                        spawned.getEquipment().setBoots(gear);
-                        spawned.getEquipment().setBootsDropChance(1.0f);
-                    }
-                    gear = info.shooter.getInventory().getItem(0);
-                    if (gear != null) {
-                        spawned.getEquipment().setItemInHand(gear);
-                        spawned.getEquipment().setItemInHandDropChance(1.0f);
-                    }
-                    String mobName = info.shooter.getInventory().getItem(27).getItemMeta().getDisplayName();
-                    if (mobName == null) {
-                        spawned.setCustomName(info.shooter.getName() + "'s Minion");
-                    } else {
-                        spawned.setCustomName(mobName);
-                    }
+                    spawned.setCustomName(info.shooter.getName() + "'s Minion");
                     spawned.setCustomNameVisible(true);
                 }
-
             }
         }.runTaskLater(plugin, 1L);
+    }
+
+    public static void onEntityTargetPlayer(EntityTargetLivingEntityEvent event) {
+        if (event.getTarget() instanceof Player) {
+            if ((event.getEntity().getCustomName() != null) && (event.getTarget().getName() != null)) {
+                //trying to prevent null exceptions: we only care about the 'match' case
+                if (event.getEntity().getCustomName().startsWith(event.getTarget().getName())) {
+                    event.setCancelled(true);
+                } //make all minions not harm their creators
+            } //in some circumstances, new entities run this before they're ready.
+        } //when that happens, the odd minion will try to kill you until you smack it to snap it out of its madness!
     }
 
     /**
@@ -858,7 +554,7 @@ public abstract class SnowballLogic {
     // Logic Association
     //
     private final static WeakHashMap<Snowball, SnowballLogicData> inFlight = new WeakHashMap<Snowball, SnowballLogicData>();
-    private static int approximateInFlightCount = 0;
+    // private static int approximateInFlightCount = 0;
     private static long inFlightSyncDeadline = 0;
 
     /**
@@ -874,22 +570,6 @@ public abstract class SnowballLogic {
             this.logic = logic;
             this.info = info;
         }
-    }
-
-    /**
-     * This returns the number of snowballs (that have attached logic) that are currently in flight. This may count snowballs that
-     * have been unloaded or otherwise destroyed for a time; it is not exact.
-     *
-     * @return The number of in-flight snowballs.
-     */
-    public static int getInFlightCount() {
-        long now = System.currentTimeMillis();
-
-        if (inFlightSyncDeadline <= now) {
-            inFlightSyncDeadline = now + 1000;
-            approximateInFlightCount = inFlight.size();
-        }
-        return approximateInFlightCount;
     }
 
     /**
@@ -914,8 +594,6 @@ public abstract class SnowballLogic {
      */
     public void start(Snowball snowball, SnowballInfo info) {
         inFlight.put(snowball, new SnowballLogicData(this, info));
-
-        approximateInFlightCount++;
     }
 
     /**
@@ -924,11 +602,10 @@ public abstract class SnowballLogic {
      * @param snowball The snowball to deregister.
      */
     public void end(Snowball snowball) {
-        approximateInFlightCount--;
         inFlight.remove(snowball);
     }
     ////////////////////////////////////////////////////////////////
-    // Utilitu Methods
+    // Utility Methods
     //
 
     /**
