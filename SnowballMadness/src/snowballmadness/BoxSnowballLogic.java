@@ -38,8 +38,8 @@ public class BoxSnowballLogic extends SnowballLogic {
 
         Location snowballLoc = snowball.getLocation();
         World world = snowball.getWorld();
-        final int radius = boxSize;
-        final int diameter = boxSize * 2;
+        final int radius = boxSize / 2;
+        final int diameter = boxSize;
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
 

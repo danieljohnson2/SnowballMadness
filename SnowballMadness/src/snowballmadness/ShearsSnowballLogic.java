@@ -22,7 +22,7 @@ public class ShearsSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        final int radius = (int) Math.sqrt(32 * info.power);
+        final int radius = (int) Math.sqrt(16 * info.power);
         final double distanceSquaredLimit = (radius * (double) radius);
 
         //size is heavily dependent on tool type, power expands so aggressively with
@@ -48,7 +48,7 @@ public class ShearsSnowballLogic extends SnowballLogic {
                     locationBuffer.setZ(z + 0.5);
                     if (snowballLoc.distanceSquared(locationBuffer) < distanceSquaredLimit) {
                         final Block beingMined = world.getBlockAt(x, y, z);
-                        if (canMine(beingMined, info.power)) {
+                        if (canMine(beingMined)) {
                             beingMined.setType(Material.AIR);
                         }
                     }
@@ -57,11 +57,8 @@ public class ShearsSnowballLogic extends SnowballLogic {
         }
     }
 
-    protected boolean canMine(Block target, double extraPower) {
+    protected boolean canMine(Block target) {
         Material material = target.getType();
-        //multiplied by: 1 for no power boosts at all
-        //multiplied by: 9 for double glowstone
-        //multiplied by: 16 for double nether star
 
         return target.getType() == Material.LEAVES //the simplest case: clear leaves.
                 || (material == Material.LEAVES_2)
@@ -72,13 +69,13 @@ public class ShearsSnowballLogic extends SnowballLogic {
                 || (material == Material.DEAD_BUSH)
                 || (material == Material.DEAD_BUSH)
                 || (material == Material.DEAD_BUSH)
-                || (material == Material.SNOW && (extraPower > 3.0)) //level 10 and you can shovel snow
-                || (material == Material.CACTUS && (extraPower > 3.0)) //and clear cacti
-                || (material == Material.CROPS && (extraPower < 5.5))
-                || (material == Material.MELON && (extraPower < 5.5))
-                || (material == Material.MELON_STEM && (extraPower < 5.5))
-                || (material == Material.POTATO && (extraPower < 5.5)) //under level 31 you wipe crops too
-                || (material == Material.PUMPKIN && (extraPower < 5.5)) //over level 30 you have the control not to
-                || (material == Material.PUMPKIN_STEM && (extraPower < 5.5));
+                || (material == Material.SNOW) 
+                || (material == Material.CACTUS)
+                || (material == Material.CROPS)
+                || (material == Material.MELON)
+                || (material == Material.MELON_STEM)
+                || (material == Material.POTATO)
+                || (material == Material.PUMPKIN) 
+                || (material == Material.PUMPKIN_STEM);
     }
 }

@@ -42,10 +42,10 @@ public final class SnowballInfo {
     public SnowballInfo(SnowballMadness plugin, Location launchLocation, Player shooter) {
         this.plugin = Preconditions.checkNotNull(plugin);
         this.shouldLogMessages = plugin.shouldLogSnowballs();
-        this.speed = 1.0;
+        this.speed = Math.max(1.0, shooter.getLevel());
         this.launchLocation = launchLocation.clone();
         this.shooter = shooter.getPlayer();
-        this.power = Math.max(1.0, Math.sqrt(shooter.getLevel()));
+        this.power = Math.max(1.0, Math.sqrt (shooter.getLevel()));
     }
 
     private SnowballInfo(double speed, double power, SnowballInfo original) {

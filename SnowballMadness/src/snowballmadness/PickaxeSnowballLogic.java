@@ -25,7 +25,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        int baseTool = 0;
+        int baseTool = 0; //wooden pick
         switch (toolUsed) {
             case DIAMOND_PICKAXE:
                 baseTool = 4;
@@ -36,8 +36,11 @@ public class PickaxeSnowballLogic extends SnowballLogic {
             case IRON_PICKAXE:
                 baseTool = 2;
                 break;
+            case STONE_PICKAXE:
+                baseTool = 1;
+                break;
         }
-        final double totalEffectiveness = baseTool * info.power;
+        final double totalEffectiveness = baseTool * 4f;
         final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
 
@@ -71,7 +74,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                     locationBuffer.setZ(z + 0.5);
                     if (snowballLoc.distanceSquared(locationBuffer) < moddedRoof) {
                         final Block beingMined = world.getBlockAt(x, y, z);
-                        if (canMine(beingMined, totalEffectiveness)) {
+                        if (canMine(beingMined, baseTool)) {
                             beingMined.setType(Material.AIR);
                         }
                     }
@@ -80,7 +83,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
         }
     }
 
-    protected boolean canMine(Block target, double tool) {
+    protected boolean canMine(Block target, int baseTool) {
         Material material = target.getType();
         //base tools:
         //0 = wood, 1 = stone, 2 = iron, 3 = gold, 4 = diamond
@@ -88,33 +91,27 @@ public class PickaxeSnowballLogic extends SnowballLogic {
 
         return target.getType() == Material.STONE //the simplest case: clear stone.
 
-                || (material == Material.NETHERRACK && (tool > 1))
-                || (material == Material.ENDER_STONE && (tool > 1))
-                || (material == Material.SAND && (tool > 1))
-                || (material == Material.DIRT && (tool > 1))
-                || (material == Material.SANDSTONE && (tool > 1))
-                || (material == Material.COBBLESTONE && (tool > 1))
-                || (material == Material.GRASS && (tool > 1))
-                || (material == Material.GRAVEL && (tool > 1)) //better than wood, and you are clearing dirt and gravel etc.
+                || (material == Material.NETHERRACK)
+                || (material == Material.ENDER_STONE)
+                || (material == Material.SAND)
+                || (material == Material.DIRT )
+                || (material == Material.SANDSTONE)
+                || (material == Material.COBBLESTONE)
+                || (material == Material.GRASS)
+                || (material == Material.GRAVEL)
 
-                || (material == Material.WATER && (tool > 2))
-                || (material == Material.STATIONARY_WATER && (tool > 2)) //better than plain iron and you can clear water
+                || (material == Material.WATER && (baseTool > 1))
+                || (material == Material.STATIONARY_WATER && (baseTool > 1)) //better than stone and you can clear water
 
-                || (material == Material.LAVA && (tool > 4))
-                || (material == Material.STATIONARY_LAVA && (tool > 4)) //better than plain diamond and you can clear lava
-                || (material == Material.COAL_ORE && (tool > 4))
-                || (material == Material.IRON_ORE && (tool > 4)) //and you are not looking for mere iron or coal, pfaugh!
-
-                || (material == Material.OBSIDIAN && (tool > 11)) //glowstone block diamond means you can clear obsidian
-                || (material == Material.BEDROCK && (tool > 30) && (target.getY() > 0)) //more means a bedrock flat floor
-
-                || (material == Material.DIAMOND_ORE && (tool > 15))
-                || (material == Material.LAPIS_ORE && (tool > 15))
-                || (material == Material.GOLD_ORE && (tool > 15))
-                || (material == Material.REDSTONE_ORE && (tool > 15))
-                || (material == Material.EMERALD_ORE && (tool > 15));
-        //anything over glowstone block no longer leaves ore in midair.
-        //You wouldn't be able to reach it anyway.
-        //this power becomes a cave-maker.
+                || (material == Material.LAVA && (baseTool > 2)) //better than iron and you can clear lava
+                || (material == Material.STATIONARY_LAVA && (baseTool > 2)) //all of these leave ores to mine
+                || (material == Material.COAL_ORE && (baseTool > 3)) //mining with gold pick means you want ores
+                || (material == Material.IRON_ORE && (baseTool > 3)) //mining with diamond pick clears ores
+                || (material == Material.OBSIDIAN && (baseTool > 3))
+                || (material == Material.BEDROCK && (baseTool > 3) && (target.getY() > 0)) //more means a bedrock flat floor
+                || (material == Material.LAPIS_ORE && (baseTool > 3))
+                || (material == Material.GOLD_ORE && (baseTool > 3))
+                || (material == Material.REDSTONE_ORE && (baseTool > 3)) //diamond pick mining leaves no ores to clear
+                || (material == Material.EMERALD_ORE && (baseTool > 3)); //except other diamond.
     }
 }

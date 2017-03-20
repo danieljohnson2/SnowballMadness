@@ -3,6 +3,7 @@ package snowballmadness;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.*;
+import org.bukkit.projectiles.ProjectileSource;
 
 /**
  * This logic makes a box out of the material you give it, varying the construction method by type. You can specify the material
@@ -14,25 +15,32 @@ public class SphereSnowballLogic extends SnowballLogic {
 
     private final Material wallMaterial;
     private final Material fillMaterial;
-  
-    public SphereSnowballLogic(Material wallMaterial) {
-        this(wallMaterial, Material.AIR);
-    }
+    private int boxSize;
 
-    public SphereSnowballLogic(Material wallMaterial, Material fillMaterial) {
+    public SphereSnowballLogic(Material wallMaterial, Material fillMaterial, int boxSize) {
         this.wallMaterial = wallMaterial;
         this.fillMaterial = fillMaterial;
+        this.boxSize = boxSize;
     }
 
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        int baseTool = 8;
-        final double totalEffectiveness = baseTool * info.power;
-        final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
-        final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
-        final int diameter = (int) (radius * 2);
-
+        ProjectileSource shooter = snowball.getShooter();
+        int expLevel = 1;
+        if (shooter instanceof Player) {
+            Player player = (Player) shooter;
+            expLevel = player.getLevel();
+        }
+        if (boxSize > expLevel) {
+            boxSize = expLevel;
+        } //as you get better at magic (level up) your max creation size ramps up too
+        
+        final double totalEffectiveness = boxSize * info.power;
+        final int radius = boxSize / 2;
+        final int diameter = boxSize;
+         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
+    
         World world = snowball.getWorld();
         Location snowballLoc = snowball.getLocation().clone();
 

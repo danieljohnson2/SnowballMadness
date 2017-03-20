@@ -141,19 +141,6 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                     }
                 };
 
-            case COAL_ORE:
-            case IRON_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 1);
-            case REDSTONE_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 2);
-            case LAPIS_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 3);
-            case EMERALD_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 4);
-            case DIAMOND_ORE:
-                return new BlockEmbedSnowballLogic(Material.AIR, Material.AIR, 8);
-            //new version is just a trap rather than an OP deathtrap
-
             case REDSTONE_TORCH_ON:
             case REDSTONE_TORCH_OFF:
                 return new BlockEmbedSnowballLogic(Material.COAL_BLOCK, Material.AIR, 1) {

@@ -5,10 +5,10 @@ import com.google.common.io.Files;
 import java.io.*;
 import java.util.*;
 import org.bukkit.*;
-import org.bukkit.BanList.Type;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
@@ -73,19 +73,11 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 }
             }
         }
-
-
-        /*
-
-         if (unbanPlayers == true) {
-         BanList banList = this.getServer().getBanList(BanList.Type.NAME);
-         for (BanEntry entry : banList.getBanEntries()) {
-         String name = entry.getTarget();
-         banList.pardon(name);
-         }
-         }
-         */
-
+        //we have completed nuking the files, now we want to reset our list to blank
+        toNuke.clear();
+        getConfig().set("nuke", toNuke);
+        saveConfig();
+        //now we start afresh and players unloading chunks can flag what ought to be cleared
     }
 
     /**
@@ -176,6 +168,62 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onChunkUnload(ChunkUnloadEvent e) {
+        FileConfiguration config = getConfig();
+        Chunk chunk = e.getChunk();
+        String unloadingWorld = "world";
+        if (chunk.getWorld().getEnvironment().equals(World.Environment.NETHER)) {
+            unloadingWorld = "world_nether";
+        } else if (chunk.getWorld().getEnvironment().equals(World.Environment.THE_END)) {
+            unloadingWorld = "world_the_end";
+        } //we will also try to prune nether and end, which will be even tougher to place diamond blocks in
+
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+        if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
+            //we are 16, 48, 80, 112, 144, 176, 208 etc (negative or positive) on both axes
+            boolean protectRegion = false;
+            //by default, expect to regenerate/nuke the region this is in
+            for (int height = 1; height < 8; height++) {
+                if (chunk.getBlock(16, height, 16).getType() == Material.DIAMOND_BLOCK) {
+                    protectRegion = true;
+                }
+                //if any of these blocks in the chunk being unloaded (which is the center chunk
+                //of the region) are diamond block, we will make sure that region's not in the nuke list
+            }
+            chunkX = (chunkX - 16) / 32;
+            chunkZ = (chunkZ - 16) / 32;
+            //convert these to what the region values will be
+            String target = new StringBuilder().append(unloadingWorld).append("/region/r.").append(chunkX).append(".").append(chunkZ).append(".mca").toString();
+            if (protectRegion) {
+                List<String> toNuke = config.getStringList("nuke");
+                Set<String> noDupes = new HashSet();
+                noDupes.addAll(toNuke);
+                toNuke.clear();
+                toNuke.addAll(noDupes);
+                //we've done this to ensure every item exists only once
+                //do it BEFORE the remove
+                toNuke.remove(target);
+                getConfig().set("nuke", toNuke);
+                saveConfig();
+                //make sure the region is removed from nuke list
+            } else {
+                List<String> toNuke = config.getStringList("nuke");
+                toNuke.add(target);
+                Set<String> noDupes = new HashSet();
+                noDupes.addAll(toNuke);
+                toNuke.clear();
+                toNuke.addAll(noDupes);
+                //we've done this to ensure every item exists only once
+                //do it AFTER the add
+                getConfig().set("nuke", toNuke);
+                saveConfig();
+                //make sure the region is IN the nuke list
+            }
+        } //if it's not the center chunk of the region, we fall through and nothing happens
+    }
+
+    @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent e) {
         SnowballLogic.onProjectileLaunch(this, e);
     }
@@ -223,6 +271,6 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 1));
             player.updateInventory();
         }
-        
+
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.base.*;
 import com.google.common.collect.Lists;
 
 import org.bukkit.*;
+import static org.bukkit.Material.JACK_O_LANTERN;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.*;
@@ -90,164 +91,136 @@ public abstract class SnowballLogic {
             return null;
         }
 
-        switch (hint.getType()) {
-
-            case TORCH:
-                return new TorchPlaceSnowballLogic(hint.getType());
-            //let's just allow people to light stuff, what the heck. So convenient.
-
-            case ARROW:
-                return new ArrowSnowballLogic();
-
-            case RED_ROSE:
-            case YELLOW_FLOWER:
-                return new FireworkSnowballLogic(hint);
-
-            case SAPLING:
-                return new ArboristSnowballLogic(hint);
-
-            case IRON_PICKAXE:
-            case GOLD_PICKAXE:
-            case DIAMOND_PICKAXE:
-                return new PickaxeSnowballLogic(hint.getType());
-
-            case SHEARS:
-                return new ShearsSnowballLogic();
-
-            case BOOKSHELF:
-            case ENDER_CHEST:
-            case DIAMOND_BLOCK:
-            case IRON_BLOCK:
-            case EMERALD_BLOCK:
-            case REDSTONE_BLOCK:
-            case LAPIS_BLOCK:
-            case SLIME_BLOCK:
-            case QUARTZ_BLOCK:
-            case COAL_BLOCK:
-            case GOLD_BLOCK:
-            case SNOW_BLOCK:
-            case BRICK:
-            case NETHER_BRICK:
-            case RED_NETHER_BRICK:
-            case SMOOTH_BRICK:
-            case GLASS:
-            case STAINED_GLASS:
-            case CLAY:
-            case STAINED_CLAY:
-            case GLOWSTONE:
-            case PURPUR_BLOCK:
-            case PRISMARINE:
-            case NETHER_WART_BLOCK:
-                return new BlockPlacementSnowballLogic(hint.getType(), hint.getDurability());
-            //generate stuff in quantity from any block of the consolidated stuff, including books and bricks
-            //Any block made by players out of sub-components. Glass is made out of sand. All generate single block at a time.
-
-            case DIRT:
-            case LEAVES:
-            case IRON_FENCE:
-            case STONE:
-            case ENDER_STONE:
-            case WOOD:
-            case LOG:
-            case MOSSY_COBBLESTONE:
-            case COBBLESTONE:
-                return new BoxSnowballLogic(hint.getType(), hint.getAmount(), hint.getDurability());
-
-            case GLASS_BOTTLE:
-            case POTION:
-                return new BoxSnowballLogic(Material.GLASS, hint.getAmount(), hint.getDurability());
-
-            case WOOD_SPADE:
-            case LADDER:
-            case VINE:
-            case COAL_ORE:
-            case IRON_ORE:
-            case REDSTONE_ORE:
-            case LAPIS_ORE:
-            case EMERALD_ORE:
-            case DIAMOND_ORE:
-            case REDSTONE_TORCH_ON:
-            case REDSTONE_TORCH_OFF:
+        if (hint.getType().isBlock()) {
+            if (hint.getType() == Material.TNT) {
+                return new TNTSnowballLogic(4.0f);
+            } else if (hint.getType() == Material.LADDER) {
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
+            } else if (hint.getType() == Material.VINE) {
+                return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
+                //TNT, Ladders and Vines are special blocks
+            } else {
+                return new BlockPlacementSnowballLogic(hint.getType(), hint.getDurability());
+                //everything else is just cloned one at a time, because magic. Up to and including beacons.
+            }
+        } else {
+            switch (hint.getType()) {
+                case GLASS_BOTTLE:
+                    return new SphereSnowballLogic(Material.GLASS, Material.AIR, hint.getAmount());
 
-            case BUCKET:
-                return new SphereSnowballLogic(Material.AIR, Material.AIR);
+                case WOOD_SPADE:
+                case REDSTONE_TORCH_ON:
+                case REDSTONE_TORCH_OFF:
+                    return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
-            case MAGMA:
-                return new SphereSnowballLogic(Material.FIRE, Material.FIRE);
+                case BUCKET:
+                    return new SphereSnowballLogic(Material.AIR, Material.AIR, 128);
 
-            case SULPHUR:
-                return new TNTSnowballLogic(0.25f);
+                case BLAZE_POWDER:
+                    return new SphereSnowballLogic(Material.FIRE, Material.FIRE, 128);
 
-            case TNT:
-                return new TNTSnowballLogic(1.0f);
+                case FIREWORK:
+                    return new JetpackSnowballLogic();
 
-            case FIREWORK:
-                return new JetpackSnowballLogic();
+                case DRAGON_EGG:
+                    return new DeathVortexSnowballLogic();
 
-            case DRAGON_EGG:
-                return new DeathVortexSnowballLogic();
+                case IRON_INGOT:
+                    return new MagneticSnowballLogic();
 
-            case IRON_INGOT:
-                return new MagneticSnowballLogic();
+                case TORCH:
+                    return new TorchPlaceSnowballLogic(hint.getType());
+                //let's just allow people to light stuff, what the heck. So convenient.
 
-            case APPLE:
-                return new SpeededSnowballLogic(1.5, slice.skip(1));
+                case ARROW:
+                    return new ArrowSnowballLogic();
 
-            case MELON:
-                return new SpeededSnowballLogic(1.5, slice.skip(1));
+                case RED_ROSE:
+                case YELLOW_FLOWER:
+                    return new FireworkSnowballLogic(hint);
 
-            case SUGAR:
-                return new SpeededSnowballLogic(2, slice.skip(1));
+                case SAPLING:
+                    return new ArboristSnowballLogic(hint);
 
-            case COOKIE:
-                return new SpeededSnowballLogic(2.4, slice.skip(1));
+                case IRON_PICKAXE:
+                case GOLD_PICKAXE:
+                case DIAMOND_PICKAXE:
+                    return new PickaxeSnowballLogic(hint.getType());
 
-            case PUMPKIN_PIE:
-                return new SpeededSnowballLogic(2.6, slice.skip(1));
+                case SHEARS:
+                    return new ShearsSnowballLogic();
 
-            case CAKE:
-                return new SpeededSnowballLogic(3, slice.skip(1));
-
-            case JACK_O_LANTERN:
-                return new SpawnSnowballLogic<Skeleton>(Skeleton.class) {
-                    @Override
-                    protected void initializeEntity(Skeleton spawned, final SnowballInfo info) {
-                        super.initializeEntity(spawned, info);
-
-                        //my skellington army of undead minions!
-                        if (info.speed > 1) {
-                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.speed));
+                case BONE:
+                    return new SpawnSnowballLogic<Skeleton>(Skeleton.class) {
+                        @Override
+                        protected void initializeEntity(Skeleton spawned, final SnowballInfo info) {
+                            super.initializeEntity(spawned, info);
+                            if (info.power > 1) {
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.power));
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, (int) info.power));
+                            }
                         }
-                    }
 
-                    @Override
-                    protected void equipEntity(Skeleton spawned, SnowballInfo info) {
-                        super.equipEntity(spawned, info);
-                        equipSkele(info.plugin, spawned, info);
-                    }
-                };
-
-            case ROTTEN_FLESH:
-                return new SpawnSnowballLogic<Zombie>(Zombie.class) {
-                    @Override
-                    protected void initializeEntity(Zombie spawned, SnowballInfo info) {
-                        super.initializeEntity(spawned, info);
-                        //my zombie army of yucky minions!
-                        if (info.speed > 1) {
-                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.power));
+                        @Override
+                        protected void equipEntity(Skeleton spawned, SnowballInfo info) {
+                            super.equipEntity(spawned, info);
+                            equipSkele(info.plugin, spawned, info);
                         }
-                    }
+                    };
 
-                    @Override
-                    protected void equipEntity(Zombie spawned, SnowballInfo info) {
-                        super.equipEntity(spawned, info);
-                        equipZombie(info.plugin, spawned, info);
-                    }
-                };
+                case SPIDER_EYE:
+                    return new SpawnSnowballLogic<Spider>(Spider.class) {
+                        @Override
+                        protected void initializeEntity(Spider spawned, final SnowballInfo info) {
+                            super.initializeEntity(spawned, info);
+                            if (info.power > 1) {
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.power));
+                            }
+                        }
 
-            default:
-                return null;
+                        @Override
+                        protected void equipEntity(Spider spawned, SnowballInfo info) {
+                            super.equipEntity(spawned, info);
+                            equipSpider(info.plugin, spawned, info);
+                        }
+                    };
+
+                case ROTTEN_FLESH:
+                    return new SpawnSnowballLogic<Zombie>(Zombie.class) {
+                        @Override
+                        protected void initializeEntity(Zombie spawned, SnowballInfo info) {
+                            super.initializeEntity(spawned, info);
+                        }
+
+                        @Override
+                        protected void equipEntity(Zombie spawned, SnowballInfo info) {
+                            super.equipEntity(spawned, info);
+                            equipZombie(info.plugin, spawned, info);
+                        }
+                    };
+
+                case SULPHUR:
+                    return new SpawnSnowballLogic<Creeper>(Creeper.class) {
+                        @Override
+                        protected void initializeEntity(Creeper spawned, SnowballInfo info) {
+                            super.initializeEntity(spawned, info);
+                            if (info.power > 4) {
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, (int) info.power / 4));
+                                spawned.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, (int) info.power / 4));
+                            } //just to be even more horrible, when the creepers light up they accelerate
+                        }
+
+                        @Override
+                        protected void equipEntity(Creeper spawned, SnowballInfo info) {
+                            super.equipEntity(spawned, info);
+                            equipCreeper(info.plugin, spawned, info);
+                        }
+                    };
+
+
+                default:
+                    return null;
+            }
         }
     }
 
@@ -342,8 +315,6 @@ public abstract class SnowballLogic {
 
                 Snowball snowball = (Snowball) proj;
                 Player player = (Player) shooter;
-                //if ((player.getLocation().toVector().getX() < 0.0) || (player.getLocation().toVector().getZ() < 0.0)) {
-                //either of the vectors is negative: we're not in the Versus Set Area
                 PlayerInventory inv = player.getInventory();
                 int heldSlot = inv.getHeldItemSlot();
                 ItemStack sourceStack = inv.getItem(heldSlot);
@@ -351,11 +322,10 @@ public abstract class SnowballLogic {
                     InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
                     SnowballLogic logic = performLaunch(slice, snowball,
                             new SnowballInfo(plugin, snowball.getLocation(), player));
-                    if (logic != null) {
-                        replenishSnowball(plugin, inv, heldSlot);
-                    }
+                    // if (logic != null) {
+                    replenishSnowball(plugin, inv, heldSlot);
+                    //}
                 }
-                //} //this goes with the Versus special case: defines an area where Snowball doesn't function
             }
         }
     }
@@ -423,14 +393,14 @@ public abstract class SnowballLogic {
 
                 if (replacing == null) {
                     inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL));
-                } else if (replacing.getType() == Material.SNOW_BALL) {
-                    int oldCount = replacing.getAmount();
-                    int newCount = Math.min(16, oldCount + 1);
+                } /*else if (replacing.getType() == Material.SNOW_BALL) {
+                 int oldCount = replacing.getAmount();
+                 int newCount = Math.min(16, oldCount + 1);
 
-                    if (oldCount != newCount) {
-                        inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL, newCount));
-                    }
-                }
+                 if (oldCount != newCount) {
+                 inventory.setItem(slotIndex, new ItemStack(Material.SNOW_BALL, newCount));
+                 }
+                 }*/
             }
         }.runTaskLater(plugin, 1);
     }
@@ -439,43 +409,42 @@ public abstract class SnowballLogic {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (info.power > 3.3 && info.shooter != null) {
-                    //you have to be over level 10 to make them your minions
-                    ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                    meta.setOwner(info.shooter.getName());
-                    skull.setItemMeta(meta);
-                    // OH GOD IT HAS MY FAAAAAAACE!
-                    spawned.getEquipment().setHelmet(skull);
-                    spawned.getEquipment().setHelmetDropChance(0.0f);
-
-                    if (info.power > 4.5) {
-                        //you have to be over level 20 to armor them and have them holding your weapon
-                        ItemStack gear = info.shooter.getInventory().getChestplate();
-                        if (gear != null) {
-                            spawned.getEquipment().setChestplate(gear);
-                            spawned.getEquipment().setChestplateDropChance(0.0f);
-                        }
-                        gear = info.shooter.getInventory().getLeggings();
-                        if (gear != null) {
-                            spawned.getEquipment().setLeggings(gear);
-                            spawned.getEquipment().setLeggingsDropChance(0.0f);
-                        }
-                        gear = info.shooter.getInventory().getBoots();
-                        if (gear != null) {
-                            spawned.getEquipment().setBoots(gear);
-                            spawned.getEquipment().setBootsDropChance(0.0f);
-                        }
-                        if (info.power > 5.5) {
-                            gear = info.shooter.getInventory().getItem(0);
-                            if (gear != null) {
-                                spawned.getEquipment().setItemInMainHand(gear);
-                                spawned.getEquipment().setItemInMainHandDropChance(1.0f);
-                            }
-                        }
+                if (info.shooter != null) {
+                    float dropChance = info.shooter.getLevel() * 0.01f;
+                    ItemStack gear = info.shooter.getInventory().getHelmet();
+                    if (gear != null) {
+                        spawned.getEquipment().setHelmet(gear);
+                        spawned.getEquipment().setHelmetDropChance(dropChance);
+                    } else {
+                        gear = new ItemStack(Material.JACK_O_LANTERN);
+                        spawned.getEquipment().setHelmet(gear);
+                        spawned.getEquipment().setHelmetDropChance(dropChance);
                     }
-                    spawned.setCustomName(info.shooter.getName() + "'s Minion");
+                    gear = info.shooter.getInventory().getChestplate();
+                    if (gear != null) {
+                        spawned.getEquipment().setChestplate(gear);
+                        spawned.getEquipment().setChestplateDropChance(dropChance);
+                    }
+                    gear = info.shooter.getInventory().getLeggings();
+                    if (gear != null) {
+                        spawned.getEquipment().setLeggings(gear);
+                        spawned.getEquipment().setLeggingsDropChance(dropChance);
+                    }
+                    gear = info.shooter.getInventory().getBoots();
+                    if (gear != null) {
+                        spawned.getEquipment().setBoots(gear);
+                        spawned.getEquipment().setBootsDropChance(dropChance);
+                    }
+                    gear = info.shooter.getInventory().getItem(0).clone();
+                    //we are altering the itemStack, must clone or we alter it right in our inventory!
+                    if (gear != null) {
+                        gear.setAmount(1);
+                        spawned.getEquipment().setItemInMainHand(gear);
+                        spawned.getEquipment().setItemInMainHandDropChance(dropChance);
+                    }
+                    spawned.setCustomName(info.shooter.getName() + "'s Skeleton");
                     spawned.setCustomNameVisible(true);
+                    spawned.setRemoveWhenFarAway(false);
                 }
             }
         }.runTaskLater(plugin, 1L);
@@ -485,43 +454,41 @@ public abstract class SnowballLogic {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (info.power > 3.3 && info.shooter != null) {
-                    //you have to be over level 10 to make them your minions
-                    ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                    meta.setOwner(info.shooter.getName());
-                    skull.setItemMeta(meta);
-                    // OH GOD IT HAS MY FAAAAAAACE!
-                    spawned.getEquipment().setHelmet(skull);
-                    spawned.getEquipment().setHelmetDropChance(0.0f);
-
-                    if (info.power > 4.5) {
-                        //you have to be over level 20 to armor them
-                        ItemStack gear = info.shooter.getInventory().getChestplate();
-                        if (gear != null) {
-                            spawned.getEquipment().setChestplate(gear);
-                            spawned.getEquipment().setChestplateDropChance(0.0f);
-                        }
-                        gear = info.shooter.getInventory().getLeggings();
-                        if (gear != null) {
-                            spawned.getEquipment().setLeggings(gear);
-                            spawned.getEquipment().setLeggingsDropChance(0.0f);
-                        }
-                        gear = info.shooter.getInventory().getBoots();
-                        if (gear != null) {
-                            spawned.getEquipment().setBoots(gear);
-                            spawned.getEquipment().setBootsDropChance(0.0f);
-                        }
-                        if (info.power > 5.5) {
-                            gear = info.shooter.getInventory().getItem(0);
-                            if (gear != null) {
-                                spawned.getEquipment().setItemInMainHand(gear);
-                                spawned.getEquipment().setItemInMainHandDropChance(1.0f);
-                            }
-                        }
-                    }
-                    spawned.setCustomName(info.shooter.getName() + "'s Minion");
+                if (info.shooter != null) {
+                    spawned.setCustomName(info.shooter.getName() + "'s Army");
                     spawned.setCustomNameVisible(true);
+                    spawned.setRemoveWhenFarAway(false);
+                }
+            }
+        }.runTaskLater(plugin, 1L);
+    }
+
+    private static void equipCreeper(Plugin plugin, final Creeper spawned, final SnowballInfo info) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (info.shooter != null) {
+                    if (info.power > 4) {
+                        spawned.setPowered(true);
+                        spawned.setCustomName(info.shooter.getName() + "'s Nightmare");
+                    } else {
+                        spawned.setCustomName(info.shooter.getName() + "'s Mistake");
+                    }
+                    spawned.setCustomNameVisible(true);
+                    spawned.setRemoveWhenFarAway(false);
+                }
+            }
+        }.runTaskLater(plugin, 1L);
+    }
+
+    private static void equipSpider(Plugin plugin, final Spider spawned, final SnowballInfo info) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (info.shooter != null) {
+                    spawned.setCustomName(info.shooter.getName() + "'s Creepy");
+                    spawned.setCustomNameVisible(true);
+                    spawned.setRemoveWhenFarAway(false);
                 }
             }
         }.runTaskLater(plugin, 1L);
@@ -529,11 +496,15 @@ public abstract class SnowballLogic {
 
     public static void onEntityTargetPlayer(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() instanceof Player) {
-            if ((event.getEntity().getCustomName() != null) && (event.getTarget().getName() != null)) {
+            Player player = (Player) event.getTarget();
+            if ((event.getEntity().getCustomName() != null) && (player.getName() != null)) {
                 //trying to prevent null exceptions: we only care about the 'match' case
-                if (event.getEntity().getCustomName().startsWith(event.getTarget().getName())) {
-                    event.setCancelled(true);
-                } //make all minions not harm their creators
+                if (event.getEntity().getCustomName().startsWith(player.getName())) {
+                    if (Math.random() < player.getLevel() * 0.01) {
+                        event.setCancelled(true);
+                    }
+                } //make minions not harm their creators if the creators are tough enough
+
             } //in some circumstances, new entities run this before they're ready.
         } //when that happens, the odd minion will try to kill you until you smack it to snap it out of its madness!
     }
