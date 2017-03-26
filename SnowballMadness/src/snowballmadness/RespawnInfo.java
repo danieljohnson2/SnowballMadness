@@ -48,6 +48,7 @@ public final class RespawnInfo {
         double randX;
         double randZ;
         boolean foundSpawn;
+        boolean badPlace;
         Block block; //we'll just keep using this one
 
         /**
@@ -55,17 +56,23 @@ public final class RespawnInfo {
          * immediate vicinity of the spawn location for solid ground that doesn't include any bad blocks.
          */
         foundSpawn = false;
-        
+        badPlace = false;
+
         if (player.hasPlayedBefore()) {
             foundSpawn = true;
             //crazy random only on first logon ever
         }
-        
+
         while (foundSpawn == false) {
-            randX = -2000 + Math.random() * 4001;
-            randZ = -2000 + Math.random() * 4001;
+            randX = -1000 + Math.random() * 2001;
+            randZ = -1000 + Math.random() * 2001;
             World world = player.getWorld();
-            Location loc = new Location(player.getWorld(), randX, 127, randZ);
+            Location loc;
+            if (badPlace) {
+                loc = new Location(player.getWorld(), randX, 127, randZ);
+            } else {
+                loc = player.getLocation().clone();
+            }
             world.getChunkAt(loc).load();
             block = loc.getBlock();
             if (world.getEnvironment().equals(Environment.NETHER)) {
@@ -94,7 +101,8 @@ public final class RespawnInfo {
                         || material == Material.CACTUS
                         || material == Material.PORTAL
                         || material == Material.ENDER_PORTAL) {
-                    //it's a bad thing we hit! we leave foundSpawn as false!                
+                    badPlace = true;
+                    //it's a bad thing we hit! we leave foundSpawn as false! and randomize location!
                 } else {
                     loc.setY(loc.getY() + 1.5);
                     //step back up into the air again

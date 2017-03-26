@@ -21,12 +21,7 @@ public class ArrowSnowballLogic extends SnowballLogic {
 
         location.add(velocity.normalize().multiply(1.5));
         //adjusting shot position so you can't run into it while firing
-        float speed = (float) info.speed;
-        if (speed > info.power) {
-           speed = (float) info.power;
-        } //as you get better at magic (level up) your max shot speed ramps up too
-        //needs both study and the material components (beacons, cakes etc)
-  
+        float speed = (float) info.power;
         if (speed > 1.7) {
             snowball.getWorld().playEffect(location, Effect.BOW_FIRE, null, 128);
             if (speed > 3.2) {

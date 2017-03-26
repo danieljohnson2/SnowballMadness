@@ -40,18 +40,19 @@ public class MagneticSnowballLogic extends SnowballLogic {
                 previousTarget = target;
             }
         }
-
+       
         for (Entity victim : world.getEntities()) {
-            if (canAttract(victim, snowball, info)) {
+            if ( victim instanceof Snowball || (victim == snowball.getShooter())) {
+                //does not apply to other snowballs
+            } else {
                 accelerate(victim, target, info.power);
                 if (!(victim instanceof Snowball)) {
-                    accelerate(victim, momentum, info.speed * 2.0);
+                    accelerate(victim, momentum, info.power);
                 }
                 accelerate(victim, target.getMidpoint(previousTarget), info.power);
                 accelerate(victim, previousTarget, info.power);
             }
         }
-
         previousTarget = target;
     }
 
@@ -108,27 +109,5 @@ public class MagneticSnowballLogic extends SnowballLogic {
         if (victim instanceof Snowball && dist < 2 && !(victim == target)) {
             victim.remove(); //we will cut down on the clustering slightly this way
         }
-    }
-
-    /**
-     * This method decides whether to attract 'entity' to the snowball given. If
-     * this returns false, the entity is skipped.
-     *
-     * @param entity The entity that might be attracted.
-     * @param snowball The snowball to attract the entity to.
-     * @param info The info about the snowball.
-     * @return true to move accelerate entity towards the snowball, false to do
-     * nothing to it.
-     */
-    protected boolean canAttract(Entity victim, Snowball snowball, SnowballInfo info) {
-        if (victim == snowball.getShooter()) {
-            return false;
-        }
-
-        if (victim instanceof Snowball) {
-            return false;
-        }
-
-        return true;
     }
 }

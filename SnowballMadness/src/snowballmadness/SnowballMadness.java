@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
@@ -184,7 +185,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             //we are 16, 48, 80, 112, 144, 176, 208 etc (negative or positive) on both axes
             boolean protectRegion = false;
             //by default, expect to regenerate/nuke the region this is in
-            for (int height = 1; height < 8; height++) {
+            for (int height = 1; height < 257; height++) {
                 if (chunk.getBlock(16, height, 16).getType() == Material.DIAMOND_BLOCK) {
                     protectRegion = true;
                 }
@@ -234,6 +235,26 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.getBlockPlaced().getType() == Material.DIAMOND_BLOCK) {
+            Chunk chunk = event.getBlockPlaced().getChunk();
+            int chunkX = chunk.getX();
+            int chunkZ = chunk.getZ();
+            if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
+                //we are 16, 48, 80, 112, 144, 176, 208 etc (negative or positive) on both axes
+                //so we are the correct chunk for the region
+                for (int height = 1; height < 257; height++) {
+                    if (chunk.getBlock(16, height, 16).getType() == Material.DIAMOND_BLOCK) {
+                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1f, 0.1f);
+                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_WITHER_DEATH, 1f, 0.1f);
+                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, 1f, 0.1f);
+                    }//this is entirely a player cue, to show player they've correctly placed the protection diamond block.
+                }
+            }
+        } 
+    }
+
+    @EventHandler
     public void onEntityTargetPlayer(EntityTargetLivingEntityEvent e) {
         SnowballLogic.onEntityTargetPlayer(e);
     }
@@ -246,31 +267,18 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        bestowSnowball(player);
+        PlayerInventory inventory = player.getInventory();
+        ItemStack oldStack = inventory.getItem(8);
+        if (oldStack == null) {
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 1));
+            player.updateInventory();
+        } //only upon join do we give only one base snowball, only if slot 8 is empty.
         RespawnInfo.checkRespawn(player, this);
     }
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
         Player player = e.getPlayer();
-        bestowSnowball(player);
         RespawnInfo.checkRespawn(player, this);
-    }
-
-    /**
-     * This method gives a player a snowball in a designated snowball slot, provided this slot is empty.
-     *
-     * @param player The player to be gifted with snow!
-     */
-    @SuppressWarnings("deprecation")
-    private void bestowSnowball(Player player) {
-
-        PlayerInventory inventory = player.getInventory();
-        ItemStack oldStack = inventory.getItem(8);
-        if (oldStack == null || oldStack.getType() == Material.SNOW_BALL) {
-            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 1));
-            player.updateInventory();
-        }
-
     }
 }

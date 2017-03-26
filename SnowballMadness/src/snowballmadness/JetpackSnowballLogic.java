@@ -23,7 +23,7 @@ public class JetpackSnowballLogic extends SnowballLogic {
             LivingEntity shooter = (LivingEntity) psource;
             Location location = shooter.getLocation();
  
-            double delta = info.power * info.speed;
+            double delta = info.power * info.power;
             double ground;
             //any form of powering will crank this up
             snowball.getWorld().playEffect(location, Effect.MOBSPAWNER_FLAMES, null, 128);
