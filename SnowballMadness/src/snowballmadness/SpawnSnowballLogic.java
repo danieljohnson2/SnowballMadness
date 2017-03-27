@@ -5,8 +5,6 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -20,19 +18,10 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
 
-    //private final static CooldownTimer<Object> cooldown = new CooldownTimer<Object>(100);
     private final Class<? extends TEntity> entityClass;
-    private final Class<? extends TEntity> poweredEntityClass;
-    private final double upgradePower;
 
     public SpawnSnowballLogic(Class<? extends TEntity> entityClass) {
-        this(entityClass, entityClass, 1.0);
-    }
-
-    public SpawnSnowballLogic(Class<? extends TEntity> entityClass, Class<? extends TEntity> poweredEntityClass, double upgradePower) {
         this.entityClass = Preconditions.checkNotNull(entityClass);
-        this.poweredEntityClass = Preconditions.checkNotNull(poweredEntityClass);
-        this.upgradePower = upgradePower;
     }
 
     /**
@@ -43,21 +32,13 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
         return new SpawnSnowballLogic<T>(entityClass);
     }
 
-    /**
-     * This method creates an instance of this logic; the use of a static method like this means the type argument T is inferred,
-     * so you don't have to give the type thrice.
-     */
-    public static <T extends Entity> SpawnSnowballLogic<T> fromEntityClass(Class<? extends T> entityClass, Class<? extends T> poweredEntityClass, double upgradePower) {
-        return new SpawnSnowballLogic<T>(entityClass, poweredEntityClass, upgradePower);
-    }
-
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        //if (cooldown.check("")) {
-        spawnEntity(snowball.getLocation(), info);
-        //}
+        if (canSpawnAt(snowball.getLocation(), info)) {
+            spawnEntity(snowball.getLocation(), info);
+        } //resume nerfing smother traps
     }
 
     /**
@@ -67,24 +48,34 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * @param location The place to spawn at.
      * @param info The snowball info in effect, if you need it.
      */
-    private final void spawnEntity(Location location, final SnowballInfo info) {
+    private void spawnEntity(Location location, final SnowballInfo info) {
         World world = location.getWorld();
         Location adjusted = location.clone();
         Class<? extends TEntity> spawnClass = pickSpawnClass(adjusted, info);
 
         if (spawnClass != null) {
-            if (world.getLivingEntities().size() < 3000) {
-                final TEntity spawned = world.spawn(adjusted, spawnClass);
-                initializeEntity(spawned, info);
-
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        equipEntity(spawned, info);
-                    }
-                }.runTaskLater(info.plugin, 1);
-            }
-        }
+            if (world.getLivingEntities().size() > 1024) {
+                //we check that once, not constantly
+                int bailout = (int)Math.sqrt(world.getEntitiesByClass(spawnClass).size());
+                //our bailout is more intense when the particular type being spammed is saturated
+                for (Entity e : world.getEntitiesByClass(spawnClass)) {
+                    e.remove();
+                    bailout--;
+                    if (bailout < 1) {
+                        break;
+                    } //every spawn is capable of removing many entities of the type being spawned
+                } //from an overloaded pool of such entities. We don't try to delete the whole pool
+            } //and we don't try to do anything intelligent because by definition we're lagged already.
+            
+            final TEntity spawned = world.spawn(adjusted, spawnClass);
+            initializeEntity(spawned, info);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    equipEntity(spawned, info);
+                }
+            }.runTaskLater(info.plugin, 1);
+        } //we will always spawn one, even if we've had to remove eight
     }
 
     /**
@@ -94,13 +85,13 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * @param info The snowball info of the snowball.
      * @return True to allow the spawn; false to spawn nothing.
      */
-   protected boolean canSpawnAt(Location location, SnowballInfo info) {
-     //we're only going to spawn an entity if the block is breathable space
-     //nerfing too-trivially-easy suffocation mob farms
-     Block above = location.getBlock().getRelative(BlockFace.UP);
-     return above.isEmpty() || above.isLiquid();
-     } //since minions are now tame and can be freely killed there's no reason to have this
-     
+    protected boolean canSpawnAt(Location location, SnowballInfo info) {
+        //we're only going to spawn an entity if the block is breathable space
+        //nerfing too-trivially-easy suffocation mob farms
+        Block above = location.getBlock().getRelative(BlockFace.UP);
+        return above.isEmpty() || above.isLiquid();
+    }
+
     /**
      * This method returns the entity type to spawn; we pick the powered version if the snowball is sufficiently powered.
      *
@@ -113,11 +104,7 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * @return The entity type to spawn.
      */
     protected Class<? extends TEntity> pickSpawnClass(Location location, SnowballInfo info) {
-        if (info.power > upgradePower) {
-            return poweredEntityClass;
-        } else {
-            return entityClass;
-        }
+        return entityClass;
     }
 
     /**
@@ -139,96 +126,5 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
      * @param info The info of the snowball that spawned it.
      */
     protected void equipEntity(TEntity spawned, SnowballInfo info) {
-    }
-
-    /**
-     * This returns the logic for a given skull type; some skull types just produce null, which means we don't support them.
-     *
-     * @param skullType The type of skull used for the snowball.
-     * @return A logic for the snowball, or null.
-     */
-    public static SpawnSnowballLogic<?> fromSkullType(SkullType skullType) {
-        switch (skullType) {
-            case CREEPER:
-                return new CreeperLogic();
-
-            case SKELETON:
-                return fromEntityClass(Skeleton.class);
-
-            case ZOMBIE:
-                return new ZombieLogic();
-                
-            case WITHER:
-                return new WitherSkeletonLogic();
-
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * This logic provides powered creepers when powered.
-     */
-    private static class CreeperLogic extends SpawnSnowballLogic<Creeper> {
-
-        public CreeperLogic() {
-            super(Creeper.class);
-        }
-
-        @Override
-        protected void initializeEntity(Creeper creepy, SnowballInfo info) {
-            super.initializeEntity(creepy, info);
-        }
-    }
-
-   /**
-     * This logic provides cave spiders when powered.
-     */
-    private static class SpiderLogic extends SpawnSnowballLogic<Spider> {
-
-        public SpiderLogic() {
-            super(Spider.class);
-        }
-
-        @Override
-        protected void initializeEntity(Spider spidey, SnowballInfo info) {
-            super.initializeEntity(spidey, info);
-        }
-    }
-
-    /**
-     * This logic provides villager zombies when powered.
-     */
-    private static class ZombieLogic extends SpawnSnowballLogic<Zombie> {
-
-        public ZombieLogic() {
-            super(Zombie.class);
-        }
-
-        @Override
-        protected void initializeEntity(Zombie zombie, SnowballInfo info) {
-            super.initializeEntity(zombie, info);
-        }
-    }
-
-    /**
-     * This logic provides wither skeletons when not powered, but withers when powered a lot. You have to already have two wither
-     * stars.
-     */
-    private static class WitherSkeletonLogic extends SpawnSnowballLogic<Monster> {
-
-        public WitherSkeletonLogic() {
-            super(Skeleton.class, Wither.class, 15);
-        }
-
-        @Override
-        protected void initializeEntity(Monster spawned, SnowballInfo info) {
-            super.initializeEntity(spawned, info);
-
-            if (spawned instanceof Skeleton) {
-                Skeleton skelly = (Skeleton) spawned;
-                skelly.setSkeletonType(Skeleton.SkeletonType.WITHER);
-            }
-        }
     }
 }

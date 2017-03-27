@@ -94,8 +94,16 @@ public abstract class SnowballLogic {
         if (hint.getType().isBlock()) {
             if (hint.getType() == Material.TNT) {
                 return new TNTSnowballLogic(4.0f);
+            } else if (hint.getType() == Material.DRAGON_EGG) {
+                return new DeathVortexSnowballLogic();
+            } else if (hint.getType() == Material.RED_ROSE) {
+                return new FireworkSnowballLogic(hint);
+            } else if (hint.getType() == Material.YELLOW_FLOWER) {
+                return new FireworkSnowballLogic(hint);
             } else if (hint.getType() == Material.TORCH) {
                 return new TorchPlaceSnowballLogic();
+            } else if (hint.getType() == Material.SAPLING) {
+                return new ArboristSnowballLogic(hint);
             } else if (hint.getType() == Material.REDSTONE_TORCH_ON) {
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
             } else if (hint.getType() == Material.LADDER) {
@@ -127,21 +135,11 @@ public abstract class SnowballLogic {
                 case WATCH:
                     return new WatchSnowballLogic();
 
-                case DRAGON_EGG:
-                    return new DeathVortexSnowballLogic();
-
                 case IRON_INGOT:
                     return new MagneticSnowballLogic();
 
                 case ARROW:
                     return new ArrowSnowballLogic();
-
-                case RED_ROSE:
-                case YELLOW_FLOWER:
-                    return new FireworkSnowballLogic(hint);
-
-                case SAPLING:
-                    return new ArboristSnowballLogic(hint);
 
                 case STONE_PICKAXE:
                 case IRON_PICKAXE:
@@ -153,7 +151,9 @@ public abstract class SnowballLogic {
                     return new ShearsSnowballLogic();
 
                 case SNOW_BALL:
-                    return new MultiplierSnowballLogic(hint.getAmount(), slice.skip(1));
+                    String targetName = hint.getItemMeta().getDisplayName();
+                    hint.setItemMeta(null); //Using named snowballs CLEARS the named snowball stack you use
+                    return new MultiplierSnowballLogic(hint.getAmount(), targetName, slice.skip(1));
 //________________________________________________________________________________________________________________________________
 //Food Animals Spawn As Babies
 
@@ -322,28 +322,29 @@ public abstract class SnowballLogic {
                             }.runTaskLater(info.plugin, 1L);
                         }
                     };
-                    
+
                 case CARROT_ITEM:
                     return new SpawnSnowballLogic<Snowman>(Snowman.class) {
-                       @Override
+                        @Override
                         protected void initializeEntity(Snowman spawned, SnowballInfo info) {
                             super.initializeEntity(spawned, info);
                             spawned.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, Integer.MAX_VALUE, 1), true);
                             spawned.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 1), true);
                         }
-                       @Override
+
+                        @Override
                         protected void equipEntity(final Snowman spawned, final SnowballInfo info) {
                             super.equipEntity(spawned, info);
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
-                                spawned.setCustomName(info.shooter.getName() + "'s Snow Bank");
-                                        spawned.setCustomNameVisible(false);
-                                        spawned.setRemoveWhenFarAway(false);
-                                        AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
-                                        followAttribute.setBaseValue(0.0f);
-                                        AttributeInstance speedAttribute = spawned.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                                        speedAttribute.setBaseValue(0.0f);
+                                    spawned.setCustomName(info.shooter.getName() + "'s Snow Bank");
+                                    spawned.setCustomNameVisible(false);
+                                    spawned.setRemoveWhenFarAway(false);
+                                    AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
+                                    followAttribute.setBaseValue(0.0f);
+                                    AttributeInstance speedAttribute = spawned.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+                                    speedAttribute.setBaseValue(0.0f);
                                 } //the magic snowman is an all-biome source that doesn't wander. Still works as a turret.
                             }.runTaskLater(info.plugin, 1L);
                         }
@@ -522,10 +523,6 @@ public abstract class SnowballLogic {
 
                 case BONE:
                     return new SpawnSnowballLogic<Skeleton>(Skeleton.class) {
-                        //                     @Override
-                        //                   protected void initializeEntity(Skeleton spawned, final SnowballInfo info) {
-                        //                     super.initializeEntity(spawned, info);
-                        //               }
                         @Override
                         protected void equipEntity(final Skeleton spawned, final SnowballInfo info) {
                             super.equipEntity(spawned, info);
@@ -556,29 +553,42 @@ public abstract class SnowballLogic {
                                             belt = Color.BLACK; //81
                                         }
 
-                                        gear = new ItemStack(Material.LEATHER_HELMET, 1);
-                                        dye = (LeatherArmorMeta) gear.getItemMeta();
-                                        dye.setColor(belt);
-                                        gear.setItemMeta(dye);
+                                        gear = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                                        SkullMeta meta = (SkullMeta) gear.getItemMeta();
+                                        meta.setOwner(info.shooter.getName());
+                                        gear.setItemMeta(meta);
+                                        // OH GOD IT HAS MY FAAAAAAACE!
                                         spawned.getEquipment().setHelmet(gear);
+                                        spawned.getEquipment().setHelmetDropChance(0.0f);
 
                                         gear = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setChestplate(gear);
+                                        spawned.getEquipment().setChestplateDropChance(0.0f);
 
                                         gear = new ItemStack(Material.LEATHER_LEGGINGS, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setLeggings(gear);
+                                        spawned.getEquipment().setLeggingsDropChance(0.0f);
 
                                         gear = new ItemStack(Material.LEATHER_BOOTS, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setBoots(gear);
+                                        spawned.getEquipment().setBootsDropChance(0.0f);
+
+                                        gear = info.shooter.getInventory().getItem(0);
+                                        if (gear != null) {
+                                            gear = info.shooter.getInventory().getItem(0).clone();
+                                            //we are altering the itemStack, must clone or we alter it right in our inventory!
+                                            gear.setAmount(1);
+                                            spawned.getEquipment().setItemInMainHand(gear);
+                                        }
 
                                         spawned.setCustomName(info.shooter.getName() + "'s Ninja");
                                         spawned.setCustomNameVisible(false);
@@ -592,17 +602,14 @@ public abstract class SnowballLogic {
                                         spawned.setHealth(spawned.getMaxHealth());
                                     }
                                 }
-                            }.runTaskLater(info.plugin, 1L);
+                            }
+                                    .runTaskLater(info.plugin,
+                                    1L);
                         }
                     };
 
                 case ROTTEN_FLESH:
                     return new SpawnSnowballLogic<Zombie>(Zombie.class) {
-                        @Override
-                        protected void initializeEntity(Zombie spawned, SnowballInfo info) {
-                            super.initializeEntity(spawned, info);
-                        }
-
                         @Override
                         protected void equipEntity(final Zombie spawned, final SnowballInfo info) {
                             super.equipEntity(spawned, info);
@@ -614,49 +621,61 @@ public abstract class SnowballLogic {
                                         LeatherArmorMeta dye;
                                         Color belt = Color.WHITE;
                                         if (info.power < 2) {
-                                            belt = Color.WHITE;
+                                            belt = Color.WHITE; //noob
                                         } else if (info.power < 3) {
-                                            belt = Color.YELLOW;
+                                            belt = Color.YELLOW; //4
                                         } else if (info.power < 4) {
-                                            belt = Color.ORANGE;
+                                            belt = Color.ORANGE; //9
                                         } else if (info.power < 5) {
-                                            belt = Color.LIME;
+                                            belt = Color.LIME; //16
                                         } else if (info.power < 6) {
-                                            belt = Color.BLUE;
+                                            belt = Color.BLUE; //25
                                         } else if (info.power < 7) {
-                                            belt = Color.PURPLE;
+                                            belt = Color.PURPLE; //36
                                         } else if (info.power < 8) {
-                                            belt = Color.GRAY;
+                                            belt = Color.GRAY; //49
                                         } else if (info.power < 9) {
-                                            belt = Color.RED;
+                                            belt = Color.RED; //64
                                         } else if (info.power < 10) {
-                                            belt = Color.BLACK;
+                                            belt = Color.BLACK; //81
                                         }
 
-                                        gear = new ItemStack(Material.LEATHER_HELMET, 1);
-                                        dye = (LeatherArmorMeta) gear.getItemMeta();
-                                        dye.setColor(belt);
-                                        gear.setItemMeta(dye);
+                                        gear = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                                        SkullMeta meta = (SkullMeta) gear.getItemMeta();
+                                        meta.setOwner(info.shooter.getName());
+                                        gear.setItemMeta(meta);
+                                        // OH GOD IT HAS MY FAAAAAAACE!
                                         spawned.getEquipment().setHelmet(gear);
+                                        spawned.getEquipment().setHelmetDropChance(0.0f);
 
                                         gear = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setChestplate(gear);
+                                        spawned.getEquipment().setChestplateDropChance(0.0f);
 
                                         gear = new ItemStack(Material.LEATHER_LEGGINGS, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setLeggings(gear);
+                                        spawned.getEquipment().setLeggingsDropChance(0.0f);
 
                                         gear = new ItemStack(Material.LEATHER_BOOTS, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setBoots(gear);
+                                        spawned.getEquipment().setBootsDropChance(0.0f);
 
+                                        gear = info.shooter.getInventory().getItem(0);
+                                        if (gear != null) {
+                                            gear = info.shooter.getInventory().getItem(0).clone();
+                                            //we are altering the itemStack, must clone or we alter it right in our inventory!
+                                            gear.setAmount(1);
+                                            spawned.getEquipment().setItemInMainHand(gear);
+                                        }
                                         spawned.setCustomName(info.shooter.getName() + "'s Army");
                                         spawned.setCustomNameVisible(false);
                                         spawned.setRemoveWhenFarAway(false);
@@ -669,12 +688,16 @@ public abstract class SnowballLogic {
                                         AttributeInstance zomAttribute = spawned.getAttribute(Attribute.ZOMBIE_SPAWN_REINFORCEMENTS);
                                         zomAttribute.setBaseValue(0.0f); //army zoms don't hire civilians!
                                         spawned.setHealth(spawned.getMaxHealth());
+                                        if (info.power > 11) {
+                                            spawned.setBaby(true);
+                                        } else {
+                                            spawned.setBaby(false);
+                                        } // at level 100, all the zombie ninjas are BABY NINJAS
                                     }
                                 }
                             }.runTaskLater(info.plugin, 1L);
                         }
                     };
-
                 case SULPHUR:
                     return new SpawnSnowballLogic<Creeper>(Creeper.class) {
                         @Override
@@ -704,6 +727,8 @@ public abstract class SnowballLogic {
                             }.runTaskLater(info.plugin, 1L);
                         }
                     };
+
+
 
                 default:
                     return null;
@@ -788,7 +813,6 @@ public abstract class SnowballLogic {
             LivingEntity shooter = (LivingEntity) psource;
 
             if (proj instanceof Snowball && shooter instanceof Player) {
-
                 Snowball snowball = (Snowball) proj;
                 Player player = (Player) shooter;
                 PlayerInventory inv = player.getInventory();
@@ -798,9 +822,7 @@ public abstract class SnowballLogic {
                     InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
                     SnowballLogic logic = performLaunch(slice, snowball,
                             new SnowballInfo(plugin, snowball.getLocation(), player));
-                    // if (logic != null) {
                     replenishSnowball(plugin, inv, heldSlot);
-                    //}
                 }
             }
         }
@@ -874,29 +896,35 @@ public abstract class SnowballLogic {
     public static void onEntityTargetPlayer(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() instanceof Player) {
             Player player = (Player) event.getTarget();
+            LivingEntity attacker = (LivingEntity) event.getEntity();
+
             if ((event.getEntity().getCustomName() != null) && (player.getName() != null)) {
                 if (event.getEntity().getCustomName().startsWith(player.getName())) {
                     //we are attacking our creator
-                    
-                    if (Math.random() < player.getLevel() * player.getHealth() * 0.001f) {
+                    if (attacker.getHealth() < (player.getLevel() + 1.0f) * player.getHealth() * 0.05f) {
                         event.setCancelled(true);
                     } //make minions not harm their creators if the creators are tough enough
-                    // level 50 at 20 hearts gets you total immunity, unless one gets a shot in
-                    //which can radically alter the dynamic! they sense weakness.
+                    //level 20 will do it for normal 20 heart mobs. Assumes you're not injured.
                 } else {
                     //we're attacking a player that's not our creator
-                    LivingEntity attacker = (LivingEntity) event.getEntity();
-                    
                     AttributeInstance speedAttribute = attacker.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                    if (speedAttribute.getValue() > Math.sqrt(player.getLevel()) / 4.0f) {
+                    if (speedAttribute.getValue() > Math.sqrt(player.getLevel())) {
                         event.setCancelled(true);
-                    } //make mobs not attack other low level players when they are hyper, on general principles
-                    
-                    if ((attacker.getHealth()) > (player.getHealth() * 10.0)) {
+                    } //ultra hyper mobs are seeking high level players
+
+                    if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
                         event.setCancelled(true);
-                    } //make custom mobs not attack other players when they have way more HP than the player.
-                } //this should stop them attacking those lower level than their creators
-            } //in some circumstances, new entities run this before they're ready.
+                    }//mobs try to get you down to level*health is less than their health.
+                    //If you're level 0, almost any damage ought to make them relent
+                    //If you're over level 20, you'll be dead before they trust you.
+                }
+            } else {
+                if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
+                    event.setCancelled(true);
+                }//mobs try to get you down to level*health is less than their health.
+                //If you're level 0, almost any damage ought to make them relent
+                //If you're over level 20, you'll be dead before they trust you.
+            }
         }
     }
 
@@ -946,7 +974,7 @@ public abstract class SnowballLogic {
         }
     }
     /*     Templates for all the Attribute stuff
- 
+
      AttributeInstance healthAttribute = spawned.getAttribute(Attribute.GENERIC_MAX_HEALTH);
      healthAttribute.setBaseValue(20); //HP in half-hearts
 
@@ -961,10 +989,10 @@ public abstract class SnowballLogic {
 
      AttributeInstance damageAttribute = spawned.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
      //knockAttribute.setBaseValue(2.0); //damage in half-hearts
-     
+
      AttributeInstance zomAttribute = spawned.getAttribute(Attribute.ZOMBIE_SPAWN_REINFORCEMENTS);
      zomAttribute.setBaseValue(1.0f); //0.0-1.0 chance of spawning other zoms, zom only
-                                        
+
      */
     /* original  army/ninja armoring code: lets you put player head on your minions
 
