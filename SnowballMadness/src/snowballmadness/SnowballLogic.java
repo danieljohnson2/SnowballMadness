@@ -104,8 +104,6 @@ public abstract class SnowballLogic {
                 return new TorchPlaceSnowballLogic();
             } else if (hint.getType() == Material.SAPLING) {
                 return new ArboristSnowballLogic(hint);
-            } else if (hint.getType() == Material.GLASS_BOTTLE) {
-                return new SphereSnowballLogic(Material.GLASS, Material.AIR, hint.getAmount());
             } else if (hint.getType() == Material.REDSTONE_TORCH_ON) {
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
             } else if (hint.getType() == Material.LADDER) {
@@ -119,6 +117,9 @@ public abstract class SnowballLogic {
             }
         } else {
             switch (hint.getType()) {
+                case GLASS_BOTTLE:
+                    return new SphereSnowballLogic(Material.GLASS, Material.AIR, hint.getAmount());
+                    
                 case WOOD_SPADE:
                     return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
