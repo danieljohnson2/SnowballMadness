@@ -23,7 +23,7 @@ public class JetpackSnowballLogic extends SnowballLogic {
             LivingEntity shooter = (LivingEntity) psource;
             Location location = shooter.getLocation();
  
-            double delta = info.power * info.power;
+            double delta = info.power;
             double ground;
             //any form of powering will crank this up
             snowball.getWorld().playEffect(location, Effect.MOBSPAWNER_FLAMES, null, 128);
@@ -63,7 +63,7 @@ public class JetpackSnowballLogic extends SnowballLogic {
             shooter.removePotionEffect(PotionEffectType.JUMP);
             shooter.setVelocity(velocity);
             if (shooter.getFallDistance() > 0.001) {
-                shooter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, (int)(delta * delta), (int)(delta * delta)));
+                shooter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, (int)(delta * delta * 10.0), (int)(delta * delta * 10.0)));
             } //only if we're actually in air do we have the jump boost
             shooter.setFallDistance(0);
             //we will also keep resetting the player's fall distance. This should help
