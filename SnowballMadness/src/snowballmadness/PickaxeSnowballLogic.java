@@ -8,9 +8,8 @@ import org.bukkit.entity.*;
 import org.bukkit.util.Vector;
 
 /**
- * This logic mines blocks with picks, with a broad set of rules for what can be
- * replaced with air. It drops nothing, it's just a clear-things-out tool for
- * quickly exposing ores.
+ * This logic mines blocks with picks, with a broad set of rules for what can be replaced with air. It drops nothing, it's just a
+ * clear-things-out tool for quickly exposing ores.
  *
  * @author chrisjohnson
  */
@@ -41,7 +40,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                 break;
         }
         final double totalEffectiveness = baseTool * 4f;
-        final int radius = (int) (Math.sqrt(totalEffectiveness) * baseTool);
+        final int radius = (int) (Math.sqrt(totalEffectiveness * baseTool));
         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
 
         //size is heavily dependent on tool type, power expands so aggressively with
@@ -74,44 +73,34 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                     locationBuffer.setZ(z + 0.5);
                     if (snowballLoc.distanceSquared(locationBuffer) < moddedRoof) {
                         final Block beingMined = world.getBlockAt(x, y, z);
-                        if (canMine(beingMined, baseTool)) {
+                        final Material material = beingMined.getType();
+                        if (material == Material.STONE //the simplest case: clear stone.
+                                || (material == Material.NETHERRACK)
+                                || (material == Material.ENDER_STONE)
+                                || (material == Material.SAND)
+                                || (material == Material.DIRT)
+                                || (material == Material.SANDSTONE)
+                                || (material == Material.COBBLESTONE)
+                                || (material == Material.GRASS)
+                                || (material == Material.GRAVEL)
+                                || (material == Material.WATER && (baseTool > 1))
+                                || (material == Material.STATIONARY_WATER && (baseTool > 1)) //better than stone and you can clear water
+                                || (material == Material.LAVA && (baseTool > 2)) //better than iron and you can clear lava
+                                || (material == Material.STATIONARY_LAVA && (baseTool > 2)) //all of these leave ores to mine
+                                || (material == Material.COAL_ORE && (baseTool > 3)) //mining with gold pick means you want ores
+                                || (material == Material.IRON_ORE && (baseTool > 3)) //mining with diamond pick clears iron and coal ores
+                                || (material == Material.LAPIS_ORE && (baseTool > 3))
+                                || (material == Material.GOLD_ORE && (baseTool > 3))
+                                || (material == Material.REDSTONE_ORE && (baseTool > 3)) //diamond pick mining leaves no ores to clear
+                                || (material == Material.EMERALD_ORE && (baseTool > 3))
+                                || (material == Material.DIAMOND_ORE && (baseTool > 3))
+                                || (material == Material.BEDROCK && (baseTool > 3) && (beingMined.getY() > 0))) //more means a bedrock flat floor) 
+                        {
                             beingMined.setType(Material.AIR);
                         }
                     }
                 }
             }
         }
-    }
-
-    protected boolean canMine(Block target, int baseTool) {
-        Material material = target.getType();
-        //base tools:
-        //0 = wood, 1 = stone, 2 = iron, 3 = gold, 4 = diamond
-        //multiplied by power level
-
-        return target.getType() == Material.STONE //the simplest case: clear stone.
-
-                || (material == Material.NETHERRACK)
-                || (material == Material.ENDER_STONE)
-                || (material == Material.SAND)
-                || (material == Material.DIRT )
-                || (material == Material.SANDSTONE)
-                || (material == Material.COBBLESTONE)
-                || (material == Material.GRASS)
-                || (material == Material.GRAVEL)
-
-                || (material == Material.WATER && (baseTool > 1))
-                || (material == Material.STATIONARY_WATER && (baseTool > 1)) //better than stone and you can clear water
-
-                || (material == Material.LAVA && (baseTool > 2)) //better than iron and you can clear lava
-                || (material == Material.STATIONARY_LAVA && (baseTool > 2)) //all of these leave ores to mine
-                || (material == Material.COAL_ORE && (baseTool > 3)) //mining with gold pick means you want ores
-                || (material == Material.IRON_ORE && (baseTool > 3)) //mining with diamond pick clears ores
-                || (material == Material.OBSIDIAN && (baseTool > 3))
-                || (material == Material.BEDROCK && (baseTool > 3) && (target.getY() > 0)) //more means a bedrock flat floor
-                || (material == Material.LAPIS_ORE && (baseTool > 3))
-                || (material == Material.GOLD_ORE && (baseTool > 3))
-                || (material == Material.REDSTONE_ORE && (baseTool > 3)) //diamond pick mining leaves no ores to clear
-                || (material == Material.EMERALD_ORE && (baseTool > 3)); //except other diamond.
     }
 }
