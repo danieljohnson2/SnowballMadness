@@ -119,7 +119,7 @@ public abstract class SnowballLogic {
             switch (hint.getType()) {
                 case GLASS_BOTTLE:
                     return new SphereSnowballLogic(Material.GLASS, Material.AIR, hint.getAmount());
-
+                    
                 case WOOD_SPADE:
                     return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
@@ -328,8 +328,7 @@ public abstract class SnowballLogic {
                         @Override
                         protected void initializeEntity(Snowman spawned, SnowballInfo info) {
                             super.initializeEntity(spawned, info);
-                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, Integer.MAX_VALUE, 1), true);
-                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 1), true);
+                            spawned.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
                         }
 
                         @Override
@@ -342,9 +341,9 @@ public abstract class SnowballLogic {
                                     spawned.setCustomNameVisible(false);
                                     spawned.setRemoveWhenFarAway(false);
                                     AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
-                                    followAttribute.setBaseValue(0.0f);
+                                    followAttribute.setBaseValue((info.power * info.power) + 16f); //default 16 + caster level
                                     AttributeInstance speedAttribute = spawned.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                                    speedAttribute.setBaseValue(0.0f);
+                                    speedAttribute.setBaseValue(info.power / 4.0f);
                                 } //the magic snowman is an all-biome source that doesn't wander. Still works as a turret.
                             }.runTaskLater(info.plugin, 1L);
                         }
@@ -896,34 +895,36 @@ public abstract class SnowballLogic {
     public static void onEntityTargetPlayer(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() instanceof Player) {
             Player player = (Player) event.getTarget();
-            LivingEntity attacker = (LivingEntity) event.getEntity();
+            if (event.getEntity() instanceof LivingEntity) {
+                LivingEntity attacker = (LivingEntity) event.getEntity();
 
-            if ((event.getEntity().getCustomName() != null) && (player.getName() != null)) {
-                if (event.getEntity().getCustomName().startsWith(player.getName())) {
-                    //we are attacking our creator
-                    if (attacker.getHealth() < (player.getLevel() + 1.0f) * player.getHealth() * 0.05f) {
-                        event.setCancelled(true);
-                    } //make minions not harm their creators if the creators are tough enough
-                    //level 20 will do it for normal 20 heart mobs. Assumes you're not injured.
+                if ((event.getEntity().getCustomName() != null) && (player.getName() != null)) {
+                    if (event.getEntity().getCustomName().startsWith(player.getName())) {
+                        //we are attacking our creator
+                        if (attacker.getHealth() < (player.getLevel() + 1.0f) * player.getHealth() * 0.05f) {
+                            event.setCancelled(true);
+                        } //make minions not harm their creators if the creators are tough enough
+                        //level 20 will do it for normal 20 heart mobs. Assumes you're not injured.
+                    } else {
+                        //we're attacking a player that's not our creator
+                        AttributeInstance speedAttribute = attacker.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+                        if (speedAttribute.getValue() > Math.sqrt(player.getLevel())) {
+                            event.setCancelled(true);
+                        } //ultra hyper mobs are seeking high level players
+
+                        if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
+                            event.setCancelled(true);
+                        }//mobs try to get you down to level*health is less than their health.
+                        //If you're level 0, almost any damage ought to make them relent
+                        //If you're over level 20, you'll be dead before they trust you.
+                    }
                 } else {
-                    //we're attacking a player that's not our creator
-                    AttributeInstance speedAttribute = attacker.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                    if (speedAttribute.getValue() > Math.sqrt(player.getLevel())) {
-                        event.setCancelled(true);
-                    } //ultra hyper mobs are seeking high level players
-
                     if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
                         event.setCancelled(true);
                     }//mobs try to get you down to level*health is less than their health.
                     //If you're level 0, almost any damage ought to make them relent
                     //If you're over level 20, you'll be dead before they trust you.
                 }
-            } else {
-                if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
-                    event.setCancelled(true);
-                }//mobs try to get you down to level*health is less than their health.
-                //If you're level 0, almost any damage ought to make them relent
-                //If you're over level 20, you'll be dead before they trust you.
             }
         }
     }

@@ -5,12 +5,16 @@ import com.google.common.io.Files;
 import java.io.*;
 import java.util.*;
 import org.bukkit.*;
+import org.bukkit.block.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -235,6 +239,50 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onBlockBurn(BlockBurnEvent event) {
+        Block block = event.getBlock();
+        if (block.getRelative(BlockFace.UP).getType() == Material.FIRE) {
+            block.getRelative(BlockFace.UP).setType(Material.AIR);
+        }
+       if (block.getRelative(BlockFace.NORTH).getType() == Material.FIRE) {
+            block.getRelative(BlockFace.NORTH).setType(Material.AIR);
+        }
+       if (block.getRelative(BlockFace.SOUTH).getType() == Material.FIRE) {
+            block.getRelative(BlockFace.SOUTH).setType(Material.AIR);
+        }
+       if (block.getRelative(BlockFace.WEST).getType() == Material.FIRE) {
+            block.getRelative(BlockFace.WEST).setType(Material.AIR);
+        }
+       if (block.getRelative(BlockFace.EAST).getType() == Material.FIRE) {
+            block.getRelative(BlockFace.EAST).setType(Material.AIR);
+        }
+       //rather than disabling fire spread, we make it burn itself out by targeting fire blocks and removing them
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerFall(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player player = (Player) e.getEntity();
+            if (e.getCause() == DamageCause.FALL) {
+                PlayerInventory inv = player.getInventory();
+                int heldSlot = inv.getHeldItemSlot();
+                ItemStack sourceStack = inv.getItem(heldSlot);
+                if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
+                    InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
+                    if (slice.getBottomItem().getType() == Material.FIREWORK) {
+                        player.setFallDistance(0);
+                        e.setCancelled(true);
+                        //if we have the jetpack engaged, we're free from any fall damage.
+                    }
+                }
+            }
+            return;
+        } else {
+            return;
+        }
+    }
+
+    @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         if (event.getBlockPlaced().getType() == Material.DIAMOND_BLOCK) {
             Chunk chunk = event.getBlockPlaced().getChunk();
@@ -251,7 +299,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                     }//this is entirely a player cue, to show player they've correctly placed the protection diamond block.
                 }
             }
-        } 
+        }
     }
 
     @EventHandler
@@ -270,7 +318,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         PlayerInventory inventory = player.getInventory();
         ItemStack oldStack = inventory.getItem(8);
         if (oldStack == null) {
-            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 1));
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 5));
             player.updateInventory();
         } //only upon join do we give only one base snowball, only if slot 8 is empty.
         RespawnInfo.checkRespawn(player, this);
@@ -279,6 +327,12 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
         Player player = e.getPlayer();
+        PlayerInventory inventory = player.getInventory();
+        ItemStack oldStack = inventory.getItem(8);
+        if (oldStack == null) {
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 5));
+            player.updateInventory();
+        } //only upon join do we give only one base snowball, only if slot 8 is empty.
         RespawnInfo.checkRespawn(player, this);
     }
 }

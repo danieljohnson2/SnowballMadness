@@ -19,9 +19,10 @@ import org.bukkit.util.*;
 public class MultiplierSnowballLogic extends SnowballLogic {
 
     private static long inFlightSyncDeadline = 0;
-    private final static int inFlightSnowballLimit = 4096;
+    private int inFlightSnowballLimit = 2048;
     private final String targetName;
     private final int numberOfSnowballs;
+    private int serverBusy = 5;
     private final InventorySlice inventory;
 
     public MultiplierSnowballLogic(int numberOfSnowballs, String targetName, InventorySlice inventory) {
@@ -29,22 +30,23 @@ public class MultiplierSnowballLogic extends SnowballLogic {
         this.targetName = targetName;
         this.inventory = Preconditions.checkNotNull(inventory);
     }
- 
+
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        int serverBusy = snowball.getServer().getOnlinePlayers().size() + 4;
-        //we are scaling back the multiplier snowballs based on how many players are on.
-        //one player can fire these with 819 snowballs in the air already,
-        //two players it's down to 682, ten players there must be less than 292 snowballs in the air.
-        
+
         long now = System.currentTimeMillis();
         if (inFlightSyncDeadline <= now) {
             inFlightSyncDeadline = now + 2000;
             approximateInFlightCount = inFlight.size();
+            serverBusy = snowball.getServer().getOnlinePlayers().size() + 4;
+            inFlightSnowballLimit = 2048 / serverBusy;
+            //we are scaling back the multiplier snowballs based on how many players are on.
+            //one player can fire these with 819 snowballs in the air already,
+            //two players it's down to 682, ten players there must be less than 292 snowballs in the air.
         } //this is only used in the multiplier snowball logic
 
-        if (approximateInFlightCount < inFlightSnowballLimit / serverBusy) {
+        if (approximateInFlightCount < inFlightSnowballLimit) {
             World world = snowball.getWorld();
             ProjectileSource shooter = snowball.getShooter();
             Location source = snowball.getLocation().clone();
@@ -54,7 +56,7 @@ public class MultiplierSnowballLogic extends SnowballLogic {
             bounce.setY(-(bounce.getY()));
             //we are not going to amplify the bounce because the initial velocity should
             //be what's amplified. Thus we needn't amplify it again.
-            
+
             //here we can override if the snowball is named
             if (targetName == null) {
                 //pass right by
@@ -79,8 +81,8 @@ public class MultiplierSnowballLogic extends SnowballLogic {
                 bounce = targetLocation.toVector().subtract(snowball.getLocation().toVector());
                 //thus giving us a new trajectory that aims at the target, namely the
                 //location of the player's bedspawn, or straight up if there's no such player.
-                bounce.setY(bounce.getY()+1); //ballistic trajectory
-                double range = Math.sqrt(bounce.length())*0.2;
+                bounce.setY(bounce.getY() + 1); //ballistic trajectory
+                double range = Math.sqrt(bounce.length()) * 0.2;
                 bounce.normalize().multiply(range); //it goes very fast, so we scale it
                 //end of the named snowball location override
             }
@@ -101,9 +103,7 @@ public class MultiplierSnowballLogic extends SnowballLogic {
                 Vector vector = Vector.getRandom();
                 vector.setX(vector.getX() - 0.5);
                 vector.setZ(vector.getZ() - 0.5);
-                vector.setY(0.25);
-
-                vector.multiply(new Vector(info.power, info.power, info.power));
+                vector.setY(vector.getY() * 0.25);
 
                 //now we will interpolate between that and bounce.
                 double highvalues = i / 16.0; //if this doesn't return a fractional value it won't work

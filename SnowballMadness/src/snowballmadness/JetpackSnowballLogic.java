@@ -22,14 +22,11 @@ public class JetpackSnowballLogic extends SnowballLogic {
         if (psource instanceof LivingEntity) {
             LivingEntity shooter = (LivingEntity) psource;
             Location location = shooter.getLocation();
- 
-            double delta = info.power * info.power;
+
+            double delta = info.power + 1.0;
             double ground;
             //any form of powering will crank this up
-            snowball.getWorld().playEffect(location, Effect.MOBSPAWNER_FLAMES, null, 128);
             snowball.remove();
-            //never mind the snowballs, we rocket on trails of fire!
-            //to improve this, fill in all blocks traversed with a string of mobspawner flames
 
             double groundEffect = location.getY();
             double groundLevel = shooter.getWorld().getHighestBlockYAt(location);
@@ -41,30 +38,27 @@ public class JetpackSnowballLogic extends SnowballLogic {
             //so it will always at least be one but can become a lot higher
             ground = delta / groundEffect;
             //and we divide delta by that so we won't rocket off into the sky too wildly
-            ground = Math.sqrt(ground);
+            ground = Math.sqrt(ground) + 2.0;
             //and cut back the intensity of near-ground boosts to avoid catapulting upwards.
 
             Vector velocity = shooter.getVelocity().clone();
-            velocity.setY(Math.min(8, velocity.getY() + ground));
-            //to go up more than that, aim up. however we will tend to pull out of dives well
-            //this way. All about creating the easy cruise experience in the jetpack.
             velocity.add(shooter.getLocation().getDirection().multiply(delta));
-            //this gives us a kick in the direction we're looking, plus the up-boost
-            //increasing power also increases the velocity with which we race about
-            //more power means more possible velocity, but also more difficulty handling
-            //the overpowered jetpack. You can always fire just when about to hit, but
-            //if it flings you into the air again that's not much help.
-            double dexpLevel = Math.sqrt(delta);
-            if (velocity.length() > dexpLevel) {
-                velocity = velocity.normalize().multiply(dexpLevel);
-            }
-            //bailout for exponential velocity madness
+            //this gives us a kick in the direction we're looking
 
-            shooter.removePotionEffect(PotionEffectType.JUMP);
-            shooter.setVelocity(velocity);
-            if (shooter.getFallDistance() > 0.001) {
-                shooter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, (int)(delta * delta), (int)(delta * delta)));
-            } //only if we're actually in air do we have the jump boost
+            double speedY = velocity.getY();
+            if (speedY > 0) {
+                speedY = Math.sqrt(speedY) * 0.5;
+            }
+           if (speedY < 0) {
+                speedY = -Math.cbrt(-speedY) * 0.5;
+            }
+            velocity.setY(Math.max(0.0, speedY + ground));
+            //we can take off pointing down, or hover: to go down, jetpack less.
+
+            shooter.setVelocity(shooter.getVelocity().getMidpoint(shooter.getVelocity().getMidpoint(velocity)));
+            //smooth the abrupt change of direction. This also helps landings.
+            //We could almost restore the fall damage at this rate!
+            
             shooter.setFallDistance(0);
             //we will also keep resetting the player's fall distance. This should help
             //minimize accumulated damage, and is a key part of the mechanic.
