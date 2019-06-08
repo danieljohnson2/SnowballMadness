@@ -9,6 +9,7 @@ import org.bukkit.block.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -196,6 +197,12 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 //if any of these blocks in the chunk being unloaded (which is the center chunk
                 //of the region) are diamond block, we will make sure that region's not in the nuke list
             }
+
+            //if ((chunkX > 0) && (chunkZ > 0)){
+            //protectRegion = true;
+            //Tales Of Versus-specific hack: our WorldPainter content is all in positive X and Z. Therefore anything
+            //negative on either axis can be regenerated, but 'Versus' itself cannot.
+            //}
             chunkX = (chunkX - 16) / 32;
             chunkZ = (chunkZ - 16) / 32;
             //convert these to what the region values will be
@@ -226,7 +233,9 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 //make sure the region is IN the nuke list
             }
         } //if it's not the center chunk of the region, we fall through and nothing happens
-    }
+    } //all this assigns 'nuke' to all chunks that HAVE been visited, that then unloaded, and when unloading they didn't have
+    //a diamond block in the key spot. Blank config files should not nuke anything upon launch. You've got to unload the chunk
+    //to engage the regen functionality.
 
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent e) {
@@ -244,19 +253,21 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         if (block.getRelative(BlockFace.UP).getType() == Material.FIRE) {
             block.getRelative(BlockFace.UP).setType(Material.AIR);
         }
-       if (block.getRelative(BlockFace.NORTH).getType() == Material.FIRE) {
+        if (block.getRelative(BlockFace.NORTH).getType() == Material.FIRE) {
             block.getRelative(BlockFace.NORTH).setType(Material.AIR);
         }
-       if (block.getRelative(BlockFace.SOUTH).getType() == Material.FIRE) {
+        if (block.getRelative(BlockFace.SOUTH).getType() == Material.FIRE) {
             block.getRelative(BlockFace.SOUTH).setType(Material.AIR);
         }
-       if (block.getRelative(BlockFace.WEST).getType() == Material.FIRE) {
+        if (block.getRelative(BlockFace.WEST).getType() == Material.FIRE) {
             block.getRelative(BlockFace.WEST).setType(Material.AIR);
         }
-       if (block.getRelative(BlockFace.EAST).getType() == Material.FIRE) {
+        if (block.getRelative(BlockFace.EAST).getType() == Material.FIRE) {
             block.getRelative(BlockFace.EAST).setType(Material.AIR);
         }
-       //rather than disabling fire spread, we make it burn itself out by targeting fire blocks and removing them
+        //rather than disabling fire spread, we make it burn itself out by targeting fire blocks and removing them
+        //This is very aggressive, if you're using it you might consider a random factor. This event doesn't fire as often
+        //so it can be more intelligent.
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -302,6 +313,175 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         }
     }
 
+    /*
+   @EventHandler
+     public void jumpOnGrass(PlayerInteractEvent event) {
+     if (event.getAction() == Action.PHYSICAL && event.getClickedBlock().getType() == Material.GRASS) {
+     event.getClickedBlock().setType(Material.GRASS_PATH);
+     }
+     //if you jump on the grass, you wear it down to path.
+     }
+     
+     @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
+            Player player = event.getPlayer();
+            if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE) {
+                Block block = player.getLocation().getBlock(); //block at our feet
+                block.getRelative(-1, 0, 0).setType(Material.AIR);
+                block.getRelative(1, 0, 0).setType(Material.AIR);
+                block.getRelative(0, 0, -1).setType(Material.AIR);
+                block.getRelative(0, 0, 1).setType(Material.AIR);
+                block.getRelative(-1, 1, 0).setType(Material.AIR);
+                block.getRelative(1, 1, 0).setType(Material.AIR);
+                block.getRelative(0, 1, -1).setType(Material.AIR);
+                block.getRelative(0, 1, 1).setType(Material.AIR);
+                block.getRelative(-1, 2, 0).setType(Material.AIR);
+                block.getRelative(1, 2, 0).setType(Material.AIR);
+                block.getRelative(0, 2, -1).setType(Material.AIR);
+                block.getRelative(0, 2, 1).setType(Material.AIR);
+                block.getRelative(-1, 3, 0).setType(Material.AIR);
+                block.getRelative(1, 3, 0).setType(Material.AIR);
+                block.getRelative(0, 3, -1).setType(Material.AIR);
+                block.getRelative(0, 3, 1).setType(Material.AIR);
+                block.getRelative(-1, 4, 0).setType(Material.AIR);
+                block.getRelative(1, 4, 0).setType(Material.AIR);
+                block.getRelative(0, 4, -1).setType(Material.AIR);
+                block.getRelative(0, 4, 1).setType(Material.AIR);
+                //main column: if moving NSEW, will make continuous hole
+                block.getRelative(-2, 1, 0).setType(Material.AIR);
+                block.getRelative(2, 1, 0).setType(Material.AIR);
+                block.getRelative(0, 1, -2).setType(Material.AIR);
+                block.getRelative(0, 1, 2).setType(Material.AIR);
+                block.getRelative(-2, 2, 0).setType(Material.AIR);
+                block.getRelative(2, 2, 0).setType(Material.AIR);
+                block.getRelative(0, 2, -2).setType(Material.AIR);
+                block.getRelative(0, 2, 2).setType(Material.AIR);
+                block.getRelative(-2, 3, 0).setType(Material.AIR);
+                block.getRelative(2, 3, 0).setType(Material.AIR);
+                block.getRelative(0, 3, -2).setType(Material.AIR);
+                block.getRelative(0, 3, 2).setType(Material.AIR);
+                //wings: if moving NSEW will widen hole
+
+                double rotation = player.getLocation().getYaw() % 360;
+                if (rotation < 0) {
+                    rotation += 360.0;
+                }
+                if (0 <= rotation && rotation < 22.5) {
+                    block.getRelative(0, 0, 2).setType(Material.AIR);
+                } else if (67.5 <= rotation && rotation < 112.5) {
+                    block.getRelative(-2, 0, 0).setType(Material.AIR);
+                } else if (157.5 <= rotation && rotation < 202.5) {
+                    block.getRelative(0, 0, -2).setType(Material.AIR);
+                } else if (247.5 <= rotation && rotation < 292.5) {
+                    block.getRelative(2, 0, 0).setType(Material.AIR);
+                } else if (337.5 <= rotation && rotation < 360.0) {
+                    block.getRelative(0, 0, 2).setType(Material.AIR);
+                }
+                //only does cardinal directions. Gives you ability to move forward because your feets are clear of obstacles!
+                int lightingX = block.getX();
+                int lightingZ = block.getZ();
+                if (lightingX < 0) {
+                    lightingX += 1;
+                }
+                if (lightingZ < 0) {
+                    lightingZ += 1;
+                }
+                //this corrects negative numbers so it still has zeroes for the lighting spacing.
+                if (block.getRelative(0, 5, 0).getType() == Material.STONE && lightingX % 10 == 0 && lightingZ % 10 == 0) {
+                    block.getRelative(0, 5, 0).setType(Material.SEA_LANTERN);
+                }
+                //put in ceiling strip lighting, but ONLY if you are aligned with tens on X, Y and Z. x0.x, y0.y, z0.z is the pattern: must have the zeroes in all ones places
+                //So make tunnels 10 apart on every axis (the ones column must be zero) on height and your lateral positioning.
+                //if you want them to be lit. Otherwise, it's rogue tunneling and not part of the lighting project!
+
+                /*
+                Block block = player.getLocation().subtract(0, 1, 0).getBlock();
+                if (block.getType() == Material.GRASS) {
+                    block.setType(Material.GRASS_PATH);
+                }
+                block = block.getRelative(BlockFace.DOWN);
+                if (block.getType() == Material.GRASS) {
+                    block.setType(Material.GRASS_PATH);
+                } */
+            /*
+            } else if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_BLOCK) {
+                Block block = player.getLocation().getBlock(); //block at our feet
+                double scaleFactor = player.getInventory().getItemInMainHand().getAmount() * 0.03125;
+                //let's do everything based on an amount of 32 for a huge-ass tunnel
+                int beginX = block.getX() - (int)(13*scaleFactor);
+                int beginY = block.getY();
+                int beginZ = block.getZ() - (int)(13*scaleFactor);
+                int endX = beginX + (int)(26*scaleFactor);
+                int endY = beginY + (int)(16*scaleFactor);
+                int endZ = beginZ + (int)(26*scaleFactor);
+                World world = player.getWorld();
+                Location locationBuffer = new Location(player.getWorld(), 0, 0, 0);
+                Location playerLocation = new Location(player.getWorld(), 0, 0, 0);
+                playerLocation = player.getLocation().add(0, (int)(5*scaleFactor), 0);
+
+                // no worries- all this executes before Minecraft can send anything
+                // back to the client, so we can set the blocks in any order. This one
+                // is convenient!
+                int maxDistance = (int)(12*scaleFactor);
+                for (int x = beginX; x <= endX; ++x) {
+                    for (int z = beginZ; z <= endZ; ++z) {
+                        for (int y = beginY; y <= endY; ++y) {
+                            locationBuffer.setX(x);
+                            locationBuffer.setY(y);
+                            locationBuffer.setZ(z);
+                            if (playerLocation.distance(locationBuffer) < maxDistance) {
+                                Block target = world.getBlockAt(x, y, z);
+                                target.setType(Material.AIR);
+                            }
+                        }
+                    }
+                }
+
+                beginX = block.getX() - (int)(1.49*scaleFactor);
+                beginZ = block.getZ() - (int)(1.49*scaleFactor);
+                endX = beginX + (int)(3*scaleFactor);
+                endY = block.getY() + (int)(17*scaleFactor);
+                endZ = beginZ + (int)(3*scaleFactor);
+                for (int x = beginX; x <= endX; ++x) {
+                    for (int z = beginZ; z <= endZ; ++z) {
+                        Block target = world.getBlockAt(x, endY, z);
+                        if (target.getType() == Material.STONE) {
+                            target.setType(Material.SEA_LANTERN);
+                        }
+                    }
+                }
+                //Large light panels up top for big tunnels
+
+                beginX = block.getX() - (int)(9*scaleFactor);
+                beginZ = block.getZ() - (int)(9*scaleFactor);
+                endX = beginX + (int)(18*scaleFactor);
+                endY = block.getY() - 1;
+                endZ = beginZ + (int)(18*scaleFactor);
+                for (int x = beginX; x <= endX; ++x) {
+                    for (int z = beginZ; z <= endZ; ++z) {
+                        Block target = world.getBlockAt(x, endY, z);
+                        if (target.getType() == Material.STONE) {
+                            target.setType(Material.SMOOTH_BRICK);
+                        }
+                    }
+                }
+                //Large light panels up top for big tunnels
+
+                /*
+                Block block = player.getLocation().subtract(0, 1, 0).getBlock();
+                if (block.getType() == Material.GRASS) {
+                    block.setType(Material.GRASS_PATH);
+                }
+                block = block.getRelative(BlockFace.DOWN);
+                if (block.getType() == Material.GRASS) {
+                    block.setType(Material.GRASS_PATH);
+                } */ /*
+            }
+        }
+        //even walking on the grass turns it to path, if you're carrying a diamond hoe
+    } */
+
     @EventHandler
     public void onEntityTargetPlayer(EntityTargetLivingEntityEvent e) {
         SnowballLogic.onEntityTargetPlayer(e);
@@ -312,6 +492,28 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         SnowballLogic.onEntityDamageByEntityEvent(e);
     }
 
+    @EventHandler
+    public void explodeEvent(EntityExplodeEvent event) {
+        for (Entity entity : event.getEntity().getNearbyEntities(1.1, 10.0, 1.1)) {
+            entity.remove();
+        }
+        //if there still appear to be drops, relog: the client sometimes still sees them after
+        //they have been removed. The 10 should be a vertical slice inside which drops are removed.
+    }
+
+    /*
+    @EventHandler
+    public void onExplosionPrime(ExplosionPrimeEvent event) {
+        for (Entity entity : event.getEntity().getNearbyEntities(1.1, 1.1, 1.1)) {
+            entity.remove();
+        }
+    }
+    //These operate on the same princimple of the fire spread: if we have absurd densities of TNT spam,
+    //we indiscriminately begin killing entities to de-lag the server while still allowing a ridiculous
+    //amount of mayhem. Much noise and fury, but it burns itself out unnaturally fast.
+    */
+
+    /*
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
@@ -335,4 +537,11 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         } //only upon join do we give only one base snowball, only if slot 8 is empty.
         RespawnInfo.checkRespawn(player, this);
     }
+    
+    //for the Wytse version, we're not going to just give people snowballs willy nilly
+    //instead, you gotta go and get some and manage that as a resource, slowing the roll of
+    //random trolls. You might call it a toll on that. Slow-troll-roll toll :)
+    */
+    
+    
 }

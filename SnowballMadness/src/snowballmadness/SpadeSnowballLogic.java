@@ -12,17 +12,35 @@ import org.bukkit.util.Vector;
  *
  * @author chrisjohnson
  */
-public class ShearsSnowballLogic extends SnowballLogic {
+public class SpadeSnowballLogic extends SnowballLogic {
 
-    public ShearsSnowballLogic() {
+    private final Material toolUsed;
+
+    public SpadeSnowballLogic(Material toolUsed) {
+        this.toolUsed = Preconditions.checkNotNull(toolUsed);
     }
 
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-
-        final int radius = (int) Math.sqrt(16 * info.power);
-        final double distanceSquaredLimit = (radius * (double) radius);
+int baseTool = 0; //wooden pick
+        switch (toolUsed) {
+            case DIAMOND_SPADE:
+                baseTool = 4;
+                break;
+            case GOLD_SPADE:
+                baseTool = 3;
+                break;
+            case IRON_SPADE:
+                baseTool = 2;
+                break;
+            case STONE_SPADE:
+                baseTool = 1;
+                break;
+        }
+        final double totalEffectiveness = baseTool * 4f;
+        final int radius = (int) (Math.sqrt(totalEffectiveness * baseTool));
+        final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
 
         //size is heavily dependent on tool type, power expands so aggressively with
         //doubling that we must control it. Max will still be very huge.
@@ -58,22 +76,13 @@ public class ShearsSnowballLogic extends SnowballLogic {
     protected boolean canMine(Block target) {
         Material material = target.getType();
 
-        return target.getType() == Material.LEAVES //the simplest case: clear leaves.
-                || (material == Material.LEAVES_2)
-                || (material == Material.LONG_GRASS)
-                || (material == Material.DOUBLE_PLANT)
-                || (material == Material.RED_ROSE)
-                || (material == Material.YELLOW_FLOWER)
-                || (material == Material.DEAD_BUSH)
-                || (material == Material.DEAD_BUSH)
-                || (material == Material.DEAD_BUSH)
-                || (material == Material.SNOW) 
-                || (material == Material.CACTUS)
-                || (material == Material.CROPS)
-                || (material == Material.MELON)
-                || (material == Material.MELON_STEM)
-                || (material == Material.POTATO)
-                || (material == Material.PUMPKIN) 
-                || (material == Material.PUMPKIN_STEM);
+        return target.getType() == Material.DIRT //dig up shovel type stuff
+                || (material == Material.GRASS)
+                || (material == Material.SAND)
+                || (material == Material.GRAVEL)
+                || (material == Material.SNOW)
+                || (material == Material.SNOW_BLOCK)
+                || (material == Material.SOIL)
+                || (material == Material.SOUL_SAND);
     }
 }

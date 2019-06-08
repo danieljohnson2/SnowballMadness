@@ -2,7 +2,6 @@ package snowballmadness;
 
 import org.bukkit.*;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.*;
 import org.bukkit.util.*;
 import org.bukkit.projectiles.*;
 

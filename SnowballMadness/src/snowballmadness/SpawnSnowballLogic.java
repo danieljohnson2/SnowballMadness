@@ -61,7 +61,7 @@ public class SpawnSnowballLogic<TEntity extends Entity> extends SnowballLogic {
                 for (Entity e : world.getEntitiesByClass(spawnClass)) {
                     e.remove();
                     bailout--;
-                    if (bailout < 1) {
+                    if (bailout < 4) {
                         break;
                     } //every spawn is capable of removing many entities of the type being spawned
                 } //from an overloaded pool of such entities. We don't try to delete the whole pool

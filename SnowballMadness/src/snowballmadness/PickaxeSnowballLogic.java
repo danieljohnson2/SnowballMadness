@@ -1,6 +1,6 @@
 package snowballmadness;
 
-import com.google.common.base.*;
+import com.google.common.base.Preconditions;
 import java.util.Random;
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -80,6 +80,9 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                                 || (material == Material.SAND)
                                 || (material == Material.DIRT)
                                 || (material == Material.SANDSTONE)
+                                || (material == Material.CONCRETE)
+                                || (material == Material.HARD_CLAY)
+                                || (material == Material.STAINED_CLAY)
                                 || (material == Material.COBBLESTONE)
                                 || (material == Material.GRASS)
                                 || (material == Material.GRAVEL)
@@ -89,11 +92,6 @@ public class PickaxeSnowballLogic extends SnowballLogic {
                                 || (material == Material.STATIONARY_LAVA && (baseTool > 2)) //all of these leave ores to mine
                                 || (material == Material.COAL_ORE && (baseTool > 3)) //mining with gold pick means you want ores
                                 || (material == Material.IRON_ORE && (baseTool > 3)) //mining with diamond pick clears iron and coal ores
-                                || (material == Material.LAPIS_ORE && (baseTool > 3))
-                                || (material == Material.GOLD_ORE && (baseTool > 3))
-                                || (material == Material.REDSTONE_ORE && (baseTool > 3)) //diamond pick mining leaves no ores to clear
-                                || (material == Material.EMERALD_ORE && (baseTool > 3))
-                                || (material == Material.DIAMOND_ORE && (baseTool > 3))
                                 || (material == Material.BEDROCK && (baseTool > 3) && (beingMined.getY() > 0))) //more means a bedrock flat floor) 
                         {
                             beingMined.setType(Material.AIR);

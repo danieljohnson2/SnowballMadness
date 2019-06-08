@@ -86,7 +86,6 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
                     }
                 };
 
-
             case VINE:
                 return new BlockEmbedSnowballLogic(material, material, 256) {
                     @Override
@@ -202,7 +201,11 @@ public class BlockEmbedSnowballLogic extends SnowballLogic {
      * @param block The block to be updated.
      */
     protected void placeCapBlock(Block block) {
-        block.setType(toCap);
+        if (toCap == Material.REDSTONE_BLOCK) {
+            block.getWorld().strikeLightning(block.getLocation());
+        } else {
+            block.setType(toCap);
+        }
     }
 
     /**
