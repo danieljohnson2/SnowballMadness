@@ -51,7 +51,7 @@ public class ShellSnowballLogic extends SnowballLogic {
                 baseTool = 2;
                 break;
         }
-        
+
         final int radius = (int) (Math.sqrt(expLevel * baseTool));
         final int diameter = radius * 2;
         final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
@@ -61,7 +61,6 @@ public class ShellSnowballLogic extends SnowballLogic {
 
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
-
         final int beginX = snowballLoc.getBlockX() - radius;
         final int beginY = Math.max(1, snowballLoc.getBlockY() - radius);
         final int beginZ = snowballLoc.getBlockZ() - radius;
@@ -74,7 +73,6 @@ public class ShellSnowballLogic extends SnowballLogic {
         // no worries- all this executes before Minecraft can send anything
         // back to the client, so we can set the blocks in any order. This one
         // is convenient!
-
         for (int x = beginX; x <= endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
                 for (int y = beginY; y <= endY; ++y) {
@@ -85,38 +83,24 @@ public class ShellSnowballLogic extends SnowballLogic {
                     if (distanceSquared > ((distanceSquaredLimit * 0.9) - 9.0)
                             && distanceSquared <= distanceSquaredLimit) {
                         Block target = world.getBlockAt(x, y, z);
-                        if (canReplace(target)) {
+                        Material material = target.getType();
+                        if (material == Material.AIR
+                                || material == Material.WATER
+                                || material == Material.STATIONARY_WATER
+                                || material == Material.LAVA
+                                || material == Material.STATIONARY_LAVA
+                                || material == Material.WEB
+                                || material == Material.TNT
+                                || material == Material.MONSTER_EGGS
+                                || material == Material.FIRE
+                                || material == Material.LONG_GRASS
+                                || material == Material.RED_ROSE
+                                || material == Material.YELLOW_FLOWER) {
                             target.setType(wallMaterial);
                         }
                     }
                 }
             }
         }
-    }
-
-    /**
-     * This method decides whether to replace a given block; by default it replaces air and liquid blocks only.
-     *
-     * @param target The proposed block to update.
-     * @return True to update the block; false to do nothing.
-     */
-    protected boolean canReplace(Block target) {
-        Material material = target.getType();
-
-        return target.getType() == Material.AIR
-                || material == Material.WATER
-                || material == Material.STATIONARY_WATER
-                || material == Material.LAVA
-                || material == Material.STATIONARY_LAVA
-                || material == Material.WEB
-                || material == Material.TNT
-                || material == Material.MONSTER_EGGS
-                || material == Material.FIRE
-                || material == Material.LONG_GRASS
-                || material == Material.RED_ROSE
-                || material == Material.YELLOW_FLOWER;
-        //including some of the ground cover blocks as they seem like
-        //glitches when they block wall placement
-        //also, we replace webs and TNT where possible
     }
 }

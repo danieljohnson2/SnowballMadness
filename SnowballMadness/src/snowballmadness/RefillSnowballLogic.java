@@ -27,9 +27,9 @@ public class RefillSnowballLogic extends SnowballLogic {
         super.hit(snowball, info);
 
         final double totalEffectiveness = boxSize;
-        final int radius = 128; //boxSize / 2;
-        final int diameter = 256; //boxSize;
-        final double distanceLimit = 128; //radius + 1.0;
+        final int radius = boxSize / 2;
+        final int diameter = boxSize;
+        final double distanceLimit = radius + 1.0;
 
         World world = snowball.getWorld();
         Location snowballLoc = snowball.getLocation().clone();
@@ -56,6 +56,7 @@ public class RefillSnowballLogic extends SnowballLogic {
                         if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
                             Block target = world.getBlockAt(x, y, z);
                             if (target.getType() == Material.GLASS
+                                    || target.getType() == Material.FIRE
                                     || target.getType() == Material.LAVA
                                     || target.getType() == Material.STATIONARY_LAVA
                                     || target.getType() == Material.WATER
@@ -69,24 +70,19 @@ public class RefillSnowballLogic extends SnowballLogic {
         }
         //the normal world empty-stuff version
 
-        if (world.getEnvironment()
-                == Environment.NORMAL && purpose == Material.WATER_BUCKET) {
+        if (purpose == Material.WATER_BUCKET) {
+            int y = beginY;
             for (int x = beginX; x <= endX; ++x) {
                 for (int z = beginZ; z <= endZ; ++z) {
-                    for (int y = 61; y >= 1; --y) { //62
-                        locationBuffer.setX(x);
-                        locationBuffer.setY(y);
-                        locationBuffer.setZ(z);
-                        if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
-                            Block target = world.getBlockAt(x, y, z);
-                            if (target.getType() == Material.AIR
-                                    || target.getType() == Material.WATER
-                                    || target.getType() == Material.STATIONARY_WATER) {
-                                target.setType(Material.STATIONARY_WATER);
-                            } else {
-                                break;
-                                //stop iterating down with y and do another z or x
-                            }
+                    locationBuffer.setX(x);
+                    locationBuffer.setY(y);
+                    locationBuffer.setZ(z);
+                    if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
+                        Block target = world.getBlockAt(x, y, z);
+                        if (target.getType() == Material.AIR
+                                || target.getType() == Material.WATER
+                                || target.getType() == Material.STATIONARY_WATER) {
+                            target.setType(Material.STATIONARY_WATER);
                         }
                     }
                 }
@@ -94,8 +90,8 @@ public class RefillSnowballLogic extends SnowballLogic {
         }
         //the normal world water filling version
 
-        if (world.getEnvironment()
-                == Environment.NETHER && purpose == Material.LAVA_BUCKET) {
+        if (purpose == Material.LAVA_BUCKET) {
+            int y = beginY;
             for (int x = beginX; x <= endX; ++x) {
                 for (int z = beginZ; z <= endZ; ++z) {
 
@@ -104,31 +100,15 @@ public class RefillSnowballLogic extends SnowballLogic {
                         locationBuffer.setY(yz);
                         locationBuffer.setZ(z);
                         if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
-                            for (int y = 39; y >= 30; --y) {
-                                locationBuffer.setX(x);
-                                locationBuffer.setY(y);
-                                locationBuffer.setZ(z);
-                                if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
-                                    Block target = world.getBlockAt(x, y, z);
-                                    if (target.getType() == Material.LAVA
-                                            || target.getType() == Material.NETHERRACK
-                                            || target.getType() == Material.GRAVEL
-                                            || target.getType() == Material.BROWN_MUSHROOM
-                                            || target.getType() == Material.GLOWSTONE
-                                            || target.getType() == Material.FIRE
-                                            || target.getType() == Material.NETHER_BRICK
-                                            || target.getType() == Material.NETHER_BRICK_STAIRS
-                                            || target.getType() == Material.NETHER_FENCE
-                                            || target.getType() == Material.NETHER_STALK
-                                            || target.getType() == Material.QUARTZ_ORE
-                                            || target.getType() == Material.MAGMA
-                                            || target.getType() == Material.SOUL_SAND
-                                            || target.getType() == Material.STATIONARY_LAVA) {
-                                        target.setType(Material.QUARTZ_BLOCK);
-                                    } else {
-                                        break;
-                                        //stop iterating down with y and do another z or x
-                                    }
+                            locationBuffer.setX(x);
+                            locationBuffer.setY(y);
+                            locationBuffer.setZ(z);
+                            if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
+                                Block target = world.getBlockAt(x, y, z);
+                                if (target.getType() == Material.AIR
+                                        || target.getType() == Material.WATER
+                                        || target.getType() == Material.STATIONARY_WATER) {
+                                    target.setType(Material.STATIONARY_LAVA);
                                 }
                             }
                         }

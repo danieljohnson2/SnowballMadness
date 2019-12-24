@@ -32,13 +32,12 @@ public class SphereSnowballLogic extends SnowballLogic {
             Player player = (Player) shooter;
             expLevel = player.getLevel();
         }
-       
+
         //because this is the Moon build, we're going to allow all dome creation to happen without restriction. This is the fundamental
         //method for making Moon bases: 'transparent aluminum' domes. Thus, we will let them be large
-
         final int radius = boxSize + 1;
         final int diameter = radius * 2;
-        
+
         World world = snowball.getWorld();
         Location snowballLoc = snowball.getLocation().clone();
 
@@ -55,7 +54,6 @@ public class SphereSnowballLogic extends SnowballLogic {
         // no worries- all this executes before Minecraft can send anything
         // back to the client, so we can set the blocks in any order. This one
         // is convenient!
-        
         for (int x = beginX; x <= endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
                 for (int y = beginY; y <= endY; ++y) {
@@ -63,41 +61,29 @@ public class SphereSnowballLogic extends SnowballLogic {
                     locationBuffer.setX(x);
                     locationBuffer.setY(y);
                     locationBuffer.setZ(z);
-                    if (snowballLoc.distance(locationBuffer) > (radius - 1) && snowballLoc.distance(locationBuffer) <= radius) {
-                            Block target = world.getBlockAt(x, y, z);
-                            if (target.getType() == Material.AIR) {
-                                target.setType(Material.GLASS);
-                            }
+                    if (snowballLoc.distance(locationBuffer) > (radius - 1)) {
+                        replacement = wallMaterial;
+                    }
+                    if (snowballLoc.distance(locationBuffer) <= radius) {
+                        Block target = world.getBlockAt(x, y, z);
+                        Material material = target.getType();
+                        if (material == Material.AIR
+                                || material == Material.WATER
+                                || material == Material.STATIONARY_WATER
+                                || material == Material.LAVA
+                                || material == Material.STATIONARY_LAVA
+                                || material == Material.WEB
+                                || material == Material.TNT
+                                || material == Material.MONSTER_EGGS
+                                || material == Material.FIRE
+                                || material == Material.LONG_GRASS
+                                || material == Material.RED_ROSE
+                                || material == Material.YELLOW_FLOWER) {
+                            target.setType(replacement);
                         }
                     }
                 }
             }
         }
-    
-
-    /**
-     * This method decides whether to replace a given block; by default it replaces air and liquid blocks only.
-     *
-     * @param target The proposed block to update.
-     * @return True to update the block; false to do nothing.
-     */
-    protected boolean canReplace(Block target) {
-        Material material = target.getType();
-
-        return target.getType() == Material.AIR
-                || material == Material.WATER
-                || material == Material.STATIONARY_WATER
-                || material == Material.LAVA
-                || material == Material.STATIONARY_LAVA
-                || material == Material.WEB
-                || material == Material.TNT
-                || material == Material.MONSTER_EGGS
-                || material == Material.FIRE
-                || material == Material.LONG_GRASS
-                || material == Material.RED_ROSE
-                || material == Material.YELLOW_FLOWER;
-        //including some of the ground cover blocks as they seem like
-        //glitches when they block wall placement
-        //also, we replace webs and TNT where possible
     }
 }

@@ -196,22 +196,22 @@ public abstract class SnowballLogic {
                             Material.SADDLE);
 
                 case WATER_BUCKET:
-                    return new RefillSnowballLogic(Material.WATER_BUCKET, 128);
+                    return new RefillSnowballLogic(Material.WATER_BUCKET, 16);
 
                 case LAVA_BUCKET:
-                    return new RefillSnowballLogic(Material.LAVA_BUCKET, 128);
+                    return new RefillSnowballLogic(Material.LAVA_BUCKET, 16);
 
                 case WOOD_SPADE:
                     return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
 
                 case BUCKET:
-                    return new RefillSnowballLogic(Material.BUCKET, 128);
+                    return new RefillSnowballLogic(Material.BUCKET, 64);
 
                 case FEATHER:
                     return new FeatherSnowballLogic();
 
                 case FLINT_AND_STEEL:
-                    return new SphereSnowballLogic(Material.FIRE, Material.FIRE, 128);
+                    return new SphereSnowballLogic(Material.AIR, Material.FIRE, 16);
 
                 case FIREWORK:
                     return new JetpackSnowballLogic();

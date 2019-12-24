@@ -30,7 +30,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
     private BukkitRunnable ticker;
     private boolean shouldLogSnowballs;
-    private boolean unbanPlayers;
+    private boolean nukeRegions;
 
     /**
      * This returns true if we should be logging snowball activity.
@@ -46,8 +46,8 @@ public class SnowballMadness extends JavaPlugin implements Listener {
      *
      * @return True to unban all playerss.
      */
-    public boolean unbanPlayers() {
-        return unbanPlayers;
+    public boolean nukeRegions() {
+        return nukeRegions;
     }
 
     @Override
@@ -56,13 +56,16 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
         FileConfiguration config = getConfig();
         shouldLogSnowballs = config.getBoolean("logsnowballs", false);
-        unbanPlayers = config.getBoolean("unbanPlayers", false);
+        nukeRegions = config.getBoolean("nukeRegions", false);
 
         List<String> toNuke = config.getStringList("nuke");
         //This mechanic permits a list of region files to be deleted upon startup. It's for
         //use with servers that restart periodically and want to have regenerating terrain,
         //but leave some more distant areas persistent. The idea is for it to be low maintenance.
 
+        if (!nukeRegions) {
+            toNuke.clear(); //the moon server shouldn't be nuking all the locations
+        }
         for (String victim : toNuke) {
             File file = new File(victim);
 
@@ -177,63 +180,58 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     public void onChunkUnload(ChunkUnloadEvent e) {
         FileConfiguration config = getConfig();
         Chunk chunk = e.getChunk();
+        boolean protectRegion = false;
+        //by default, expect to regenerate/nuke the region this is in
         String unloadingWorld = "world";
         if (chunk.getWorld().getEnvironment().equals(World.Environment.NETHER)) {
             unloadingWorld = "world_nether";
+            protectRegion = true;
         } else if (chunk.getWorld().getEnvironment().equals(World.Environment.THE_END)) {
             unloadingWorld = "world_the_end";
-        } //we will also try to prune nether and end, which will be even tougher to place diamond blocks in
+            protectRegion = true;
+        } //we will not try to prune nether or end
 
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
-        if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
-            //we are 16, 48, 80, 112, 144, 176, 208 etc (negative or positive) on both axes
-            boolean protectRegion = false;
-            //by default, expect to regenerate/nuke the region this is in
-            for (int height = 1; height < 257; height++) {
-                if (chunk.getBlock(16, height, 16).getType() == Material.DIAMOND_BLOCK) {
-                    protectRegion = true;
-                }
-                //if any of these blocks in the chunk being unloaded (which is the center chunk
-                //of the region) are diamond block, we will make sure that region's not in the nuke list
+        for (int height = 1; height < 257; height++) {
+            if (chunk.getBlock(16, height, 16).getType() == Material.REDSTONE_TORCH_ON) {
+                protectRegion = true;
             }
+            //if any of these blocks in the chunk being unloaded (which is the center chunk
+            //of the region) are diamond block, we will make sure that region's not in the nuke list
+        }
 
-            //if ((chunkX > 0) && (chunkZ > 0)){
-            //protectRegion = true;
-            //Tales Of Versus-specific hack: our WorldPainter content is all in positive X and Z. Therefore anything
-            //negative on either axis can be regenerated, but 'Versus' itself cannot.
-            //}
-            chunkX = (chunkX - 16) / 32;
-            chunkZ = (chunkZ - 16) / 32;
-            //convert these to what the region values will be
-            String target = new StringBuilder().append(unloadingWorld).append("/region/r.").append(chunkX).append(".").append(chunkZ).append(".mca").toString();
-            if (protectRegion) {
-                List<String> toNuke = config.getStringList("nuke");
-                Set<String> noDupes = new HashSet();
-                noDupes.addAll(toNuke);
-                toNuke.clear();
-                toNuke.addAll(noDupes);
-                //we've done this to ensure every item exists only once
-                //do it BEFORE the remove
-                toNuke.remove(target);
-                getConfig().set("nuke", toNuke);
-                saveConfig();
-                //make sure the region is removed from nuke list
-            } else {
-                List<String> toNuke = config.getStringList("nuke");
-                toNuke.add(target);
-                Set<String> noDupes = new HashSet();
-                noDupes.addAll(toNuke);
-                toNuke.clear();
-                toNuke.addAll(noDupes);
-                //we've done this to ensure every item exists only once
-                //do it AFTER the add
-                getConfig().set("nuke", toNuke);
-                saveConfig();
-                //make sure the region is IN the nuke list
-            }
-        } //if it's not the center chunk of the region, we fall through and nothing happens
-    } //all this assigns 'nuke' to all chunks that HAVE been visited, that then unloaded, and when unloading they didn't have
+        chunkX = chunkX / 32;
+        chunkZ = chunkZ / 32;
+        //convert these to what the region values will be
+        String target = new StringBuilder().append(unloadingWorld).append("/region/r.").append(chunkX).append(".").append(chunkZ).append(".mca").toString();
+        if (protectRegion) {
+            List<String> toNuke = config.getStringList("nuke");
+            Set<String> noDupes = new HashSet();
+            noDupes.addAll(toNuke);
+            toNuke.clear();
+            toNuke.addAll(noDupes);
+            //we've done this to ensure every item exists only once
+            //do it BEFORE the remove
+            toNuke.remove(target);
+            getConfig().set("nuke", toNuke);
+            saveConfig();
+            //make sure the region is removed from nuke list
+        } else {
+            List<String> toNuke = config.getStringList("nuke");
+            toNuke.add(target);
+            Set<String> noDupes = new HashSet();
+            noDupes.addAll(toNuke);
+            toNuke.clear();
+            toNuke.addAll(noDupes);
+            //we've done this to ensure every item exists only once
+            //do it AFTER the add
+            getConfig().set("nuke", toNuke);
+            saveConfig();
+            //make sure the region is IN the nuke list
+        }
+    }
+    //all this assigns 'nuke' to all chunks that HAVE been visited, that then unloaded, and when unloading they didn't have
     //a diamond block in the key spot. Blank config files should not nuke anything upon launch. You've got to unload the chunk
     //to engage the regen functionality.
 
@@ -272,43 +270,42 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerFall(EntityDamageEvent e) {
-        if (e.getEntity() instanceof Player) {
-            Player player = (Player) e.getEntity();
-            if (e.getCause() == DamageCause.FALL) {
-                PlayerInventory inv = player.getInventory();
-                int heldSlot = inv.getHeldItemSlot();
-                ItemStack sourceStack = inv.getItem(heldSlot);
-                if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
-                    InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
-                    if (slice.getBottomItem().getType() == Material.FIREWORK) {
-                        player.setFallDistance(0);
-                        e.setCancelled(true);
-                        //if we have the jetpack engaged, we're free from any fall damage.
+        if (!(e == null)) {
+            if (e.getEntity() instanceof Player) {
+                Player player = (Player) e.getEntity();
+                if (e.getCause() == DamageCause.FALL) {
+                    PlayerInventory inv = player.getInventory();
+                    int heldSlot = inv.getHeldItemSlot();
+                    ItemStack sourceStack = inv.getItem(heldSlot);
+                    if (sourceStack == null || sourceStack.getType() == Material.SNOW_BALL) {
+                        InventorySlice slice = InventorySlice.fromSlot(player, heldSlot).skip(1);
+                        if (slice.getBottomItem().getType() == Material.FIREWORK) {
+                            player.setFallDistance(0);
+                            e.setCancelled(true);
+                            //if we have the jetpack engaged, we're free from any fall damage.
+                        }
                     }
                 }
+                return;
+            } else {
+                return;
             }
-            return;
-        } else {
-            return;
         }
     }
-
+    
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (event.getBlockPlaced().getType() == Material.DIAMOND_BLOCK) {
+        if (event.getBlockPlaced().getType() == Material.REDSTONE_TORCH_ON) {
             Chunk chunk = event.getBlockPlaced().getChunk();
-            int chunkX = chunk.getX();
-            int chunkZ = chunk.getZ();
-            if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
-                //we are 16, 48, 80, 112, 144, 176, 208 etc (negative or positive) on both axes
-                //so we are the correct chunk for the region
-                for (int height = 1; height < 257; height++) {
-                    if (chunk.getBlock(16, height, 16).getType() == Material.DIAMOND_BLOCK) {
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1f, 0.1f);
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_WITHER_DEATH, 1f, 0.1f);
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, 1f, 0.1f);
-                    }//this is entirely a player cue, to show player they've correctly placed the protection diamond block.
-                }
+            boolean makeSound = false;
+            for (int height = 1; height < 257; height++) {
+                if (chunk.getBlock(16, height, 16).getType() == Material.REDSTONE_TORCH_ON) {
+                    makeSound = true;
+                }//this is entirely a player cue, to show player they've correctly placed the protection redstone torch.
+            }
+            if (makeSound) {
+                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_WITHER_DEATH, 1f, 0.1f);
+                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, 1f, 0.1f);
             }
         }
     }
@@ -404,7 +401,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 if (block.getType() == Material.GRASS) {
                     block.setType(Material.GRASS_PATH);
                 } */
-            /*
+ /*
             } else if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_BLOCK) {
                 Block block = player.getLocation().getBlock(); //block at our feet
                 double scaleFactor = player.getInventory().getItemInMainHand().getAmount() * 0.03125;
@@ -511,9 +508,9 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     //These operate on the same princimple of the fire spread: if we have absurd densities of TNT spam,
     //we indiscriminately begin killing entities to de-lag the server while still allowing a ridiculous
     //amount of mayhem. Much noise and fury, but it burns itself out unnaturally fast.
-    */
+     */
 
-    /*
+ /*
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
@@ -538,10 +535,8 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         RespawnInfo.checkRespawn(player, this);
     }
     
-    //for the Wytse version, we're not going to just give people snowballs willy nilly
+    //for the current version, we're not going to just give people snowballs willy nilly
     //instead, you gotta go and get some and manage that as a resource, slowing the roll of
     //random trolls. You might call it a toll on that. Slow-troll-roll toll :)
-    */
-    
-    
+     */
 }
