@@ -193,43 +193,46 @@ public class SnowballMadness extends JavaPlugin implements Listener {
 
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
-        for (int height = 1; height < 257; height++) {
-            if (chunk.getBlock(16, height, 16).getType() == Material.REDSTONE_TORCH_ON) {
-                protectRegion = true;
+        if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
+            //we are 16, 48, 80, 112, 144, 176, 208 etc (negative or positive) on both axes
+            for (int height = 1; height < 257; height++) {
+                if (chunk.getBlock(16, height, 16).getType() == Material.REDSTONE_TORCH_ON || chunk.getBlock(16, height, 16).getType() == Material.OBSIDIAN) {
+                    protectRegion = true;
+                }
+                //if any of these blocks in the chunk being unloaded (which is the center chunk
+                //of the region) are redstone torch OR obsidian, we will make sure that region's not in the nuke list
             }
-            //if any of these blocks in the chunk being unloaded (which is the center chunk
-            //of the region) are diamond block, we will make sure that region's not in the nuke list
-        }
 
-        chunkX = chunkX / 32;
-        chunkZ = chunkZ / 32;
-        //convert these to what the region values will be
-        String target = new StringBuilder().append(unloadingWorld).append("/region/r.").append(chunkX).append(".").append(chunkZ).append(".mca").toString();
-        if (protectRegion) {
-            List<String> toNuke = config.getStringList("nuke");
-            Set<String> noDupes = new HashSet();
-            noDupes.addAll(toNuke);
-            toNuke.clear();
-            toNuke.addAll(noDupes);
-            //we've done this to ensure every item exists only once
-            //do it BEFORE the remove
-            toNuke.remove(target);
-            getConfig().set("nuke", toNuke);
-            saveConfig();
-            //make sure the region is removed from nuke list
-        } else {
-            List<String> toNuke = config.getStringList("nuke");
-            toNuke.add(target);
-            Set<String> noDupes = new HashSet();
-            noDupes.addAll(toNuke);
-            toNuke.clear();
-            toNuke.addAll(noDupes);
-            //we've done this to ensure every item exists only once
-            //do it AFTER the add
-            getConfig().set("nuke", toNuke);
-            saveConfig();
-            //make sure the region is IN the nuke list
-        }
+            chunkX = (chunkX - 16) / 32;
+            chunkZ = (chunkZ - 16) / 32;
+            //convert these to what the region values will be
+            String target = new StringBuilder().append(unloadingWorld).append("/region/r.").append(chunkX).append(".").append(chunkZ).append(".mca").toString();
+            if (protectRegion) {
+                List<String> toNuke = config.getStringList("nuke");
+                Set<String> noDupes = new HashSet();
+                noDupes.addAll(toNuke);
+                toNuke.clear();
+                toNuke.addAll(noDupes);
+                //we've done this to ensure every item exists only once
+                //do it BEFORE the remove
+                toNuke.remove(target);
+                getConfig().set("nuke", toNuke);
+                saveConfig();
+                //make sure the region is removed from nuke list
+            } else {
+                List<String> toNuke = config.getStringList("nuke");
+                toNuke.add(target);
+                Set<String> noDupes = new HashSet();
+                noDupes.addAll(toNuke);
+                toNuke.clear();
+                toNuke.addAll(noDupes);
+                //we've done this to ensure every item exists only once
+                //do it AFTER the add
+                getConfig().set("nuke", toNuke);
+                saveConfig();
+                //make sure the region is IN the nuke list
+            }
+        }//if it's not the center chunk of the region, we fall through and nothing happens
     }
     //all this assigns 'nuke' to all chunks that HAVE been visited, that then unloaded, and when unloading they didn't have
     //a diamond block in the key spot. Blank config files should not nuke anything upon launch. You've got to unload the chunk
@@ -292,20 +295,39 @@ public class SnowballMadness extends JavaPlugin implements Listener {
             }
         }
     }
-    
+
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (event.getBlockPlaced().getType() == Material.REDSTONE_TORCH_ON) {
+        if (event.getBlockPlaced().getType() == Material.REDSTONE_TORCH_ON || event.getBlockPlaced().getType() == Material.OBSIDIAN) {
             Chunk chunk = event.getBlockPlaced().getChunk();
+            int chunkX = chunk.getX();
+            int chunkZ = chunk.getZ();
             boolean makeSound = false;
             for (int height = 1; height < 257; height++) {
-                if (chunk.getBlock(16, height, 16).getType() == Material.REDSTONE_TORCH_ON) {
+                if (chunk.getBlock(16, height, 16).getType() == Material.REDSTONE_TORCH_ON || chunk.getBlock(16, height, 16).getType() == Material.OBSIDIAN) {
                     makeSound = true;
                 }//this is entirely a player cue, to show player they've correctly placed the protection redstone torch.
             }
             if (makeSound) {
-                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_WITHER_DEATH, 1f, 0.1f);
-                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, 1f, 0.1f);
+                if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
+                    event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.ENTITY_WITHER_DEATH, 1f, 0.1f);
+                    event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, 1f, 0.1f);
+                } else {
+                    //this is not the correct position
+                    float guideSoundVol = 1.0f;//base loudness, for farther calculations
+                    float guideSoundDistance = Math.abs((float) ((chunkX % 32) - 16) + 1.0f) * Math.abs((float) ((chunkZ % 32) - 16) + 1.0f) * 0.1f;
+                    if (guideSoundDistance > 1.0f) {
+                        guideSoundVol /= guideSoundDistance * guideSoundDistance;
+                    }
+                    if (chunkX % 32 == 0
+                            || chunkZ % 32 == 0
+                            || chunkX % 32 == 31
+                            || chunkZ % 32 == 31) {
+                        guideSoundVol = 0.0f; //f we are literally on a region boundary, do NOT even give a sound
+                    }
+                    float guideSoundFreq = 0.1f + guideSoundDistance;
+                    event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, guideSoundVol, guideSoundFreq);
+                }
             }
         }
     }

@@ -15,7 +15,7 @@ public class SphereSnowballLogic extends SnowballLogic {
 
     private final Material wallMaterial;
     private final Material fillMaterial;
-    private final int boxSize;
+    private int boxSize;
 
     public SphereSnowballLogic(Material wallMaterial, Material fillMaterial, int boxSize) {
         this.wallMaterial = wallMaterial;
@@ -32,9 +32,8 @@ public class SphereSnowballLogic extends SnowballLogic {
             Player player = (Player) shooter;
             expLevel = player.getLevel();
         }
+        boxSize = (int) Math.min(boxSize, info.power);
 
-        //because this is the Moon build, we're going to allow all dome creation to happen without restriction. This is the fundamental
-        //method for making Moon bases: 'transparent aluminum' domes. Thus, we will let them be large
         final int radius = boxSize + 1;
         final int diameter = radius * 2;
 

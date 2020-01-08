@@ -26,7 +26,8 @@ public class RefillSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
 
-        final double totalEffectiveness = boxSize;
+        boxSize = (int) Math.min(boxSize, info.power);
+        //size of bukkit is limited by how high level you are
         final int radius = boxSize / 2;
         final int diameter = boxSize;
         final double distanceLimit = radius + 1.0;
@@ -37,9 +38,10 @@ public class RefillSnowballLogic extends SnowballLogic {
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
         final int beginX = snowballLoc.getBlockX() - radius;
-        final int beginY = snowballLoc.getBlockY();
+        final int beginY = Math.max(snowballLoc.getBlockY() - radius, 1);
         final int beginZ = snowballLoc.getBlockZ() - radius;
         final int endX = beginX + diameter;
+        final int endY = beginY + diameter;
         final int endZ = beginZ + diameter;
         final Location locationBuffer = new Location(world, 0, 0, 0);
 
@@ -49,7 +51,7 @@ public class RefillSnowballLogic extends SnowballLogic {
         if (purpose == Material.BUCKET) {
             for (int x = beginX; x <= endX; ++x) {
                 for (int z = beginZ; z <= endZ; ++z) {
-                    for (int y = beginY; y >= 1; --y) {
+                    for (int y = beginY; y <= endY; ++y) {
                         locationBuffer.setX(x);
                         locationBuffer.setY(y);
                         locationBuffer.setZ(z);
@@ -80,8 +82,7 @@ public class RefillSnowballLogic extends SnowballLogic {
                     if (snowballLoc.distance(locationBuffer) <= distanceLimit) {
                         Block target = world.getBlockAt(x, y, z);
                         if (target.getType() == Material.AIR
-                                || target.getType() == Material.WATER
-                                || target.getType() == Material.STATIONARY_WATER) {
+                                || target.getType() == Material.WATER) {
                             target.setType(Material.STATIONARY_WATER);
                         }
                     }
@@ -114,7 +115,6 @@ public class RefillSnowballLogic extends SnowballLogic {
                         }
                     }
                 }
-                //the nether world put a quartz floor in version
             }
         }
     }

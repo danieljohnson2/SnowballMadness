@@ -20,7 +20,7 @@ public class ArrowSnowballLogic extends SnowballLogic {
 
         location.add(velocity.normalize().multiply(1.5));
         //adjusting shot position so you can't run into it while firing
-        float speed = (float) info.power;
+        float speed = (float) info.power + 1.0f;
         if (speed > 1.7) {
             snowball.getWorld().playEffect(location, Effect.BOW_FIRE, null, 128);
             if (speed > 3.2) {

@@ -28,7 +28,7 @@ public class WallPaintingSnowballLogic extends SnowballLogic {
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-
+        boxSize = (int) Math.min(boxSize, info.power);
         final int radius = boxSize + 1;
         final int diameter = radius * 2;
 
