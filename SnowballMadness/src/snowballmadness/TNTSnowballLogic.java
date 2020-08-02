@@ -14,42 +14,31 @@ public class TNTSnowballLogic extends SnowballLogic {
 
     private final int boomSize;
 
-    public TNTSnowballLogic( int boomSize) {
+    public TNTSnowballLogic(int boomSize) {
         this.boomSize = boomSize;
     }
 
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        int scaled = (int)Math.sqrt(boomSize) + 1;
-        for (int x = 0; x < scaled; ++x) {
-         snowball.getWorld().createExplosion(snowball.getLocation().add(x, x, x), scaled*2);
-         //move them so we can get rid of singleton blocks
+        int scaled = (int) Math.sqrt(boomSize) + 1;
+        for (int x = 0; x < boomSize; ++x) {
+            snowball.getWorld().createExplosion(snowball.getLocation().add(0, x/8, 0), scaled);
+            //move them so we can get rid of singleton blocks
         }
         //boom!
-        if (boomSize < 8)  {
-           Entity[] entList = snowball.getWorld().getChunkAt(snowball.getLocation()).getEntities();
-            for (Entity drop : entList) {
-                if (drop instanceof Item) {
-                    //on explosion, nuke drops (and item frames?) in the chunk hit.
-                    //with massive multiplier TNT balls, we don't want to check the whole world
-                    //every single time. That's super wasteful. We reserve it for the high power explosives.
-                    drop.remove();
-                }
+
+        /* List<Entity> entList = snowball.getWorld().getEntities();
+        for (Entity drop : entList) {
+            if ((drop instanceof Item) && (drop.getLocation().distance(snowball.getLocation()) < Math.pow(info.power, 3))) {
+                //on explosion, nuke drops (and item frames?) within a distance of the burst.
+                drop.remove();
+                //this is scaled so that the insane explosives tend to wipe all the drops in the area,
+                //but smaller levels and especially unpowered TNT still give drops. As you amp it up,
+                //the lag-boosting increasingly kicks in on the assumption that drops are no longer
+                //important.
             }
-        } else {
-            List<Entity> entList = snowball.getWorld().getEntities();
-            for (Entity drop : entList) {
-                if ((drop instanceof Item) && (drop.getLocation().distance(snowball.getLocation()) < Math.pow(info.power, 3))) {
-                    //on explosion, nuke drops (and item frames?) within a distance of the burst.
-                    drop.remove();
-                    //this is scaled so that the insane explosives tend to wipe all the drops in the area,
-                    //but smaller levels and especially unpowered TNT still give drops. As you amp it up,
-                    //the lag-boosting increasingly kicks in on the assumption that drops are no longer
-                    //important.
-                }
-            }
-        }
+        }*/
     }
 
     @Override

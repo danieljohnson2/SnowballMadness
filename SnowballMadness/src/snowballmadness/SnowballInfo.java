@@ -34,7 +34,7 @@ public final class SnowballInfo {
         this.plugin = Preconditions.checkNotNull(plugin);
         this.launchLocation = launchLocation.clone();
         this.shooter = shooter.getPlayer();
-        this.power = Math.max(1.0, Math.sqrt(shooter.getLevel()));
+        this.power = Math.max(1.0, shooter.getLevel());
     }
 
     private SnowballInfo(double speed, double power, SnowballInfo original) {
@@ -45,6 +45,6 @@ public final class SnowballInfo {
         this.plugin = original.plugin;
         this.launchLocation = launchLocation.clone();
         this.shooter = shooter.getPlayer();
-        this.power = Math.max(1.0, Math.sqrt(shooter.getLevel()));
+        this.power = Math.max(1.0, shooter.getLevel());
     }
 }

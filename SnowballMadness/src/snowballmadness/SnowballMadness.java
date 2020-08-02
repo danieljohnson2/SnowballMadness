@@ -58,6 +58,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         shouldLogSnowballs = config.getBoolean("logsnowballs", false);
         nukeRegions = config.getBoolean("nukeRegions", false);
 
+        /*
         List<String> toNuke = config.getStringList("nuke");
         //This mechanic permits a list of region files to be deleted upon startup. It's for
         //use with servers that restart periodically and want to have regenerating terrain,
@@ -87,40 +88,27 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         getConfig().set("nuke", toNuke);
         saveConfig();
         //now we start afresh and players unloading chunks can flag what ought to be cleared
+         */
     }
 
     /**
      * This deletes a directory and all its contents, because Java does not provide that. Stupid Java!
      *
-     * @param directory The directory (or file) to delete.
+     * @param directory The directory (or file) to delete. private static void deleteRecursively(File directory) { String[]
+     * listedFiles = directory.list();
+     *
+     * if (listedFiles != null) { for (String subfile : listedFiles) { File sf = new File(directory, subfile);
+     * deleteRecursively(sf); } }
+     *
+     * directory.delete(); }
      */
-    private static void deleteRecursively(File directory) {
-        String[] listedFiles = directory.list();
-
-        if (listedFiles != null) {
-            for (String subfile : listedFiles) {
-                File sf = new File(directory, subfile);
-                deleteRecursively(sf);
-            }
-        }
-
-        directory.delete();
-    }
-
     /**
      * This method removes the content of a JSON file, which we need to do because when we are loading, it's too late for
      * Minecraft to recreate such a file. So we just empty it before it is read.
      *
-     * @param file The JSON file to overwrite with empty content.
+     * @param file The JSON file to overwrite with empty content. private static void clearJsonFile(File file) { try {
+     * Files.write("[]", file, Charsets.US_ASCII); } catch (IOException ex) { throw new RuntimeException(ex); } }
      */
-    private static void clearJsonFile(File file) {
-        try {
-            Files.write("[]", file, Charsets.US_ASCII);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
     /**
      * This extracts the file extension from the file given. The extension returned does not include the '.' preceeding it. If the
      * file has no extension, this method returns "".
@@ -176,6 +164,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         super.onDisable();
     }
 
+    /*
     @EventHandler
     public void onChunkUnload(ChunkUnloadEvent e) {
         FileConfiguration config = getConfig();
@@ -237,7 +226,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     //all this assigns 'nuke' to all chunks that HAVE been visited, that then unloaded, and when unloading they didn't have
     //a diamond block in the key spot. Blank config files should not nuke anything upon launch. You've got to unload the chunk
     //to engage the regen functionality.
-
+     */
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent e) {
         SnowballLogic.onProjectileLaunch(this, e);
@@ -296,6 +285,7 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         }
     }
 
+    /*
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         if (event.getBlockPlaced().getType() == Material.REDSTONE_TORCH_ON || event.getBlockPlaced().getType() == Material.OBSIDIAN) {
@@ -312,205 +302,50 @@ public class SnowballMadness extends JavaPlugin implements Listener {
                 if (((chunkX - 16) % 32 == 0) && ((chunkZ - 16) % 32 == 0)) {
                     event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.ENTITY_WITHER_DEATH, 1f, 0.1f);
                     event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, 1f, 0.1f);
-                } else {
-                    //this is not the correct position
-                    float guideSoundVol = 1.0f;//base loudness, for farther calculations
-                    float guideSoundDistance = Math.abs((float) ((chunkX % 32) - 16) + 1.0f) * Math.abs((float) ((chunkZ % 32) - 16) + 1.0f) * 0.1f;
-                    if (guideSoundDistance > 1.0f) {
-                        guideSoundVol /= guideSoundDistance * guideSoundDistance;
-                    }
-                    if (chunkX % 32 == 0
-                            || chunkZ % 32 == 0
-                            || chunkX % 32 == 31
-                            || chunkZ % 32 == 31) {
-                        guideSoundVol = 0.0f; //f we are literally on a region boundary, do NOT even give a sound
-                    }
-                    float guideSoundFreq = 0.1f + guideSoundDistance;
-                    event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_AMBIENT, guideSoundVol, guideSoundFreq);
                 }
             }
         }
     }
 
-    /*
-   @EventHandler
-     public void jumpOnGrass(PlayerInteractEvent event) {
-     if (event.getAction() == Action.PHYSICAL && event.getClickedBlock().getType() == Material.GRASS) {
-     event.getClickedBlock().setType(Material.GRASS_PATH);
-     }
-     //if you jump on the grass, you wear it down to path.
-     }
-     
-     @EventHandler
+    @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
+        if (event.getFrom().getChunk() != event.getTo().getChunk()) {
             Player player = event.getPlayer();
-            if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE) {
-                Block block = player.getLocation().getBlock(); //block at our feet
-                block.getRelative(-1, 0, 0).setType(Material.AIR);
-                block.getRelative(1, 0, 0).setType(Material.AIR);
-                block.getRelative(0, 0, -1).setType(Material.AIR);
-                block.getRelative(0, 0, 1).setType(Material.AIR);
-                block.getRelative(-1, 1, 0).setType(Material.AIR);
-                block.getRelative(1, 1, 0).setType(Material.AIR);
-                block.getRelative(0, 1, -1).setType(Material.AIR);
-                block.getRelative(0, 1, 1).setType(Material.AIR);
-                block.getRelative(-1, 2, 0).setType(Material.AIR);
-                block.getRelative(1, 2, 0).setType(Material.AIR);
-                block.getRelative(0, 2, -1).setType(Material.AIR);
-                block.getRelative(0, 2, 1).setType(Material.AIR);
-                block.getRelative(-1, 3, 0).setType(Material.AIR);
-                block.getRelative(1, 3, 0).setType(Material.AIR);
-                block.getRelative(0, 3, -1).setType(Material.AIR);
-                block.getRelative(0, 3, 1).setType(Material.AIR);
-                block.getRelative(-1, 4, 0).setType(Material.AIR);
-                block.getRelative(1, 4, 0).setType(Material.AIR);
-                block.getRelative(0, 4, -1).setType(Material.AIR);
-                block.getRelative(0, 4, 1).setType(Material.AIR);
-                //main column: if moving NSEW, will make continuous hole
-                block.getRelative(-2, 1, 0).setType(Material.AIR);
-                block.getRelative(2, 1, 0).setType(Material.AIR);
-                block.getRelative(0, 1, -2).setType(Material.AIR);
-                block.getRelative(0, 1, 2).setType(Material.AIR);
-                block.getRelative(-2, 2, 0).setType(Material.AIR);
-                block.getRelative(2, 2, 0).setType(Material.AIR);
-                block.getRelative(0, 2, -2).setType(Material.AIR);
-                block.getRelative(0, 2, 2).setType(Material.AIR);
-                block.getRelative(-2, 3, 0).setType(Material.AIR);
-                block.getRelative(2, 3, 0).setType(Material.AIR);
-                block.getRelative(0, 3, -2).setType(Material.AIR);
-                block.getRelative(0, 3, 2).setType(Material.AIR);
-                //wings: if moving NSEW will widen hole
+            Location playerLocation = player.getLocation();
+            Location startLocation = player.getCompassTarget();
 
-                double rotation = player.getLocation().getYaw() % 360;
-                if (rotation < 0) {
-                    rotation += 360.0;
-                }
-                if (0 <= rotation && rotation < 22.5) {
-                    block.getRelative(0, 0, 2).setType(Material.AIR);
-                } else if (67.5 <= rotation && rotation < 112.5) {
-                    block.getRelative(-2, 0, 0).setType(Material.AIR);
-                } else if (157.5 <= rotation && rotation < 202.5) {
-                    block.getRelative(0, 0, -2).setType(Material.AIR);
-                } else if (247.5 <= rotation && rotation < 292.5) {
-                    block.getRelative(2, 0, 0).setType(Material.AIR);
-                } else if (337.5 <= rotation && rotation < 360.0) {
-                    block.getRelative(0, 0, 2).setType(Material.AIR);
-                }
-                //only does cardinal directions. Gives you ability to move forward because your feets are clear of obstacles!
-                int lightingX = block.getX();
-                int lightingZ = block.getZ();
-                if (lightingX < 0) {
-                    lightingX += 1;
-                }
-                if (lightingZ < 0) {
-                    lightingZ += 1;
-                }
-                //this corrects negative numbers so it still has zeroes for the lighting spacing.
-                if (block.getRelative(0, 5, 0).getType() == Material.STONE && lightingX % 10 == 0 && lightingZ % 10 == 0) {
-                    block.getRelative(0, 5, 0).setType(Material.SEA_LANTERN);
-                }
-                //put in ceiling strip lighting, but ONLY if you are aligned with tens on X, Y and Z. x0.x, y0.y, z0.z is the pattern: must have the zeroes in all ones places
-                //So make tunnels 10 apart on every axis (the ones column must be zero) on height and your lateral positioning.
-                //if you want them to be lit. Otherwise, it's rogue tunneling and not part of the lighting project!
+            int playerX = playerLocation.getBlockX();
+            int playerY = playerLocation.getBlockY();
+            int playerZ = playerLocation.getBlockZ();
 
-                /*
-                Block block = player.getLocation().subtract(0, 1, 0).getBlock();
-                if (block.getType() == Material.GRASS) {
-                    block.setType(Material.GRASS_PATH);
-                }
-                block = block.getRelative(BlockFace.DOWN);
-                if (block.getType() == Material.GRASS) {
-                    block.setType(Material.GRASS_PATH);
-                } */
- /*
-            } else if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_BLOCK) {
-                Block block = player.getLocation().getBlock(); //block at our feet
-                double scaleFactor = player.getInventory().getItemInMainHand().getAmount() * 0.03125;
-                //let's do everything based on an amount of 32 for a huge-ass tunnel
-                int beginX = block.getX() - (int)(13*scaleFactor);
-                int beginY = block.getY();
-                int beginZ = block.getZ() - (int)(13*scaleFactor);
-                int endX = beginX + (int)(26*scaleFactor);
-                int endY = beginY + (int)(16*scaleFactor);
-                int endZ = beginZ + (int)(26*scaleFactor);
-                World world = player.getWorld();
-                Location locationBuffer = new Location(player.getWorld(), 0, 0, 0);
-                Location playerLocation = new Location(player.getWorld(), 0, 0, 0);
-                playerLocation = player.getLocation().add(0, (int)(5*scaleFactor), 0);
+            int offsetX = Math.floorDiv(playerX, 512);
+            int offsetZ = Math.floorDiv(playerZ, 512);
 
-                // no worries- all this executes before Minecraft can send anything
-                // back to the client, so we can set the blocks in any order. This one
-                // is convenient!
-                int maxDistance = (int)(12*scaleFactor);
-                for (int x = beginX; x <= endX; ++x) {
-                    for (int z = beginZ; z <= endZ; ++z) {
-                        for (int y = beginY; y <= endY; ++y) {
-                            locationBuffer.setX(x);
-                            locationBuffer.setY(y);
-                            locationBuffer.setZ(z);
-                            if (playerLocation.distance(locationBuffer) < maxDistance) {
-                                Block target = world.getBlockAt(x, y, z);
-                                target.setType(Material.AIR);
-                            }
-                        }
-                    }
-                }
+            playerX = (offsetX * 512) + 256;
+            playerZ = (offsetZ * 512) + 256;
 
-                beginX = block.getX() - (int)(1.49*scaleFactor);
-                beginZ = block.getZ() - (int)(1.49*scaleFactor);
-                endX = beginX + (int)(3*scaleFactor);
-                endY = block.getY() + (int)(17*scaleFactor);
-                endZ = beginZ + (int)(3*scaleFactor);
-                for (int x = beginX; x <= endX; ++x) {
-                    for (int z = beginZ; z <= endZ; ++z) {
-                        Block target = world.getBlockAt(x, endY, z);
-                        if (target.getType() == Material.STONE) {
-                            target.setType(Material.SEA_LANTERN);
-                        }
-                    }
-                }
-                //Large light panels up top for big tunnels
-
-                beginX = block.getX() - (int)(9*scaleFactor);
-                beginZ = block.getZ() - (int)(9*scaleFactor);
-                endX = beginX + (int)(18*scaleFactor);
-                endY = block.getY() - 1;
-                endZ = beginZ + (int)(18*scaleFactor);
-                for (int x = beginX; x <= endX; ++x) {
-                    for (int z = beginZ; z <= endZ; ++z) {
-                        Block target = world.getBlockAt(x, endY, z);
-                        if (target.getType() == Material.STONE) {
-                            target.setType(Material.SMOOTH_BRICK);
-                        }
-                    }
-                }
-                //Large light panels up top for big tunnels
-
-                /*
-                Block block = player.getLocation().subtract(0, 1, 0).getBlock();
-                if (block.getType() == Material.GRASS) {
-                    block.setType(Material.GRASS_PATH);
-                }
-                block = block.getRelative(BlockFace.DOWN);
-                if (block.getType() == Material.GRASS) {
-                    block.setType(Material.GRASS_PATH);
-                } */ /*
-            }
+            Location destLocation = playerLocation;
+            destLocation.setX(playerX);
+            destLocation.setY(playerY);
+            destLocation.setZ(playerZ);
+            player.setCompassTarget(destLocation);
+            //every transition to a new chunk, we recalculate what the compass is pointing to
         }
-        //even walking on the grass turns it to path, if you're carrying a diamond hoe
-    } */
+    }
+    
 
     @EventHandler
     public void onEntityTargetPlayer(EntityTargetLivingEntityEvent e) {
         SnowballLogic.onEntityTargetPlayer(e);
     }
+    */
 
     @EventHandler
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
         SnowballLogic.onEntityDamageByEntityEvent(e);
     }
 
+    /*
     @EventHandler
     public void explodeEvent(EntityExplodeEvent event) {
         for (Entity entity : event.getEntity().getNearbyEntities(1.1, 10.0, 1.1)) {
@@ -520,7 +355,6 @@ public class SnowballMadness extends JavaPlugin implements Listener {
         //they have been removed. The 10 should be a vertical slice inside which drops are removed.
     }
 
-    /*
     @EventHandler
     public void onExplosionPrime(ExplosionPrimeEvent event) {
         for (Entity entity : event.getEntity().getNearbyEntities(1.1, 1.1, 1.1)) {
@@ -530,16 +364,35 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     //These operate on the same princimple of the fire spread: if we have absurd densities of TNT spam,
     //we indiscriminately begin killing entities to de-lag the server while still allowing a ridiculous
     //amount of mayhem. Much noise and fury, but it burns itself out unnaturally fast.
-     */
-
- /*
+    */
+    
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
+        /*Location playerLocation = player.getLocation();
+        Location startLocation = player.getCompassTarget();
+
+        int playerX = playerLocation.getBlockX();
+        int playerY = playerLocation.getBlockY();
+        int playerZ = playerLocation.getBlockZ();
+
+        int offsetX = Math.floorDiv(playerX, 512);
+        int offsetZ = Math.floorDiv(playerZ, 512);
+
+        playerX = (offsetX * 512) + 256;
+        playerZ = (offsetZ * 512) + 256;
+
+        Location destLocation = playerLocation;
+        destLocation.setX(playerX);
+        destLocation.setY(playerY);
+        destLocation.setZ(playerZ);
+        player.setCompassTarget(destLocation);
+        //every new login, we recalculate what the compass is pointing to*/
+
         PlayerInventory inventory = player.getInventory();
         ItemStack oldStack = inventory.getItem(8);
         if (oldStack == null) {
-            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 5));
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 16));
             player.updateInventory();
         } //only upon join do we give only one base snowball, only if slot 8 is empty.
         RespawnInfo.checkRespawn(player, this);
@@ -548,17 +401,32 @@ public class SnowballMadness extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
         Player player = e.getPlayer();
+        /*Location playerLocation = player.getLocation();
+        Location startLocation = player.getCompassTarget();
+
+        int playerX = playerLocation.getBlockX();
+        int playerY = playerLocation.getBlockY();
+        int playerZ = playerLocation.getBlockZ();
+
+        int offsetX = Math.floorDiv(playerX, 512);
+        int offsetZ = Math.floorDiv(playerZ, 512);
+
+        playerX = (offsetX * 512) + 256;
+        playerZ = (offsetZ * 512) + 256;
+
+        Location destLocation = playerLocation;
+        destLocation.setX(playerX);
+        destLocation.setY(playerY);
+        destLocation.setZ(playerZ);
+        player.setCompassTarget(destLocation);
+        //every respawn, we recalculate what the compass is pointing to*/
+
         PlayerInventory inventory = player.getInventory();
         ItemStack oldStack = inventory.getItem(8);
         if (oldStack == null) {
-            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 5));
+            inventory.setItem(8, new ItemStack(Material.SNOW_BALL, 16));
             player.updateInventory();
         } //only upon join do we give only one base snowball, only if slot 8 is empty.
         RespawnInfo.checkRespawn(player, this);
     }
-    
-    //for the current version, we're not going to just give people snowballs willy nilly
-    //instead, you gotta go and get some and manage that as a resource, slowing the roll of
-    //random trolls. You might call it a toll on that. Slow-troll-roll toll :)
-     */
 }

@@ -10,8 +10,7 @@ import org.bukkit.util.*;
 import org.bukkit.Location;
 
 /**
- * This logic attracts entities to the snowball; more power makes the
- * attractions stronger and longer ranged.
+ * This logic attracts entities to the snowball; more power makes the attractions stronger and longer ranged.
  *
  * @author DanJ
  */
@@ -40,16 +39,16 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
         }
 
         for (Entity victim : world.getEntities()) {
-            if ((victim instanceof Snowball) || (victim == snowball.getShooter())) {
+            /*if ((victim instanceof Snowball) || (victim == snowball.getShooter())) {
                 accelerate(victim, target, (0.03 * info.power));
                 //victim is another snowball or the shooter, we make them less interactive
-            } else {
-                accelerate(victim, target, info.power);
-                accelerate(victim, previousTarget, info.power);
-                if (victim instanceof ExperienceOrb) {
-                    victim.remove();
+            } else {*/
+            accelerate(victim, target, info.power);
+            accelerate(victim, previousTarget, info.power);
+            /*if (victim instanceof ExperienceOrb) {
+                victim.remove();
                 }
-            }
+            }*/
         }
         previousTarget = target;
     }
@@ -62,9 +61,8 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
     }
 
     /**
-     * This method applies acceleration of a victim towards a target. We a
-     * vector for 'target' instead of a Location because the methods we need are
-     * found on it; semantically this is a location.
+     * This method applies acceleration of a victim towards a target. We a vector for 'target' instead of a Location because the
+     * methods we need are found on it; semantically this is a location.
      *
      * @param victim The entity to accelerate.
      * @param target The target to move the entity towards.
@@ -76,7 +74,7 @@ public class DeathVortexSnowballLogic extends SnowballLogic {
 
         if (dist > 0.0) {
             double factor = power / dist;
-            if (factor > 0.0001) {
+            if (factor > 0.01) {
                 Vector vel = victim.getVelocity().clone();
                 double restraint = 1.0 / ((Math.pow(vel.length(), 3)) + 1.0);
                 factor *= restraint;

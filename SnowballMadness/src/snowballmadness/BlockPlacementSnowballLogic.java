@@ -26,39 +26,184 @@ public class BlockPlacementSnowballLogic extends SnowballLogic {
 
         Location loc = snowball.getLocation().clone();
 
-        if (toPlace.name().endsWith("STEP") ||
-                toPlace.name().endsWith("SLAB") ||
-                toPlace.name().endsWith("SLAB2")) {
+        if (toPlace.name().endsWith("STEP")
+                || toPlace.name().endsWith("SLAB")
+                || toPlace.name().endsWith("SLAB2")) {
             if (loc.getBlock().getType() == Material.AIR && loc.getY() > 2) {
                 loc.setY(loc.getY() - 1);
             }
-            
+
             Block target = loc.getBlock();
             target.setType(toPlace);
             target.setData((byte) durability);
-            target = loc.getBlock();
-            target.getRelative(BlockFace.NORTH).getRelative(BlockFace.EAST).setType(toPlace);
-            target.getRelative(BlockFace.NORTH).getRelative(BlockFace.EAST).setData((byte) durability);
-            target.getRelative(BlockFace.NORTH).setType(toPlace);
-            target.getRelative(BlockFace.NORTH).setData((byte) durability);
-            target.getRelative(BlockFace.NORTH).getRelative(BlockFace.WEST).setType(toPlace);
-            target.getRelative(BlockFace.NORTH).getRelative(BlockFace.WEST).setData((byte) durability);
-            
-            target.getRelative(BlockFace.EAST).setType(toPlace);
-            target.getRelative(BlockFace.EAST).setData((byte) durability);
-            target.setType(toPlace);
-            target.setData((byte) durability);
-            target.getRelative(BlockFace.WEST).setType(toPlace);
-            target.getRelative(BlockFace.WEST).setData((byte) durability);
-            
-            target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.EAST).setType(toPlace);
-            target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.EAST).setData((byte) durability);
-            target.getRelative(BlockFace.SOUTH).setType(toPlace);
-            target.getRelative(BlockFace.SOUTH).setData((byte) durability);
-            target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.WEST).setType(toPlace);
-            target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.WEST).setData((byte) durability);
-            //neat little 3x3 for building floors and bridges and roads, under one's feet
-            
+
+            Block scanOut = loc.getBlock();
+
+            scanOut = target.getRelative(BlockFace.NORTH);
+            if (scanOut.getType() == Material.AIR) {
+                scanOut.setType(toPlace);
+                scanOut.setData((byte) durability);
+                scanOut = target.getRelative(BlockFace.NORTH_EAST);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                }
+                scanOut = target.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                    scanOut = target.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH_EAST);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                    }
+                    scanOut = target.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                        scanOut = target.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH_EAST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH_EAST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                    }
+                }
+            }
+
+            scanOut = target.getRelative(BlockFace.EAST);
+            if (scanOut.getType() == Material.AIR) {
+                scanOut.setType(toPlace);
+                scanOut.setData((byte) durability);
+                scanOut = target.getRelative(BlockFace.SOUTH_EAST);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                }
+                scanOut = target.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                    scanOut = target.getRelative(BlockFace.EAST).getRelative(BlockFace.SOUTH_EAST);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                    }
+                    scanOut = target.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                        scanOut = target.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.SOUTH_EAST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.SOUTH_EAST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                    }
+                }
+            }
+
+            scanOut = target.getRelative(BlockFace.SOUTH);
+            if (scanOut.getType() == Material.AIR) {
+                scanOut.setType(toPlace);
+                scanOut.setData((byte) durability);
+                scanOut = target.getRelative(BlockFace.SOUTH_WEST);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                }
+                scanOut = target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                    scanOut = target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH_WEST);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                    }
+                    scanOut = target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                        scanOut = target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH_WEST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH_WEST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                    }
+                }
+            }
+
+            scanOut = target.getRelative(BlockFace.WEST);
+            if (scanOut.getType() == Material.AIR) {
+                scanOut.setType(toPlace);
+                scanOut.setData((byte) durability);
+                scanOut = target.getRelative(BlockFace.NORTH_WEST);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                }
+                scanOut = target.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST);
+                if (scanOut.getType() == Material.AIR) {
+                    scanOut.setType(toPlace);
+                    scanOut.setData((byte) durability);
+                    scanOut = target.getRelative(BlockFace.WEST).getRelative(BlockFace.NORTH_WEST);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                    }
+                    scanOut = target.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST);
+                    if (scanOut.getType() == Material.AIR) {
+                        scanOut.setType(toPlace);
+                        scanOut.setData((byte) durability);
+                        scanOut = target.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.NORTH_WEST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                        scanOut = target.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.NORTH_WEST);
+                        if (scanOut.getType() == Material.AIR) {
+                            scanOut.setType(toPlace);
+                            scanOut.setData((byte) durability);
+                        }
+                    }
+                }
+            }
+
+            //neat little grid for building floors and bridges and roads, under one's feet
         } else {
 
             if (loc.getBlock().getType() == Material.AIR && loc.getY() > 1) {

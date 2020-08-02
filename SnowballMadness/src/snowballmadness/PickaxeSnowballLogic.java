@@ -24,24 +24,24 @@ public class PickaxeSnowballLogic extends SnowballLogic {
     @Override
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
-        int baseTool = 0; //wooden pick
+        int baseTool = 2; //wooden pick
         switch (toolUsed) {
             case DIAMOND_PICKAXE:
-                baseTool = 4;
+                baseTool = 16;
                 break;
             case GOLD_PICKAXE:
-                baseTool = 3;
+                baseTool = 12;
                 break;
             case IRON_PICKAXE:
-                baseTool = 2;
+                baseTool = 8;
                 break;
             case STONE_PICKAXE:
-                baseTool = 1;
+                baseTool = 4;
                 break;
         }
         final double totalEffectiveness = baseTool * 4f;
-        final int radius = (int) (Math.sqrt(totalEffectiveness * baseTool));
-        final double distanceSquaredLimit = (radius * (double) radius) + 1.0;
+        final int radius = baseTool;
+        final double distanceSquaredLimit = (radius * (double) radius) - 2.0;
 
         //size is heavily dependent on tool type, power expands so aggressively with
         //doubling that we must control it. Max will still be very huge.
@@ -50,7 +50,7 @@ public class PickaxeSnowballLogic extends SnowballLogic {
         Random rand = new Random();
         Location snowballLoc = snowball.getLocation().clone();
         final int beginX = snowballLoc.getBlockX() - radius;
-        final int beginY = Math.max(0, snowballLoc.getBlockY() - 1);
+        final int beginY = Math.max(1, snowballLoc.getBlockY() - 1); // must be 1 min, for flat bedrock floor
         final int beginZ = snowballLoc.getBlockZ() - radius;
         final int endX = beginX + diameter;
         final int endY = Math.min(world.getMaxHeight(), beginY + radius);
@@ -60,44 +60,36 @@ public class PickaxeSnowballLogic extends SnowballLogic {
 
         for (int x = beginX; x < endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
-                boolean roofMod = rand.nextBoolean();
                 double moddedRoof = distanceSquaredLimit;
-                if (roofMod) {
-                    moddedRoof = distanceSquaredLimit + totalEffectiveness;
-                }
-                //being calculated column by column, so it's still fast
                 //value required is squared, remember: not a fixed amount
                 for (int y = beginY; y <= endY; ++y) {
                     locationBuffer.setX(x + 0.5);
                     locationBuffer.setY(y);
                     locationBuffer.setZ(z + 0.5);
+                    final Block beingMined = world.getBlockAt(x, y, z);
+                    final Material material = beingMined.getType();
                     if (snowballLoc.distanceSquared(locationBuffer) < moddedRoof) {
-                        final Block beingMined = world.getBlockAt(x, y, z);
-                        final Material material = beingMined.getType();
-                        if (material == Material.STONE //the simplest case: clear stone.
-                                || (material == Material.NETHERRACK)
-                                || (material == Material.ENDER_STONE)
-                                || (material == Material.SAND)
-                                || (material == Material.DIRT)
-                                || (material == Material.SANDSTONE)
-                                || (material == Material.CONCRETE)
-                                || (material == Material.HARD_CLAY)
-                                || (material == Material.STAINED_CLAY)
-                                || (material == Material.COBBLESTONE)
-                                || (material == Material.GRASS)
+                        if (material == Material.CHEST
+                                || (material == Material.ENDER_CHEST)) {
+                            //don't mine
+                        } else {
+                            beingMined.setType(Material.AIR);
+                        }//literally anything not a chest becomes air within our cave size
+                        //which is also now a smooth form
+                    } else {
+                        //in the enclosing, larger box, if we have messy liquids and falling things
+                        //we try to remove those
+                        if (material == Material.SAND
                                 || (material == Material.GRAVEL)
-                                || (material == Material.WATER && (baseTool > 1))
-                                || (material == Material.STATIONARY_WATER && (baseTool > 1)) //better than stone and you can clear water
-                                || (material == Material.LAVA && (baseTool > 2)) //better than iron and you can clear lava
-                                || (material == Material.STATIONARY_LAVA && (baseTool > 2)) //all of these leave ores to mine
-                                || (material == Material.COAL_ORE && (baseTool > 3)) //mining with gold pick means you want ores
-                                || (material == Material.IRON_ORE && (baseTool > 3)) //mining with diamond pick clears iron and coal ores
-                                || (material == Material.BEDROCK && (baseTool > 3) && (beingMined.getY() > 0))) //more means a bedrock flat floor) 
-                        {
+                                || (material == Material.WATER)
+                                || (material == Material.STATIONARY_WATER)
+                                || (material == Material.LAVA)
+                                || (material == Material.STATIONARY_LAVA)) {
                             beingMined.setType(Material.AIR);
                         }
                     }
                 }
+
             }
         }
     }

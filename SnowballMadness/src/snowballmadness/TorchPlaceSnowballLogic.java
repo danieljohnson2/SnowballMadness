@@ -20,40 +20,55 @@ public class TorchPlaceSnowballLogic extends SnowballLogic {
         super.hit(snowball, info);
 
         Location loc = snowball.getLocation();
-        loc.setX(Math.floor(loc.getX() / 7) * 7);
-        loc.setZ(Math.floor(loc.getZ() / 7) * 7);
+
         loc.setY(loc.getBlockY() + 1);
         Block target = loc.getBlock();
         if (target.getType() == Material.AIR) {
             target = target.getRelative(BlockFace.DOWN);
         }
-        if (target.getType() == Material.AIR||
-                target.getType() == Material.DOUBLE_PLANT) {
+        if (target.getType() == Material.AIR
+                || target.getType() == Material.DOUBLE_PLANT) {
             target = target.getRelative(BlockFace.DOWN);
         }
-        if (target.getType() == Material.AIR||
-                target.getType() == Material.LEAVES||
-                target.getType() == Material.LONG_GRASS||
-                target.getType() == Material.DOUBLE_PLANT||
-                target.getType() == Material.RED_ROSE||
-                target.getType() == Material.YELLOW_FLOWER||
-                target.getType() == Material.DEAD_BUSH) {
+        if (target.getType() == Material.AIR
+                || target.getType() == Material.LEAVES
+                || target.getType() == Material.LONG_GRASS
+                || target.getType() == Material.DOUBLE_PLANT
+                || target.getType() == Material.RED_ROSE
+                || target.getType() == Material.YELLOW_FLOWER
+                || target.getType() == Material.DEAD_BUSH) {
             target = target.getRelative(BlockFace.DOWN);
         }
         //this is primitive, but it starts with our location and goes to find a spot that's not air
         target = target.getRelative(BlockFace.UP);
         //having found this spot, we go up into the spot where a torch will be placed
-        if (target.getRelative(BlockFace.DOWN).getType().isSolid()) {
-            if (target.getType() == Material.AIR||
-                target.getType() == Material.LEAVES||
-                target.getType() == Material.LONG_GRASS||
-                target.getType() == Material.DOUBLE_PLANT||
-                target.getType() == Material.RED_ROSE||
-                target.getType() == Material.YELLOW_FLOWER||
-                target.getType() == Material.DEAD_BUSH) {
-                target.setType(Material.TORCH);
-            }
+        /*boolean place = true;
+        if (target.getRelative(BlockFace.EAST).getType() != Material.AIR) {
+            place = false;
         }
+        if (target.getRelative(BlockFace.WEST).getType() != Material.AIR) {
+            place = false;
+        }
+        if (target.getRelative(BlockFace.NORTH).getType() != Material.AIR) {
+            place = false;
+        }
+        if (target.getRelative(BlockFace.SOUTH).getType() != Material.AIR) {
+            place = false;
+        }
+        if (!target.getRelative(BlockFace.SOUTH).getType().isSolid()) {
+            place = false;
+        }
+        if (place == true) {*/
+        if (target.getType() == Material.AIR
+                || target.getType() == Material.LEAVES
+                || target.getType() == Material.LONG_GRASS
+                || target.getType() == Material.DOUBLE_PLANT
+                || target.getType() == Material.RED_ROSE
+                || target.getType() == Material.YELLOW_FLOWER
+                || target.getType() == Material.DEAD_BUSH) {
+            target.setType(Material.TORCH);
+        }
+
         //and then, if the block under our magic spot is solid (and not say another torch) we torch.
     }
 }

@@ -14,6 +14,6 @@ public class WatchSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
         World world = snowball.getWorld();
-        world.setTime((long) (world.getTime() + (100.0 * info.power)));
+        world.setTime((long) (world.getTime() + (100.0 * Math.sqrt(info.power))));
     }
 }

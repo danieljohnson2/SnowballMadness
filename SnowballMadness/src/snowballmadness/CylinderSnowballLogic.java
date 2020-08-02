@@ -12,13 +12,13 @@ import org.bukkit.projectiles.ProjectileSource;
  *
  * @author christopherjohnson
  */
-public class ShellSnowballLogic extends SnowballLogic {
+public class CylinderSnowballLogic extends SnowballLogic {
 
-    private final Material helmetType;
+    private final Material chestplateType;
     private final InventorySlice inventory;
 
-    public ShellSnowballLogic(Material helmetType, InventorySlice inventory) {
-        this.helmetType = helmetType;
+    public CylinderSnowballLogic(Material chestplateType, InventorySlice inventory) {
+        this.chestplateType = chestplateType;
         this.inventory = Preconditions.checkNotNull(inventory);
     }
 
@@ -26,23 +26,26 @@ public class ShellSnowballLogic extends SnowballLogic {
     public void hit(Snowball snowball, SnowballInfo info) {
         super.hit(snowball, info);
         ProjectileSource shooter = snowball.getShooter();
-        final Material wallMaterial = inventory.getBottomItem().getType();
-        
+        Material wallMaterial = inventory.getBottomItem().getType();
+        if (wallMaterial == Material.CHEST) {
+            return;
+        }
+
         int baseTool = 0; //no effect
-        switch (helmetType) {
-            case CHAINMAIL_HELMET:
+        switch (chestplateType) {
+            case CHAINMAIL_CHESTPLATE:
                 baseTool = 64;
                 break;
-            case DIAMOND_HELMET:
+            case DIAMOND_CHESTPLATE:
                 baseTool = 32;
                 break;
-            case GOLD_HELMET:
+            case GOLD_CHESTPLATE:
                 baseTool = 16;
                 break;
-            case IRON_HELMET:
+            case IRON_CHESTPLATE:
                 baseTool = 8;
                 break;
-            case LEATHER_HELMET:
+            case LEATHER_CHESTPLATE:
                 baseTool = 4;
                 break;
         }
@@ -57,12 +60,12 @@ public class ShellSnowballLogic extends SnowballLogic {
         // while in theory x anx z are unlimited, we want to keep y
         // within the normal world.
         final int beginX = snowballLoc.getBlockX() - radius;
-        final int beginY = Math.max(1, snowballLoc.getBlockY() - radius);
+        final int beginY = Math.max(1, snowballLoc.getBlockY() - (int) (radius * 0.66666f));
         final int beginZ = snowballLoc.getBlockZ() - radius;
         final int endX = beginX + diameter;
-        final int endY = Math.min(world.getMaxHeight(), beginY + diameter);
+        final int endY = Math.min(world.getMaxHeight(), beginY + radius);
         final int endZ = beginZ + diameter;
-        final Location locationBuffer = new Location(world, 0, 0, 0);
+        final Location movingYBuffer = new Location(world, 0, 0, 0);
         double distanceSquared = 0;
 
         // no worries- all this executes before Minecraft can send anything
@@ -71,10 +74,10 @@ public class ShellSnowballLogic extends SnowballLogic {
         for (int x = beginX; x <= endX; ++x) {
             for (int z = beginZ; z <= endZ; ++z) {
                 for (int y = beginY; y <= endY; ++y) {
-                    locationBuffer.setX(x);
-                    locationBuffer.setY(y);
-                    locationBuffer.setZ(z);
-                    distanceSquared = snowballLoc.distanceSquared(locationBuffer);
+                    movingYBuffer.setX(x);
+                    movingYBuffer.setY(snowballLoc.getY());
+                    movingYBuffer.setZ(z);
+                    distanceSquared = snowballLoc.distanceSquared(movingYBuffer);
                     if (distanceSquared > ((distanceSquaredLimit * 0.9) - 9.0)
                             && distanceSquared <= distanceSquaredLimit) {
                         Block target = world.getBlockAt(x, y, z);

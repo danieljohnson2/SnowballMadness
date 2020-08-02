@@ -21,7 +21,7 @@ public class JetpackSnowballLogic extends SnowballLogic {
         ProjectileSource psource = snowball.getShooter();
         if (psource instanceof LivingEntity) {
             LivingEntity shooter = (LivingEntity) psource;
-            double delta = info.power + 1.0;
+            double delta = Math.sqrt(info.power) + 1.0;
              //any form of powering will crank this up
             snowball.remove();
             Vector velocity = shooter.getVelocity().clone();

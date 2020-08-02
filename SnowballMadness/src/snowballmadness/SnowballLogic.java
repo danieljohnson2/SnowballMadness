@@ -53,7 +53,7 @@ public abstract class SnowballLogic {
      * @param snowball The snowball hitting something.
      * @param info Other information about the snowball.
      * @param target The entity that was hit.
-     * @param damage The damage the snowball is expected to do..
+     * @param proposedDamage The damage the snowball is expected to do..
      * @return The damage teh snowball will do.
      */
     public double damage(Snowball snowball, SnowballInfo info, Entity target, double proposedDamage) {
@@ -94,45 +94,6 @@ public abstract class SnowballLogic {
         if (hint.getType().isBlock()) {
             if (hint.getType() == Material.DRAGON_EGG) {
                 return new DeathVortexSnowballLogic();
-            } else if (hint.getType() == Material.IRON_BLOCK) {
-                return new ItemDropSnowballLogic(
-                        Material.IRON_HELMET,
-                        Material.IRON_CHESTPLATE,
-                        Material.IRON_LEGGINGS,
-                        Material.IRON_BOOTS,
-                        Material.IRON_SWORD,
-                        Material.IRON_PICKAXE,
-                        Material.IRON_AXE,
-                        Material.IRON_SPADE,
-                        Material.IRON_HOE);
-            } else if (hint.getType() == Material.GOLD_BLOCK) {
-                return new ItemDropSnowballLogic(
-                        Material.GOLD_HELMET,
-                        Material.GOLD_CHESTPLATE,
-                        Material.GOLD_LEGGINGS,
-                        Material.GOLD_BOOTS,
-                        Material.GOLD_SWORD,
-                        Material.GOLD_PICKAXE,
-                        Material.GOLD_AXE,
-                        Material.GOLD_SPADE,
-                        Material.GOLD_HOE);
-            } else if (hint.getType() == Material.DIAMOND_BLOCK) {
-                return new ItemDropSnowballLogic(
-                        Material.DIAMOND_HELMET,
-                        Material.DIAMOND_CHESTPLATE,
-                        Material.DIAMOND_LEGGINGS,
-                        Material.DIAMOND_BOOTS,
-                        Material.DIAMOND_SWORD,
-                        Material.DIAMOND_PICKAXE,
-                        Material.DIAMOND_AXE,
-                        Material.DIAMOND_SPADE,
-                        Material.DIAMOND_HOE);
-            } else if (hint.getType() == Material.EMERALD_BLOCK) {
-                return new FeeshVariationsSnowballLogic(hint); //emerald block curses with silverfish
-            } else if (hint.getType() == Material.REDSTONE_BLOCK) {
-                return BlockEmbedSnowballLogic.fromMaterial(hint.getType()); //redstone block fires lightning
-            } else if (hint.getType() == Material.OBSIDIAN) {
-                return new ComeAlongSnowballLogic(Material.OBSIDIAN);
             } else if (hint.getType() == Material.RED_ROSE) {
                 return new FireworkSnowballLogic(hint);
             } else if (hint.getType() == Material.YELLOW_FLOWER) {
@@ -141,23 +102,6 @@ public abstract class SnowballLogic {
                 return new TorchPlaceSnowballLogic();
             } else if (hint.getType() == Material.SAPLING) {
                 return new ArboristSnowballLogic(hint);
-            } else if (hint.getType() == Material.WHITE_SHULKER_BOX
-                    || hint.getType() == Material.ORANGE_SHULKER_BOX
-                    || hint.getType() == Material.MAGENTA_SHULKER_BOX
-                    || hint.getType() == Material.LIGHT_BLUE_SHULKER_BOX
-                    || hint.getType() == Material.YELLOW_SHULKER_BOX
-                    || hint.getType() == Material.LIME_SHULKER_BOX
-                    || hint.getType() == Material.PINK_SHULKER_BOX
-                    || hint.getType() == Material.GRAY_SHULKER_BOX
-                    || hint.getType() == Material.SILVER_SHULKER_BOX
-                    || hint.getType() == Material.CYAN_SHULKER_BOX
-                    || hint.getType() == Material.PURPLE_SHULKER_BOX
-                    || hint.getType() == Material.BLUE_SHULKER_BOX
-                    || hint.getType() == Material.BROWN_SHULKER_BOX
-                    || hint.getType() == Material.GREEN_SHULKER_BOX
-                    || hint.getType() == Material.RED_SHULKER_BOX
-                    || hint.getType() == Material.BLACK_SHULKER_BOX) {
-                return new ShulkerBoxSnowballLogic(hint);
             } else if (hint.getType() == Material.REDSTONE_TORCH_ON) {
                 return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
             } else if (hint.getType() == Material.LADDER) {
@@ -196,10 +140,12 @@ public abstract class SnowballLogic {
                             Material.SADDLE);
 
                 case WATER_BUCKET:
-                    return new RefillSnowballLogic(Material.WATER_BUCKET, 32);
+                    return new BlockPlacementSnowballLogic(Material.WATER, hint.getDurability());
+                    //return new RefillSnowballLogic(Material.WATER_BUCKET, 32);
 
                 case LAVA_BUCKET:
-                    return new RefillSnowballLogic(Material.LAVA_BUCKET, 32);
+                    return new BlockPlacementSnowballLogic(Material.LAVA, hint.getDurability());
+                    //return new RefillSnowballLogic(Material.LAVA_BUCKET, 32);
 
                 case WOOD_SPADE:
                     return BlockEmbedSnowballLogic.fromMaterial(hint.getType());
@@ -211,7 +157,7 @@ public abstract class SnowballLogic {
                     return new FeatherSnowballLogic();
 
                 case FLINT_AND_STEEL:
-                    return new SphereSnowballLogic(Material.AIR, Material.FIRE, 16);
+                    return new SphereSnowballLogic(Material.FIRE, Material.FIRE, 16);
 
                 case FIREWORK:
                     return new JetpackSnowballLogic();
@@ -259,16 +205,22 @@ public abstract class SnowballLogic {
                 case SHEARS:
                     return new ShearsSnowballLogic();
 
-                case LEATHER_HELMET:
+                /*case LEATHER_HELMET:
                 case IRON_HELMET:
                 case GOLD_HELMET:
                 case DIAMOND_HELMET:
                 case CHAINMAIL_HELMET:
                     return new ShellSnowballLogic(hint.getType(), slice.skip(1));
 
+                case LEATHER_CHESTPLATE:
+                case IRON_CHESTPLATE:
+                case GOLD_CHESTPLATE:
+                case DIAMOND_CHESTPLATE:
+                case CHAINMAIL_CHESTPLATE:
+                    return new CylinderSnowballLogic(hint.getType(), slice.skip(1));*/
+
                 case SNOW_BALL:
                     String targetName = hint.getItemMeta().getDisplayName();
-                    hint.setItemMeta(null); //Using named snowballs CLEARS the named snowball stack you use
                     return new MultiplierSnowballLogic(hint.getAmount(), targetName, slice.skip(1));
 //________________________________________________________________________________________________________________________________
 //Food Animals Spawn As Babies
@@ -366,11 +318,11 @@ public abstract class SnowballLogic {
                                         spawned.setMaxDomestication(1);
                                         spawned.setJumpStrength(2.0); //default 0.7, max 2.0
                                         AttributeInstance speedAttribute = spawned.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                                        speedAttribute.setBaseValue(info.power / 4.0f);
+                                        speedAttribute.setBaseValue(info.power);
                                         //spawned.setTamed(true);
                                         //spawned.setOwner(info.shooter);
-                                        //spawned.setAdult();
-                                        spawned.setBaby();
+                                        spawned.setAdult();
+                                        //spawned.setBaby();
                                     }
                                 }
                             }.runTaskLater(info.plugin, 1L);
@@ -496,7 +448,7 @@ public abstract class SnowballLogic {
                         @Override
                         protected void initializeEntity(Slime spawned, final SnowballInfo info) {
                             super.initializeEntity(spawned, info);
-                            spawned.setSize((int) Math.floor(info.power * 2.0));
+                            spawned.setSize((int) Math.floor(info.power));
                         }
 
                         @Override
@@ -522,7 +474,7 @@ public abstract class SnowballLogic {
                         @Override
                         protected void initializeEntity(MagmaCube spawned, final SnowballInfo info) {
                             super.initializeEntity(spawned, info);
-                            spawned.setSize((int) Math.floor(info.power * 2.0));
+                            spawned.setSize((int) Math.floor(info.power));
                         }
 
                         @Override
@@ -638,7 +590,7 @@ public abstract class SnowballLogic {
                                     if (info.shooter != null) {
                                         ItemStack gear;
 
-                                        LeatherArmorMeta dye;
+                                        /*LeatherArmorMeta dye;
                                         Color belt = Color.WHITE;
                                         if (info.power < 2) {
                                             belt = Color.WHITE; //noob
@@ -658,7 +610,7 @@ public abstract class SnowballLogic {
                                             belt = Color.RED; //64
                                         } else if (info.power < 10) {
                                             belt = Color.BLACK; //81
-                                        }
+                                        }*/
 
                                         gear = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
                                         SkullMeta meta = (SkullMeta) gear.getItemMeta();
@@ -666,9 +618,9 @@ public abstract class SnowballLogic {
                                         gear.setItemMeta(meta);
                                         // OH GOD IT HAS MY FAAAAAAACE!
                                         spawned.getEquipment().setHelmet(gear);
-                                        spawned.getEquipment().setHelmetDropChance(0.0f);
+                                        spawned.getEquipment().setHelmetDropChance(0.0001f);
 
-                                        gear = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+                                        /*gear = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
@@ -687,7 +639,7 @@ public abstract class SnowballLogic {
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setBoots(gear);
-                                        spawned.getEquipment().setBootsDropChance(0.0f);
+                                        spawned.getEquipment().setBootsDropChance(0.0f);*/
 
                                         gear = info.shooter.getInventory().getItem(0);
                                         if (gear != null) {
@@ -701,12 +653,12 @@ public abstract class SnowballLogic {
 
                                         spawned.setCustomName(info.shooter.getName() + "'s Ninja");
                                         spawned.setCustomNameVisible(false);
-                                        AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
+                                        /*AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
                                         followAttribute.setBaseValue((info.power * info.power) + 16f); //default 16 + caster level
                                         AttributeInstance healthAttribute = spawned.getAttribute(Attribute.GENERIC_MAX_HEALTH);
                                         healthAttribute.setBaseValue(20 + info.power); //HP down
                                         AttributeInstance speedAttribute = spawned.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                                        speedAttribute.setBaseValue(info.power / 5.0f); //speed == caster level
+                                        speedAttribute.setBaseValue(info.power / 5.0f); //speed == caster level*/
                                         spawned.setRemoveWhenFarAway(false);
                                         spawned.setHealth(spawned.getMaxHealth());
                                     }
@@ -727,7 +679,7 @@ public abstract class SnowballLogic {
                                 public void run() {
                                     if (info.shooter != null) {
                                         ItemStack gear;
-                                        LeatherArmorMeta dye;
+                                        /*LeatherArmorMeta dye;
                                         Color belt = Color.WHITE;
                                         if (info.power < 2) {
                                             belt = Color.WHITE; //noob
@@ -747,7 +699,7 @@ public abstract class SnowballLogic {
                                             belt = Color.RED; //64
                                         } else if (info.power < 10) {
                                             belt = Color.BLACK; //81
-                                        }
+                                        }*/
 
                                         gear = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
                                         SkullMeta meta = (SkullMeta) gear.getItemMeta();
@@ -755,9 +707,9 @@ public abstract class SnowballLogic {
                                         gear.setItemMeta(meta);
                                         // OH GOD IT HAS MY FAAAAAAACE!
                                         spawned.getEquipment().setHelmet(gear);
-                                        spawned.getEquipment().setHelmetDropChance(0.0f);
+                                        spawned.getEquipment().setHelmetDropChance(0.0001f);
 
-                                        gear = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+                                        /*gear = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
                                         dye = (LeatherArmorMeta) gear.getItemMeta();
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
@@ -776,7 +728,7 @@ public abstract class SnowballLogic {
                                         dye.setColor(belt);
                                         gear.setItemMeta(dye);
                                         spawned.getEquipment().setBoots(gear);
-                                        spawned.getEquipment().setBootsDropChance(0.0f);
+                                        spawned.getEquipment().setBootsDropChance(0.0f);*/
 
                                         gear = info.shooter.getInventory().getItem(0);
                                         if (gear != null) {
@@ -790,20 +742,20 @@ public abstract class SnowballLogic {
                                         spawned.setCustomName(info.shooter.getName() + "'s Army");
                                         spawned.setCustomNameVisible(false);
                                         spawned.setRemoveWhenFarAway(false);
-                                        AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
+                                        /*AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
                                         followAttribute.setBaseValue((info.power * info.power) + 40f); //default 40 + caster level
                                         AttributeInstance healthAttribute = spawned.getAttribute(Attribute.GENERIC_MAX_HEALTH);
                                         healthAttribute.setBaseValue(20 + (info.power * info.power)); //HP equal to your level + 20
                                         AttributeInstance speedAttribute = spawned.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                                        speedAttribute.setBaseValue((info.power / 50.0f) + 0.23); //speed == moderate fast
+                                        speedAttribute.setBaseValue((info.power / 50.0f) + 0.23); //speed == moderate fast*/
                                         AttributeInstance zomAttribute = spawned.getAttribute(Attribute.ZOMBIE_SPAWN_REINFORCEMENTS);
                                         zomAttribute.setBaseValue(0.0f); //army zoms don't hire civilians!
-                                        spawned.setHealth(spawned.getMaxHealth());
+                                        /*spawned.setHealth(spawned.getMaxHealth());
                                         if (info.power > 11) {
                                             spawned.setBaby(true);
                                         } else {
                                             spawned.setBaby(false);
-                                        } // at level 100, all the zombie ninjas are BABY NINJAS
+                                        } // at level 100, all the zombie ninjas are BABY NINJAS*/
                                     }
                                 }
                             }.runTaskLater(info.plugin, 1L);
@@ -823,17 +775,16 @@ public abstract class SnowballLogic {
                                 @Override
                                 public void run() {
                                     if (info.shooter != null) {
-                                        if (info.power > 4) {
+                                        if (info.power > 64) {
                                             spawned.setPowered(true);
                                             spawned.setCustomName(info.shooter.getName() + "'s Nightmare");
                                         } else {
                                             spawned.setCustomName(info.shooter.getName() + "'s Mistake");
                                         }
-                                        spawned.setCustomName(info.shooter.getName() + "'s Mistake");
                                         spawned.setCustomNameVisible(false);
                                         spawned.setRemoveWhenFarAway(false);
-                                        AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
-                                        followAttribute.setBaseValue((info.power * info.power) + 60f); //default 60 + caster level
+                                        /*AttributeInstance followAttribute = spawned.getAttribute(Attribute.GENERIC_FOLLOW_RANGE);
+                                        followAttribute.setBaseValue((info.power * info.power) + 60f); //default 60 + caster level*/
                                     }
                                 }
                             }.runTaskLater(info.plugin, 1L);
@@ -880,7 +831,6 @@ public abstract class SnowballLogic {
      */
     public static void performLaunch(SnowballLogic logic, Snowball snowball, SnowballInfo info) {
         inFlight.put(snowball, new SnowballLogicData(logic, info));
-        approximateInFlightCount++;
         logic.launch(snowball, info);
     }
 
@@ -896,7 +846,6 @@ public abstract class SnowballLogic {
             try {
                 data.logic.hit(snowball, data.info);
             } finally {
-                approximateInFlightCount--;
                 inFlight.remove(snowball);
             }
         }
@@ -939,25 +888,14 @@ public abstract class SnowballLogic {
     }
 
     /**
-     * This method calls tick() on each snowball that has any logic. This also checks shouldContinue() on each snowball and
-     * removes snowball that shouldn't continue.
+     * This method calls tick() on each snowball that has any logic.
      */
     public static void onTick(long tickCount) {
         for (Map.Entry<Snowball, SnowballLogicData> e : inFlight.entrySet()) {
             Snowball snowball = e.getKey();
             SnowballLogic logic = e.getValue().logic;
             SnowballInfo info = e.getValue().info;
-
-            Location here = snowball.getLocation();
-            double y = here.getY();
-
-            if (y < 1024 && info.launchLocation.distanceSquared(here) < 1048576) {  //square the desired distance for this number: is 1024
-                logic.tick(snowball, info);
-            } else {
-                approximateInFlightCount--;
-                inFlight.remove(snowball);
-                snowball.remove();
-            }
+            logic.tick(snowball, info);
         }
     }
 
@@ -1003,6 +941,7 @@ public abstract class SnowballLogic {
         }.runTaskLater(plugin, 1);
     }
 
+    /*
     public static void onEntityTargetPlayer(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() instanceof Player) {
             Player player = (Player) event.getTarget();
@@ -1012,36 +951,16 @@ public abstract class SnowballLogic {
                 if ((event.getEntity().getCustomName() != null) && (player.getName() != null)) {
                     if (event.getEntity().getCustomName().startsWith(player.getName())) {
                         //we are attacking our creator
-                        event.setCancelled(true);
-
-                        if (attacker.getHealth() < (player.getLevel() + 1.0f) * player.getHealth() * 0.05f) {
-                            event.setCancelled(true);
-                        } //make minions not harm their creators if the creators are tough enough
-                        //level 20 will do it for normal 20 heart mobs. Assumes you're not injured.
+                        //good!
                     } else {
                         //we're attacking a player that's not our creator
-                        AttributeInstance speedAttribute = attacker.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-                        if (speedAttribute.getValue() > Math.sqrt(player.getLevel())) {
-                            event.setCancelled(true);
-                        } //ultra hyper mobs are seeking high level players
-
-                        if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
-                            event.setCancelled(true);
-                        }//mobs try to get you down to level*health is less than their health.
-                        //If you're level 0, almost any damage ought to make them relent
-                        //If you're over level 20, you'll be dead before they trust you.
-                    }
-
-                } else {
-                    if ((attacker.getHealth()) > ((player.getLevel() + 1.0f) * player.getHealth())) {
                         event.setCancelled(true);
-                    }//mobs try to get you down to level*health is less than their health.
-                    //If you're level 0, almost any damage ought to make them relent
-                    //If you're over level 20, you'll be dead before they trust you.
+                    }
                 }
             }
         }
     }
+    */
 
     /**
      * This method handles a projectile hit event, and runs the hit method.
@@ -1148,5 +1067,69 @@ public abstract class SnowballLogic {
      spawned.getEquipment().setItemInMainHand(gear);
      spawned.getEquipment().setItemInMainHandDropChance(dropChance);
      }
+    
+    
+    the wicked blocks
+    
+    else if (hint.getType() == Material.IRON_BLOCK) {
+                return new ItemDropSnowballLogic(
+                        Material.IRON_HELMET,
+                        Material.IRON_CHESTPLATE,
+                        Material.IRON_LEGGINGS,
+                        Material.IRON_BOOTS,
+                        Material.IRON_SWORD,
+                        Material.IRON_PICKAXE,
+                        Material.IRON_AXE,
+                        Material.IRON_SPADE,
+                        Material.IRON_HOE);
+            } else if (hint.getType() == Material.GOLD_BLOCK) {
+                return new ItemDropSnowballLogic(
+                        Material.GOLD_HELMET,
+                        Material.GOLD_CHESTPLATE,
+                        Material.GOLD_LEGGINGS,
+                        Material.GOLD_BOOTS,
+                        Material.GOLD_SWORD,
+                        Material.GOLD_PICKAXE,
+                        Material.GOLD_AXE,
+                        Material.GOLD_SPADE,
+                        Material.GOLD_HOE);
+            } else if (hint.getType() == Material.DIAMOND_BLOCK) {
+                return new ItemDropSnowballLogic(
+                        Material.DIAMOND_HELMET,
+                        Material.DIAMOND_CHESTPLATE,
+                        Material.DIAMOND_LEGGINGS,
+                        Material.DIAMOND_BOOTS,
+                        Material.DIAMOND_SWORD,
+                        Material.DIAMOND_PICKAXE,
+                        Material.DIAMOND_AXE,
+                        Material.DIAMOND_SPADE,
+                        Material.DIAMOND_HOE);
+            } else if (hint.getType() == Material.EMERALD_BLOCK) {
+                return new FeeshVariationsSnowballLogic(hint); //emerald block curses with silverfish
+            } else if (hint.getType() == Material.REDSTONE_BLOCK) {
+                return BlockEmbedSnowballLogic.fromMaterial(hint.getType()); //redstone block fires lightning
+            } else if (hint.getType() == Material.OBSIDIAN) {
+                return new ComeAlongSnowballLogic(Material.OBSIDIAN);
+            } 
+    
+    
+    else if (hint.getType() == Material.WHITE_SHULKER_BOX
+                    || hint.getType() == Material.ORANGE_SHULKER_BOX
+                    || hint.getType() == Material.MAGENTA_SHULKER_BOX
+                    || hint.getType() == Material.LIGHT_BLUE_SHULKER_BOX
+                    || hint.getType() == Material.YELLOW_SHULKER_BOX
+                    || hint.getType() == Material.LIME_SHULKER_BOX
+                    || hint.getType() == Material.PINK_SHULKER_BOX
+                    || hint.getType() == Material.GRAY_SHULKER_BOX
+                    || hint.getType() == Material.SILVER_SHULKER_BOX
+                    || hint.getType() == Material.CYAN_SHULKER_BOX
+                    || hint.getType() == Material.PURPLE_SHULKER_BOX
+                    || hint.getType() == Material.BLUE_SHULKER_BOX
+                    || hint.getType() == Material.BROWN_SHULKER_BOX
+                    || hint.getType() == Material.GREEN_SHULKER_BOX
+                    || hint.getType() == Material.RED_SHULKER_BOX
+                    || hint.getType() == Material.BLACK_SHULKER_BOX) {
+                return new ShulkerBoxSnowballLogic(hint);
+            } 
      */
 }

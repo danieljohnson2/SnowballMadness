@@ -20,16 +20,14 @@ public class ArrowSnowballLogic extends SnowballLogic {
 
         location.add(velocity.normalize().multiply(1.5));
         //adjusting shot position so you can't run into it while firing
-        float speed = (float) info.power + 1.0f;
-        if (speed > 1.7) {
+        float speed = (float) Math.sqrt(info.power) + 2.0f;
+        snowball.getWorld().playEffect(location, Effect.BOW_FIRE, null, 128);
+        if (speed > 4.0) {
             snowball.getWorld().playEffect(location, Effect.BOW_FIRE, null, 128);
-            if (speed > 3.2) {
+            if (speed > 8.0) {
                 snowball.getWorld().playEffect(location, Effect.BOW_FIRE, null, 128);
-                if (speed > 4.7) {
-                    snowball.getWorld().playEffect(location, Effect.BOW_FIRE, null, 128);
-                }
-            } //by doing it this way, we are stacking bow shots on top of each other to make it louder
-        }
+            }
+        } //by doing it this way, we are stacking bow shots on top of each other to make it louder
 
         Arrow arrow = world.spawnArrow(location, velocity, speed, 0);
         arrow.setShooter((ProjectileSource) snowball.getShooter());
